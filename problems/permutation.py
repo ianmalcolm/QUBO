@@ -1,10 +1,7 @@
 '''
 A DOcplex model of the QUBO formulation of the assignment problem
 '''
-import docplex.cp.model as cp
-import docplex.cp.modeler as ct
-import docplex.cp.parameters as params
-import docplex.cp.solution as sol
+from docplex.mp.model import Model
 import numpy as np
 import math
 
@@ -24,13 +21,14 @@ class PermutationProblem:
         self.D = D.astype('int32')
         self.qty = qty.astype('int32')
         
+        self.mdl = Model()
 
         self.F = self.computeF(self.bigF, qty)
         #matrix Q is square matrix with side num_items*num_locs+1
         # Q is np.matrix
         Q = self.computeQ(self.F, self.D)
         P = self.computeP()
-        perm = [[cp.binary_var() for j in range(self.num_locs)]for i in range(self.num_items)]
+        perm = self.mdl.binary_var_matrix(self.num_items, self.num_locs)
         m1 = np.matrix(perm).reshape((1,-1))
         m2 = np.matrix(perm).reshape((-1,1))
 

@@ -22,8 +22,10 @@ class GroupingProblem:
             for j in range(self.F[0][i]):
                 item_to_sku[a] = i
                 a += 1
-            
+        
+
         self.model = cp.CpoModel()
+        print(self.num_groups, self.num_items)
         dvar_grouping = np.array([[cp.binary_var() for j in range(self.num_groups)] for i in range(self.num_items)])
         self.model.add(dvar_grouping)
 
@@ -47,7 +49,7 @@ class GroupingProblem:
     def solve(self):
         grouping = []
         print("\nsolving model...\n")
-        solution = self.model.solve(TimeLimit=2)
+        solution = self.model.solve(TimeLimit=600)
         print(type(solution))
         if solution:
             all_vars = solution.get_all_var_solutions()

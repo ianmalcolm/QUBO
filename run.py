@@ -1,5 +1,5 @@
 from simanneal import Annealer
-from OrderParser import OrderParser
+from orders.order_parser import OrderParser
 from DistanceGenerator import DistanceGenerator
 from problems.grouping import GroupingProblem
 from problems.permutation import PermutationProblem
@@ -8,9 +8,9 @@ import math
 import numpy as np
 import xlsxwriter
 
-NUM_SKUS = 10
-WAREHOUSE_NUM_COLS = 6
-WAREHOUSE_NUM_ROWS = 5
+NUM_SKUS = 100
+WAREHOUSE_NUM_COLS = 40
+WAREHOUSE_NUM_ROWS = 20
 DIST_VERTICAL = 1
 DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
@@ -26,7 +26,7 @@ BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
 group_num_cols = 2
-group_num_rows = 5
+group_num_rows = 20
 
 def save_array(fname, arrname, arr, prefix=None):
     with open(fname,'w') as f:
@@ -39,14 +39,8 @@ def save_array(fname, arrname, arr, prefix=None):
         f.write(str)
 
 def main():
-    F = np.zeros((NUM_SKUS+1,NUM_SKUS+1))
-    for fname in os.listdir(ORDER_DIRNAME):
-        with open(os.path.join(ORDER_DIRNAME, fname), 'r') as f:
-            print("order", fname)
-            order_str = f.read()
-        parser = OrderParser(order_str, NUM_SKUS)
-        partial_F = parser.gen_interaction_frequency()
-        F = F + partial_F
+    order_parser = OrderParser("orders/order.txt", NUM_SKUS)
+    F = order_parser.gen_F()
     print(F)
 
     #calculate D, m+1 by m+1
@@ -54,7 +48,7 @@ def main():
         WAREHOUSE_NUM_ROWS, 
         WAREHOUSE_NUM_COLS, 
         DIST_VERTICAL, 
-        DIST_HORIZONTAL, 
+        DIST_HORIZONTAL,
         group_num_rows, 
         group_num_cols
         )
@@ -79,12 +73,11 @@ def main():
     problem1 = GroupingProblem(group_size, NUM_SKUS, F)
     grouping = np.array(problem1.solve()).astype('int32')
     
+    input()
 
-    '''
     ######################
-    second stage
+    #second stage
     ######################
-    '''
 
     def find_sku_index(i):
         '''returns the 1-based sku index for a given item'''
