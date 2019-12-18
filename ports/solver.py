@@ -8,5 +8,5 @@ class Solver(abc.ABC):
         By default, ancillaries are the last few variables.
     '''
     @abc.abstractmethod
-    def solve(self, mtx, num_ancillaries):
+    def solve(self, mtx):
         pass

@@ -49,6 +49,7 @@ def main():
 
     problem = BunchingQAP(800,800,20,F)
     print(problem.flow)
+    print(problem.cts)
     input()
     solver = Dwave()
     method = ExteriorPenaltyMethod(problem, solver)

@@ -1,6 +1,6 @@
 from .solver import Solver
-#from dwave.system.samplers import DWaveSampler
-#from dwave.system.composites import EmbeddingComposite
+from dwave.system.samplers import DWaveSampler
+from dwave.system.composites import EmbeddingComposite
 import utils.index as idx
 import numpy as np
 
