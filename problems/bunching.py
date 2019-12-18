@@ -3,6 +3,8 @@ import itertools
 import math
 import numpy as np
 import utils.index as idx
+import os
+
 
 class BunchingQAP(Problem):
     def __init__(self, num_locs, num_items, num_groups, F):
@@ -51,26 +53,28 @@ class BunchingQAP(Problem):
             A       (nm by nm) linear constraint matrix Ax = b
             b       column vector containing n 1's
             m1_0    initial penalty weight, for exterior method
+            memmap is used for large matrices
         '''
-        A = np.zeros((self.n*self.m, self.n*self.m))
+        A = np.memmap('data/A.dat',shape=(self.n*self.m, self.n*self.m),mode='w+',dtype=np.float32)
         for i in range(1,self.n+1):
             for k in range(1,self.num_groups+1):
                 x_ik_index = idx.index_1_q_to_l_1(i,k,self.m)
                 # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
-        b = np.zeros(self.n * self.m)
+        b = np.zeros((self.n * self.m),dtype=np.float32)
         for i in range(self.n):
             b[i] = 1
+        bt_A = np.zeros(self.n*self.m,dtype=np.float32)
         bt_A = np.matmul(b,A)
         print("check 2")
-        D = np.zeros((self.n*self.m, self.n*self.m))
+        D = np.zeros((self.n*self.m, self.n*self.m),dtype=np.float32)
         for i in range(self.n*self.m):
             D[i][i] = bt_A[i]
         print("check 3")
         return np.matmul(np.transpose(A),A) - 2*D
 
     def generate_flow_matrix(self):
-        ret = np.zeros((self.n*self.m,self.n*self.m))
+        ret = np.memmap('data/flow.dat',shape=(self.n*self.m,self.n*self.m),mode='w+',dtype=np.float32)
         for k in range(1,self.num_groups+1):
             for i,j in itertools.product(range(1,self.n+1), range(1,self.n+1)):
                 if i==j:

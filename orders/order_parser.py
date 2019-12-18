@@ -33,7 +33,7 @@ class OrderParser:
     
     def gen_F(self, is_for_items=True):
         '''generate F for all orders'''
-        ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1))
+        ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1),dtype=np.int32)
         orders = self.order_str.splitlines()
         for order in orders:
             partial_F = self.gen_interaction_frequency(order)
@@ -44,7 +44,7 @@ class OrderParser:
             return ret
         else:
             num_items = int(sum(self.qty))
-            _ret = np.zeros((num_items, num_items))
+            _ret = np.zeros((num_items, num_items),dtype=np.int32)
             
             # maps 1-based item indices to 1-based sku indices
             sku_indices = np.zeros(num_items + 1)
@@ -71,7 +71,7 @@ class OrderParser:
     
     def gen_interaction_frequency(self, order):
         '''generate partial F for a single order'''
-        ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1))
+        ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1), dtype=np.int32)
         sku_quantities = {}
         items = order.split(",")
         for item in items:
