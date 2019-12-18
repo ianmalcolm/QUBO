@@ -26,6 +26,7 @@ class Dwave(Solver):
         linear = {}
         quadratic = {}
 
+        print("Dwave is processing matrix to upper-triangular...")
         for i in range(size):
             for j in range(size):
                 id_i = idx.var_str(var_id,i)
@@ -39,6 +40,7 @@ class Dwave(Solver):
             
         Q = dict(linear)
         Q.update(quadratic)
+        print("Dwave starts annealing...")
         response = EmbeddingComposite(DWaveSampler()).sample_qubo(Q, num_reads=1000)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
