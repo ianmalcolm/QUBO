@@ -41,6 +41,7 @@ class Dwave(Solver):
         bqm = dimod.BinaryQuadraticModel(
             linear=linear,
             quadratic=quadratic,
+            offset=0,
             vartype=dimod.BINARY)
         print("Dwave starts annealing...")
         response = EmbeddingComposite(DWaveSampler()).sample(bqm, num_reads=1000)
