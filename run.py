@@ -7,6 +7,9 @@ import os
 import math
 import numpy as np
 import xlsxwriter
+from methods.exterior_penalty import ExteriorPenaltyMethod
+from problems.bunching import BunchingQAP
+from ports.dwave import Dwave
 
 NUM_SKUS = 100
 WAREHOUSE_NUM_COLS = 40
@@ -40,9 +43,19 @@ def save_array(fname, arrname, arr, prefix=None):
 
 def main():
     order_parser = OrderParser("orders/order.txt", NUM_SKUS)
+    # F: (n by n) upper triangular interaction frequency matrix
     F = order_parser.gen_F()
-    print(F)
+    qty = order_parser.summary()
 
+    problem = BunchingQAP(800,800,20,F)
+    print(problem.flow)
+    input()
+    solver = Dwave()
+    method = ExteriorPenaltyMethod(problem, solver)
+    solution = method.run()
+    print(solution)
+    input()
+    
     #calculate D, m+1 by m+1
     D_gen = DistanceGenerator(
         WAREHOUSE_NUM_ROWS, 

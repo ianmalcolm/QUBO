@@ -61,12 +61,12 @@ class BunchingQAP(Problem):
         b = np.zeros(self.n * self.m)
         for i in range(self.n):
             b[i] = 1
-        bt_A = np.matmul(np.transpose(b),A)
-        
+        bt_A = np.matmul(b,A)
+        print("check 2")
         D = np.zeros((self.n*self.m, self.n*self.m))
         for i in range(self.n*self.m):
             D[i][i] = bt_A[i]
-        
+        print("check 3")
         return np.matmul(np.transpose(A),A) - 2*D
 
     def generate_flow_matrix(self):
@@ -75,11 +75,11 @@ class BunchingQAP(Problem):
             for i,j in itertools.product(range(1,self.n+1), range(1,self.n+1)):
                 if i==j:
                     x_ik_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(i,k,self.m))
-                    ret[x_ik_idx_linear][x_ik_idx_linear] = -self.F[i][i]
+                    ret[x_ik_idx_linear][x_ik_idx_linear] = -self.F[i-1][i-1]
                 elif i<j:
                     x_ik_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(i,k,self.m))
                     x_jk_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(j,k,self.m))
-                    ret[x_ik_idx_linear][x_jk_idx_linear] = -self.F[i][j]
+                    ret[x_ik_idx_linear][x_jk_idx_linear] = -self.F[i-1][j-1]
                 else:
                     pass
         return ret
@@ -161,13 +161,19 @@ class BunchingQAP(Problem):
         ret = {}
 
         # process flow terms
+        print("generating flow")
         flow_matrix = self.generate_flow_matrix()
+        print("Done generating flow")
 
         # process linear constraint
+        print("generating equality constraint")
         equality_constraint_mtx = self.generate_matrix_ct1()
+        print("done generating equality constraint")
 
         # process non-linear constraint
+        print("generating inequality constraint")
         inequality_constraint_mtx = self.generate_matrix_ct2()
+        print("done generating inequality constraint")
         ret['ct2'] = inequality_constraint_mtx
 
         #embed all matrices in big matrix with ancillaries
