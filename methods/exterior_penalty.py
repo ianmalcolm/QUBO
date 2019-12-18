@@ -4,6 +4,7 @@ class ExteriorPenaltyMethod:
             precondition:
                 problem.isExterior = True
         '''
+        print("Initializing external penalty method...")
         if not problem.isExterior:
             raise ValueError("cannot solve a non-exterior problem using exterior penalty method")
         self.problem = problem
@@ -17,6 +18,7 @@ class ExteriorPenaltyMethod:
             if result passes, return the result
             else, update penalty weight
         '''
+        print("Running external penalty...")
         flow = self.problem.flow
         mtx = flow
         ms = []
@@ -31,9 +33,11 @@ class ExteriorPenaltyMethod:
 
         LIMIT = 1
         for i in range(LIMIT):
+            print("External penalty iteration %d" % i)
             solution = self.solver.solve(mtx)
             satisfied = self.problem.check(solution)
             if satisfied:
+                print("External penalty has solution. Returning...")
                 return solution
             
             mtx = flow
@@ -42,4 +46,5 @@ class ExteriorPenaltyMethod:
             for m, ct in zip(ms, cts):
                 mtx += m*ct
         
+        print("External penalty has failed. Returning...")
         return solution

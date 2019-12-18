@@ -6,6 +6,7 @@ import numpy as np
 
 class Dwave(Solver):
     def __init__(self):
+        print("Dwave solver created...")
         pass
 
     def solve(self, matrix):
@@ -13,6 +14,7 @@ class Dwave(Solver):
             returns: a solution
                     solution is a tuple (dict, float) representing sample and energy.
         '''
+        print("Dwave starts solving...")
         mtx = matrix.copy()
         var_id = 'x'
         size = mtx.shape[0]
@@ -40,5 +42,5 @@ class Dwave(Solver):
         response = EmbeddingComposite(DWaveSampler()).sample_qubo(Q, num_reads=1000)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
-        
+
         return (response.first.sample, response.first.energy)
