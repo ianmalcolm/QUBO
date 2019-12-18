@@ -9,6 +9,10 @@ class Dwave(Solver):
         pass
 
     def solve(self, matrix):
+        '''
+            returns: a solution
+                    solution is a tuple (dict, float) representing sample and energy.
+        '''
         mtx = matrix.copy()
         var_id = 'x'
         size = mtx.shape[0]
@@ -37,4 +41,4 @@ class Dwave(Solver):
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
         
-        return response.info
+        return (response.first.sample, response.first.energy)

@@ -29,9 +29,8 @@ class ExteriorPenaltyMethod:
         for m_0, ct in zip(ms,cts):
             mtx += m_0 * ct
 
-        k=0
-        LIMIT = 200
-        while k<=LIMIT:
+        LIMIT = 1
+        for i in range(LIMIT):
             solution = self.solver.solve(mtx)
             satisfied = self.problem.check(solution)
             if satisfied:
@@ -42,7 +41,5 @@ class ExteriorPenaltyMethod:
                 ms[i] = ms * alphas[i]
             for m, ct in zip(ms, cts):
                 mtx += m*ct
-
-            k+=1
         
-        return "No solution"
+        return solution
