@@ -1,6 +1,7 @@
 from .solver import Solver
 from dwave.system.samplers import DWaveSampler
 from dwave.system.composites import EmbeddingComposite
+import dimod
 import utils.index as idx
 import numpy as np
 
@@ -37,11 +38,12 @@ class Dwave(Solver):
                     linear[id_i] = mtx[i][i]
                 elif i<j:
                     quadratic[(id_i, id_j)] = mtx[i][j]
-            
-        Q = dict(linear)
-        Q.update(quadratic)
+        bqm = dimod.BinaryQuadraticModel(
+            linear=linear,
+            quadratic=quadratic,
+            vartype=dimod.BINARY)
         print("Dwave starts annealing...")
-        response = EmbeddingComposite(DWaveSampler()).sample_qubo(Q, num_reads=1000)
+        response = EmbeddingComposite(DWaveSampler()).sample(bqm, num_reads=1000)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
 
