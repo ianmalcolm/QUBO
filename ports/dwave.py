@@ -31,12 +31,20 @@ class Dwave(Solver):
         print("solver is preparing coefficient dict.")
         for i in range(size):
             for j in range(size):
-                #only process upper triangular part
+                #lower triangular part is anulled
                 if i == j:
                     linear[i] = mtx[i][i]
                 elif i<j:
                     quadratic[(i, j)] = mtx[i][j]
+                else:
+                    quadratic[(i,j)] = 0
         print("solver is constructing bqm.")
+        for k,v in linear.items():
+            print((k,v))
+        with open("quadratic.dat", 'w') as f: 
+            for k,v in quadratic.items():
+                f.write(str(k) + ',' + str(v) +'\n')
+        input()
         bqm = dimod.BinaryQuadraticModel(
             linear=linear,
             quadratic=quadratic,
@@ -44,7 +52,7 @@ class Dwave(Solver):
             vartype=dimod.BINARY)
         print("Solver engages Dwave quantum hardware!")
         sampler = AutoEmbeddingComposite(DWaveSampler())
-        response = sampler.sample(bqm, num_reads=1000)
+        response = sampler.sample(bqm)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
 
