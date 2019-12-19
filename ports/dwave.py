@@ -1,6 +1,6 @@
 from .solver import Solver
-#from dwave.system.samplers import DWaveSampler
-#from dwave.system.composites import AutoEmbeddingComposite
+from dwave.system.samplers import DWaveSampler
+from dwave.system.composites import AutoEmbeddingComposite
 
 import dimod
 import utils.index as idx
