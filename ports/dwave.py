@@ -1,6 +1,6 @@
 from .solver import Solver
 from dwave.system.samplers import DWaveSampler
-from dwave.system.composites import EmbeddingComposite, ScaleComposite
+from dwave.system.composites import EmbeddingComposite
 
 import dimod
 import utils.index as idx
@@ -49,7 +49,7 @@ class Dwave(Solver):
             vartype = dimod.BINARY
         )
         print("Solver engages Dwave quantum hardware!")
-        sampler = ScaleComposite(EmbeddingComposite(DWaveSampler()))
+        sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler()))
         response = sampler.sample(bqm)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
