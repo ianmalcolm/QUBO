@@ -11,9 +11,9 @@ from methods.exterior_penalty import ExteriorPenaltyMethod
 from problems.bunching import BunchingQAP
 from ports.dwave import Dwave
 
-NUM_SKUS = 100
-WAREHOUSE_NUM_COLS = 40
-WAREHOUSE_NUM_ROWS = 20
+NUM_SKUS = 10
+WAREHOUSE_NUM_COLS = 6
+WAREHOUSE_NUM_ROWS = 5
 DIST_VERTICAL = 1
 DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
@@ -28,8 +28,8 @@ BIGF_FILENAME = 'bigF.dat'
 BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
-group_num_cols = 20
-group_num_rows = 20
+group_num_cols = 2
+group_num_rows = 5
 
 def save_array(fname, arrname, arr, prefix=None):
     with open(fname,'w') as f:
@@ -47,7 +47,7 @@ def main():
     F = order_parser.gen_F()
     qty = order_parser.summary()
 
-    problem = BunchingQAP(800,800,2,F)
+    problem = BunchingQAP(30,30,3,F)
     print(problem.flow)
     print(problem.flow.shape)
     print(problem.cts)
