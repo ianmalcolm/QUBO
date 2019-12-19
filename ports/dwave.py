@@ -47,7 +47,7 @@ class Dwave(Solver):
             vartype=dimod.BINARY)
         print("Solver engages Dwave quantum hardware!")
         sampler = dimod.ConnectedComponentsComposite(EmbeddingComposite(DWaveSampler()))
-        response = sampler.sample(bqm, num_reads=1000))
+        response = sampler.sample(bqm, num_reads=1000)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
 
