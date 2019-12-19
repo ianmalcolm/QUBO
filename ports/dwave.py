@@ -1,6 +1,6 @@
 from .solver import Solver
 from dwave.system.samplers import DWaveSampler
-from dwave.system.composites import EmbeddingComposite
+from dwave.system.composites import AutoEmbeddingComposite
 
 import dimod
 import utils.index as idx
@@ -40,13 +40,16 @@ class Dwave(Solver):
                 elif i<j:
                     quadratic[(id_i, id_j)] = mtx[i][j]
         print("solver is constructing bqm.")
+        print(linear)
+        print(quadratic)
+        input()
         bqm = dimod.BinaryQuadraticModel(
             linear=linear,
             quadratic=quadratic,
             offset=0,
             vartype=dimod.BINARY)
         print("Solver engages Dwave quantum hardware!")
-        sampler = DWaveSampler()
+        sampler = AutoEmbeddingComposite(DWaveSampler())
         response = sampler.sample(bqm, num_reads=1000)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
