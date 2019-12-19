@@ -1,6 +1,6 @@
 from .solver import Solver
-#from dwave.system.samplers import DWaveSampler
-#from dwave.system.composites import EmbeddingComposite
+from dwave.system.samplers import DWaveSampler
+from dwave.system.composites import EmbeddingComposite, ScaleComposite
 
 import dimod
 import utils.index as idx
@@ -33,7 +33,7 @@ class Dwave(Solver):
             for j in range(size):
                 #lower triangular part is anulled
                 if i == j:
-                    linear[(i,i)] = mtx[i][i]
+                    linear[i] = mtx[i][i]
                 elif i<j:
                     quadratic[(i,j)] = mtx[i][j]
         print("solver is constructing bqm.")
@@ -42,12 +42,15 @@ class Dwave(Solver):
         with open("quadratic.dat", 'w') as f: 
             for k,v in quadratic.items():
                 f.write(str(k) + ',' + str(v) +'\n')
-        input()
-        Q = dict(linear)
-        Q.update(quadratic)
+        bqm = dimod.BQM(
+            linear = linear,
+            quadratic = quadratic,
+            offset = 0,
+            vartype = dimod.BINARY
+        )
         print("Solver engages Dwave quantum hardware!")
-        sampler = EmbeddingComposite(DWaveSampler())
-        response = sampler.sample_qubo(Q,num_reads=1)
+        sampler = ScaleComposite(EmbeddingComposite(DWaveSampler()))
+        response = sampler.sample(bqm)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)
 
