@@ -31,18 +31,12 @@ class Dwave(Solver):
         print("solver is preparing coefficient dict.")
         for i in range(size):
             for j in range(size):
-                id_i = idx.var_str(var_id,i)
-                id_j = idx.var_str(var_id,j)
-                
                 #only process upper triangular part
                 if i == j:
-                    linear[id_i] = mtx[i][i]
+                    linear[i] = mtx[i][i]
                 elif i<j:
-                    quadratic[(id_i, id_j)] = mtx[i][j]
+                    quadratic[(i, j)] = mtx[i][j]
         print("solver is constructing bqm.")
-        print(linear)
-        print(quadratic)
-        input()
         bqm = dimod.BinaryQuadraticModel(
             linear=linear,
             quadratic=quadratic,
