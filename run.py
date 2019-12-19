@@ -28,7 +28,7 @@ BIGF_FILENAME = 'bigF.dat'
 BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
-group_num_cols = 2
+group_num_cols = 20
 group_num_rows = 20
 
 def save_array(fname, arrname, arr, prefix=None):
@@ -47,8 +47,9 @@ def main():
     F = order_parser.gen_F()
     qty = order_parser.summary()
 
-    problem = BunchingQAP(800,800,20,F)
+    problem = BunchingQAP(800,800,2,F)
     print(problem.flow)
+    print(problem.flow.shape)
     print(problem.cts)
     input()
     solver = Dwave()
