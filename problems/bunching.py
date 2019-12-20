@@ -21,8 +21,7 @@ class BunchingQAP(Problem):
         self.n = num_items
         self.k = num_groups
         self.bunch_size = math.ceil(self.n / self.k)
-        self.F = F
-        
+        self.F = F.copy()
         self.q = self.generate_Q()
 
     @property
@@ -84,17 +83,16 @@ class BunchingQAP(Problem):
         ret = np.zeros(shape=(self.n*self.k,self.n*self.k),dtype=np.float32)
         for k in range(1,self.k+1):
             for i,j in itertools.product(range(1,self.n+1), range(1,self.n+1)):
-                if i==j:
-                    x_ik_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(i,k,self.k))
-                    ret[x_ik_idx_linear][x_ik_idx_linear] = -self.F[i-1][i-1]
-                elif i<j:
+                # NOTE: define interaction between identical items to be 0 because popularity is not relevant here.
+                #if i==j:
+                #    x_ik_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(i,k,self.k))
+                #    ret[x_ik_idx_linear][x_ik_idx_linear] = -self.F[i-1][i-1]
+                if i<j:
                     x_ik_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(i,k,self.k))
                     x_jk_idx_linear = idx.index_1_to_0(idx.index_1_q_to_l_1(j,k,self.k))
                     ret[x_ik_idx_linear][x_jk_idx_linear] = -self.F[i-1][j-1]
                 else:
                     pass
-        
-        print(ret.shape)
         print("%d nonzeros" % np.count_nonzero(ret))
         print("done")
         return ret
@@ -189,19 +187,22 @@ class BunchingQAP(Problem):
 
         # process flow terms
         flow_matrix = self.generate_flow_matrix()
-
+        print("flow matrix: ")
+        print(flow_matrix)
         # process linear constraint
         equality_constraint_mtx = self.generate_matrix_ct1()
-
+        print("equality matrix: ")
+        print(equality_constraint_mtx)
         # process non-linear constraint
         inequality_constraint_mtx = self.generate_matrix_ct2()
-
+        print("flow matrix: ")
+        print(inequality_constraint_mtx)
         ret['ct2'] = inequality_constraint_mtx
 
         #embed all matrices in big matrix with ancillaries
         _flow_matrix = np.zeros(inequality_constraint_mtx.shape)
         _flow_matrix[0:flow_matrix.shape[0], 0:flow_matrix.shape[0]] = flow_matrix
-        print()
+
         ret['flow'] = _flow_matrix
         _equality_constraint_mtx = np.zeros(inequality_constraint_mtx.shape)
         _equality_constraint_mtx[0:equality_constraint_mtx.shape[0], 0:equality_constraint_mtx.shape[0]] = equality_constraint_mtx

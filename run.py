@@ -10,12 +10,13 @@ import xlsxwriter
 from methods.exterior_penalty import ExteriorPenaltyMethod
 from problems.bunching import BunchingQAP
 from ports.dwave import Dwave
+from ports.classical_simanneal import ClassicalNeal
 
 import utils.mtx as mtx
 
-NUM_SKUS = 10
-WAREHOUSE_NUM_COLS = 6
-WAREHOUSE_NUM_ROWS = 5
+NUM_SKUS = 100
+WAREHOUSE_NUM_COLS = 40
+WAREHOUSE_NUM_ROWS = 20
 DIST_VERTICAL = 1
 DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
@@ -31,7 +32,7 @@ BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
 group_num_cols = 2
-group_num_rows = 5
+group_num_rows = 20
 
 def save_array(fname, arrname, arr, prefix=None):
     with open(fname,'w') as f:
@@ -47,11 +48,11 @@ def main():
     order_parser = OrderParser("orders/order.txt", NUM_SKUS, 0)
     # F: (n by n) upper triangular interaction frequency matrix
     F = order_parser.gen_F()
-    print(mtx.inspect_entries(F))
+    print(F)
 
     qty = order_parser.summary()
 
-    problem = BunchingQAP(30,30,3,F)
+    problem = BunchingQAP(800,800,20,F)
 
     solver = Dwave()
     method = ExteriorPenaltyMethod(problem, solver)

@@ -10,7 +10,7 @@ import math
 
 class GroupingProblem:
     def __init__(self, group_size, num_skus, F):
-        self.F = F.astype('int32')
+        self.F = F.astype('int32').copy()
         self.group_size = group_size
         self.num_skus = num_skus
         self.num_items = int(sum(self.F[0]))

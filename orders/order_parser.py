@@ -70,8 +70,11 @@ class OrderParser:
             for i in range(1,num_items+1):
                 for j in range(1,num_items+1):
                     if i==j:
+                        # interaction between 2 identical items = its popularity
                         _ret[i-1][i-1] = self.qty[sku_indices[i]]
                     elif i<j:
+                        # NOTE: when sku_indices[i] == sku_indices[j], 
+                        #       the value is on diagonal of old_F which is the nC2 definition.
                         _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
                     else:
                         pass
@@ -118,12 +121,13 @@ class OrderParser:
                     ret[x][y] = freq
         ret = ret + ret.transpose()
         
-        # populate frequency of appearance to diagonal entry
-        # NOTE: this is not nC2
+        # compute F[i][i]
+        # interaction of a SKU with itself happens when 2 or more of the same SKU appear in a single order.
+        # it is defined as nC2 which agrees with that between different SKUs
         for i in range(len(sku_types_ls)):
             sku = sku_types_ls[i]
             if sku_quantities[str(sku)] >1:
-                ret[sku][sku] = sku_quantities[str(sku)]
+                ret[sku][sku] = self.nCr(sku_quantities[str(sku)],2)
 
         return ret
 
