@@ -13,15 +13,17 @@ class OrderParser:
         parameters:
             num_skus
             file
+            threshold
 
         outputs:
             interaction frequency matrix (f_ij) of size (num_skus+1 * num_skus+1)
     '''
-    def __init__(self, file, num_SKUs):
+    def __init__(self, file, num_SKUs, threshold):
         self.num_SKUs = num_SKUs
         with open(file, 'r') as f:
             self.order_str = f.read()
         self.qty = np.zeros(num_SKUs+1)
+        self.threshold = threshold
     
     @staticmethod
     def nCr(n,r):
@@ -32,16 +34,22 @@ class OrderParser:
         return self.qty
     
     def gen_F(self, is_for_items=True):
-        '''generate F for all orders'''
-        ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1),dtype=np.int32)
+        '''generate F for all orders
+        
+            returns: if is_for_items then F (n by n)
+                    else F(num_SKUs by num_SKUs).
+                    Everything 0 based.
+        '''
+        
+        old_F = np.zeros((self.num_SKUs+1, self.num_SKUs+1),dtype=np.int32)
         orders = self.order_str.splitlines()
         for order in orders:
-            partial_F = self.gen_interaction_frequency(order)
-            ret += partial_F
+            old_F += self.gen_interaction_frequency(order)
+
         #qty stores quantities of SKUs with 1-based index
-        self.qty = ret[0]
+        self.qty = old_F[0]
         if not is_for_items:
-            return ret
+            return old_F[1:, 1:]
         else:
             num_items = int(sum(self.qty))
             _ret = np.zeros((num_items, num_items),dtype=np.int32)
@@ -64,13 +72,19 @@ class OrderParser:
                     if i==j:
                         _ret[i-1][i-1] = self.qty[sku_indices[i]]
                     elif i<j:
-                        _ret[i-1][j-1] = ret[sku_indices[i]][sku_indices[j]]
+                        _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
                     else:
                         pass
             return _ret
     
     def gen_interaction_frequency(self, order):
-        '''generate partial F for a single order'''
+        '''generate partial F for a single order
+        
+            returns: F (n+1 by n+1). 
+                    F is Symmetric. 
+                    Zero-th row and the diagonal are both quantities of SKUs.
+                    Except for the diagonal, interaction frequency is 0 if it does not exceed self.threshold.
+        '''
         ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1), dtype=np.int32)
         sku_quantities = {}
         items = order.split(",")
@@ -92,18 +106,24 @@ class OrderParser:
         except TypeError:
             raise AssertionError("sku_type cannot be non-integer")
 
+        # count interaction frequency between two different items
+        # if frequency does not exceed threshold value, treat it as 0
         sku_types_ls.sort()
         for i in range(len(sku_types_ls)):
             for j in range(i+1,len(sku_types_ls)):
                 x,y = (sku_types_ls[i], sku_types_ls[j])
                 print(x,y)
-                ret[x][y] = sku_quantities[str(x)] * sku_quantities[str(y)]
+                freq = sku_quantities[str(x)] * sku_quantities[str(y)]
+                if freq > self.threshold:
+                    ret[x][y] = freq
         ret = ret + ret.transpose()
         
+        # populate frequency of appearance to diagonal entry
+        # NOTE: this is not nC2
         for i in range(len(sku_types_ls)):
             sku = sku_types_ls[i]
             if sku_quantities[str(sku)] >1:
-                ret[sku][sku] = self.nCr(sku_quantities[str(sku)],2)
+                ret[sku][sku] = sku_quantities[str(sku)]
 
         return ret
 

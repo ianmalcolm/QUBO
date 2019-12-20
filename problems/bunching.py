@@ -15,6 +15,7 @@ class BunchingQAP(Problem):
         
         decision matrix X is n by k
         decision vector is (n * k + #ancillary)
+        F is n by n and item index is 0 based.
         '''
         self.m = num_locs
         self.n = num_items
@@ -72,6 +73,9 @@ class BunchingQAP(Problem):
             D[i][i] = bt_A[i]
         equality_mtx = np.zeros(shape=(self.n*self.k, self.n*self.k),dtype=np.float32)
         equality_mtx = np.matmul(np.transpose(A),A) - 2*D
+
+        print(equality_mtx.shape)
+        print("%d nonzeros" % np.count_nonzero(equality_mtx))
         print("done")
         return equality_mtx
 
@@ -89,6 +93,9 @@ class BunchingQAP(Problem):
                     ret[x_ik_idx_linear][x_jk_idx_linear] = -self.F[i-1][j-1]
                 else:
                     pass
+        
+        print(ret.shape)
+        print("%d nonzeros" % np.count_nonzero(ret))
         print("done")
         return ret
     
@@ -115,18 +122,24 @@ class BunchingQAP(Problem):
         for i in range(self.k):
             b[i] = s
         bt_A = np.matmul(np.transpose(b),A)
+        print("A has %d nonzeros out of %d" % (np.count_nonzero(A), A.shape[0]*A.shape[1]))
         
         D = np.zeros((self.n*self.k, self.n*self.k))
         for i in range(self.n*self.k):
             D[i][i] = bt_A[i]
 
-        ret[0:self.n*self.k, 0:self.n*self.k] = np.matmul(np.transpose(A),A) - 2*D
+        print("D has %d nonzeros out of %d" % (np.count_nonzero(D), D.shape[0]*D.shape[1]))
+        # A^tA-2D
+        AtA_2D = np.matmul(np.transpose(A),A) - 2*D
+
+        print("AtA-2D has %d nonzeros out of %d" % (np.count_nonzero(AtA_2D), AtA_2D.shape[0]*AtA_2D.shape[1]))
+        ret[0:self.n*self.k, 0:self.n*self.k] = AtA_2D
         
         twos = np.zeros(num_bits)
         for i in range(num_bits):
             twos[i] = math.pow(2,i)
 
-        # all yi multiplies with x via A in + 2y^tAx
+        # 2y^tAx
         for k in range(1, self.k+1):
             for i in range(1,self.n*self.k+1):
                 for l in range(num_bits):
@@ -152,7 +165,11 @@ class BunchingQAP(Problem):
                     ret[idx.index_1_to_0(uj_idx_1)][idx.index_1_to_0(ul_idx_1)] = 2*twos[j]*twos[l]
                 else:
                     pass
-
+        
+        print(ret.shape)
+        print("inequality mtx has %d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
+        test = np.transpose(ret) + ret
+        print("test mtx has %d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
         print("done")
         return ret
     
@@ -184,10 +201,14 @@ class BunchingQAP(Problem):
         #embed all matrices in big matrix with ancillaries
         _flow_matrix = np.zeros(inequality_constraint_mtx.shape)
         _flow_matrix[0:flow_matrix.shape[0], 0:flow_matrix.shape[0]] = flow_matrix
+        print()
         ret['flow'] = _flow_matrix
-        
         _equality_constraint_mtx = np.zeros(inequality_constraint_mtx.shape)
         _equality_constraint_mtx[0:equality_constraint_mtx.shape[0], 0:equality_constraint_mtx.shape[0]] = equality_constraint_mtx
         ret['ct1'] = _equality_constraint_mtx
+        
+        s = _flow_matrix + _equality_constraint_mtx + inequality_constraint_mtx
+        s = np.transpose(s) +s
+        print("s mtx has %d nonzeros out of %d" % (np.count_nonzero(s), s.shape[0]*s.shape[1]))
         
         return ret

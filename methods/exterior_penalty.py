@@ -1,3 +1,5 @@
+import numpy as np
+
 class ExteriorPenaltyMethod:
     def __init__(self, problem, solver):
         '''
@@ -19,7 +21,7 @@ class ExteriorPenaltyMethod:
             else, update penalty weight
         '''
         print("Running external penalty...")
-        flow = self.problem.flow
+        flow = self.problem.flow.copy()
         mtx = flow
         ms = []
         alphas = []
@@ -27,10 +29,12 @@ class ExteriorPenaltyMethod:
         for m_0, alpha, ct in self.problem.cts:
             ms.append(m_0)
             alphas = alpha
-            cts = ct
+            cts.append(ct)
         for m_0, ct in zip(ms,cts):
             mtx += m_0 * ct
 
+        print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
+        print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
         LIMIT = 1
         for i in range(LIMIT):
             print("External penalty iteration %d" % i)

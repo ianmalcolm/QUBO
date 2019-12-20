@@ -4,6 +4,7 @@ from dwave.system.composites import EmbeddingComposite
 
 import dimod
 import utils.index as idx
+import utils.mtx as mt
 import numpy as np
 
 class Dwave(Solver):
@@ -25,31 +26,34 @@ class Dwave(Solver):
         for i in range(size):
             mtx[i][i] = mtx[i][i] / 2
 
+        print(mtx.shape)
+        print(np.count_nonzero(mtx))
+
         linear = {}
         quadratic = {}
 
         print("solver is preparing coefficient dict.")
         for i in range(size):
             for j in range(size):
-                #lower triangular part is anulled
+                #lower triangular part is thrown away
                 if i == j:
                     linear[i] = mtx[i][i]
-                elif i<j:
+                elif i<j and (not mtx[i][j]==0):
                     quadratic[(i,j)] = mtx[i][j]
         print("solver is constructing bqm.")
-        for k,v in linear.items():
-            print((k,v))
         with open("quadratic.dat", 'w') as f: 
             for k,v in quadratic.items():
                 f.write(str(k) + ',' + str(v) +'\n')
         bqm = dimod.BQM(
             linear = linear,
             quadratic = quadratic,
-            offset = 0,
+            offset = 0.0,
             vartype = dimod.BINARY
         )
+        input()
+
         print("Solver engages Dwave quantum hardware!")
-        sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler()))
+        sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler(num_qubits__gt=2000)))
         response = sampler.sample(bqm)
         for sample, energy, num_occurrences in response.data():
             print(sample, "Energy: ", energy, "Occurrences: ", num_occurrences)

@@ -11,6 +11,8 @@ from methods.exterior_penalty import ExteriorPenaltyMethod
 from problems.bunching import BunchingQAP
 from ports.dwave import Dwave
 
+import utils.mtx as mtx
+
 NUM_SKUS = 10
 WAREHOUSE_NUM_COLS = 6
 WAREHOUSE_NUM_ROWS = 5
@@ -42,16 +44,15 @@ def save_array(fname, arrname, arr, prefix=None):
         f.write(str)
 
 def main():
-    order_parser = OrderParser("orders/order.txt", NUM_SKUS)
+    order_parser = OrderParser("orders/order.txt", NUM_SKUS, 0)
     # F: (n by n) upper triangular interaction frequency matrix
     F = order_parser.gen_F()
+    print(mtx.inspect_entries(F))
+
     qty = order_parser.summary()
 
     problem = BunchingQAP(30,30,3,F)
-    print(problem.flow)
-    print(problem.flow.shape)
-    print(problem.cts)
-    input()
+
     solver = Dwave()
     method = ExteriorPenaltyMethod(problem, solver)
     solution = method.run()
