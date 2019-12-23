@@ -34,9 +34,9 @@ class BunchingQAP(Problem):
 
     @property
     def cts(self):
-        ct1_m_0 = 1
+        ct1_m_0 = 0.1
         ct1_alpha = 10
-        ct2_m_0 = 1
+        ct2_m_0 = 0.1
         ct2_alpha = 10
         cts = [(ct1_m_0, ct1_alpha, self.q['ct1']), (ct2_m_0, ct2_alpha, self.q['ct2'])]
         return cts
@@ -51,7 +51,7 @@ class BunchingQAP(Problem):
             for k in range(1,self.k+1):
                 index = idx.index_1_q_to_l_1(i,k,self.k) - 1
                 solution_mtx[i-1][k-1] = solution[index]
-        
+        print(solution_mtx)
         #recovers ancillaries. Not used for now.
         '''
         num_ancillaries = len(solution.keys()) - self.n*self.k

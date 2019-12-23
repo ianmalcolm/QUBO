@@ -27,9 +27,9 @@ class ClassicalNeal(Solver):
         sampler = neal.SimulatedAnnealingSampler()
         
         if bool(initial):
-            response = sampler.sample(bqm, initial_states=dimod.SampleSet.from_samples(initial_sample, vartype='BINARY', energy=[initial[1]]))
+            response = sampler.sample(bqm, initial_states=dimod.SampleSet.from_samples(initial_sample, vartype='BINARY', energy=[initial[1]]),num_reads=1000)
         else:
-            response = sampler.sample(bqm)
+            response = sampler.sample(bqm, num_reads=1000)
 
         #for datum in response.data(fields=['sample','energy','num_occurrences']):
         #    print(datum)
