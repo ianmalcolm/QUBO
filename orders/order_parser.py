@@ -65,6 +65,7 @@ class OrderParser:
                     a+=1
             sku_indices = sku_indices.astype(int)
 
+            print("quantities of SKUs: ")
             print(self.qty)
             # construct F for items as upper-triangular
             for i in range(1,num_items+1):
@@ -78,6 +79,11 @@ class OrderParser:
                         _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
                     else:
                         pass
+            print("Flow matrix: ")
+            #np.set_printoptions(threshold=np.inf)
+            print(_ret)
+            np.savetxt("Flow.txt",_ret, fmt='%d')
+            np.set_printoptions(threshold=6)
             return _ret
     
     def gen_interaction_frequency(self, order):
@@ -96,7 +102,7 @@ class OrderParser:
                 sku_quantities[item] = 1
             else:
                 sku_quantities[item] += 1
-        print(sku_quantities)
+        #print(sku_quantities)
         for (sku_type, sku_quantity) in sku_quantities.items():
             try:
                 ret[0][int(sku_type)] = sku_quantity
@@ -115,7 +121,7 @@ class OrderParser:
         for i in range(len(sku_types_ls)):
             for j in range(i+1,len(sku_types_ls)):
                 x,y = (sku_types_ls[i], sku_types_ls[j])
-                print(x,y)
+                #print(x,y)
                 freq = sku_quantities[str(x)] * sku_quantities[str(y)]
                 if freq > self.threshold:
                     ret[x][y] = freq

@@ -45,7 +45,7 @@ def save_array(fname, arrname, arr, prefix=None):
         f.write(str)
 
 def main():
-    order_parser = OrderParser("orders/order.txt", NUM_SKUS, 0)
+    order_parser = OrderParser("orders/order.txt", NUM_SKUS, threshold=0)
     # F: (n by n) upper triangular interaction frequency matrix
     F = order_parser.gen_F()
     print(F)
@@ -54,10 +54,9 @@ def main():
 
     problem = BunchingQAP(800,800,20,F)
 
-    solver = Dwave()
+    solver = ClassicalNeal()
     method = ExteriorPenaltyMethod(problem, solver)
     solution = method.run()
-    print(solution)
     input()
     
     #calculate D, m+1 by m+1

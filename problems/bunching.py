@@ -34,14 +34,62 @@ class BunchingQAP(Problem):
 
     @property
     def cts(self):
-        ct1_m_0 = 0.1
+        ct1_m_0 = 1
         ct1_alpha = 10
-        ct2_m_0 = 0.1
+        ct2_m_0 = 1
         ct2_alpha = 10
         cts = [(ct1_m_0, ct1_alpha, self.q['ct1']), (ct2_m_0, ct2_alpha, self.q['ct2'])]
         return cts
 
     def check(self, solution):
+        '''
+            solution is a dict of (var, val)
+        '''
+        #print(solution)
+        solution_mtx = np.zeros((self.n, self.k), dtype=np.int8)
+        for i in range(1,self.n+1):
+            for k in range(1,self.k+1):
+                index = idx.index_1_q_to_l_1(i,k,self.k) - 1
+                solution_mtx[i-1][k-1] = solution[index]
+        
+        #recovers ancillaries. Not used for now.
+        '''
+        num_ancillaries = len(solution.keys()) - self.n*self.k
+        num_bits = num_ancillaries / self.k
+        twos = np.zeros(num_bits)
+        for i in range(num_bits):
+            twos[i] = math.pow(2,i)
+        
+        ancillaries = []
+        start = self.n*self.k
+        for i in range(self.k):
+            ancillary_binary = np.zeros(num_bits, dtype=np.int8)
+            for j in num_bits:
+                offset = j + k * num_bits
+                binary_index = start + offset
+                ancillary_binary[j] = solution[binary_index]
+
+            ancillary = np.dot(twos,ancillary_binary)
+            ancillaries.append(ancillary)
+        '''
+        
+        # check equality constraint ct1
+        test = np.zeros(self.n, dtype=np.int8)
+        for k in range(self.k):
+            #sum(x_ik) = 1
+            test += solution_mtx[:,k]
+        result = test != 1
+        if np.any(result):
+            return False
+
+        # check inequality constraint ct2
+        test = np.zeros(self.k, dtype=np.int32)
+        for i in range(self.n):
+            test += solution_mtx[i,:]
+        result = test > self.bunch_size
+        if np.any(result):
+            return False
+        
         return True
 
     def generate_matrix_ct1(self):
@@ -74,7 +122,7 @@ class BunchingQAP(Problem):
         equality_mtx = np.matmul(np.transpose(A),A) - 2*D
 
         print(equality_mtx.shape)
-        print("%d nonzeros" % np.count_nonzero(equality_mtx))
+        print("%d nonzeros out of %d" % (np.count_nonzero(equality_mtx), equality_mtx.shape[0]*equality_mtx.shape[1]))
         print("done")
         return equality_mtx
 
@@ -93,7 +141,7 @@ class BunchingQAP(Problem):
                     ret[x_ik_idx_linear][x_jk_idx_linear] = -self.F[i-1][j-1]
                 else:
                     pass
-        print("%d nonzeros" % np.count_nonzero(ret))
+        print("%d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
         print("done")
         return ret
     
@@ -195,7 +243,7 @@ class BunchingQAP(Problem):
         print(equality_constraint_mtx)
         # process non-linear constraint
         inequality_constraint_mtx = self.generate_matrix_ct2()
-        print("flow matrix: ")
+        print("inequality matrix: ")
         print(inequality_constraint_mtx)
         ret['ct2'] = inequality_constraint_mtx
 
@@ -210,6 +258,6 @@ class BunchingQAP(Problem):
         
         s = _flow_matrix + _equality_constraint_mtx + inequality_constraint_mtx
         s = np.transpose(s) +s
-        print("s mtx has %d nonzeros out of %d" % (np.count_nonzero(s), s.shape[0]*s.shape[1]))
+        print("sum mtx has %d nonzeros out of %d" % (np.count_nonzero(s), s.shape[0]*s.shape[1]))
         
         return ret

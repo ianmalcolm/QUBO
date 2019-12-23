@@ -5,6 +5,9 @@ class ExteriorPenaltyMethod:
         '''
             precondition:
                 problem.isExterior = True
+            
+            Remark:
+            - a solution is of the form (sample, energy)
         '''
         print("Initializing external penalty method...")
         if not problem.isExterior:
@@ -28,27 +31,37 @@ class ExteriorPenaltyMethod:
         cts = []
         for m_0, alpha, ct in self.problem.cts:
             ms.append(m_0)
-            alphas = alpha
+            alphas.append(alpha)
             cts.append(ct)
         for m_0, ct in zip(ms,cts):
             mtx += m_0 * ct
 
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
         print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
-        LIMIT = 1
+        LIMIT = 100
+        first = True
+        initial = ()
         for i in range(LIMIT):
             print("External penalty iteration %d" % i)
-            solution = self.solver.solve(mtx)
-            satisfied = self.problem.check(solution)
+            
+            if not first:
+                solution = self.solver.solve(mtx, initial)
+            else:
+                solution = self.solver.solve(mtx)
+
+            satisfied = self.problem.check(solution[0])
             if satisfied:
                 print("External penalty has solution. Returning...")
                 return solution
             
             mtx = flow
             for i in range(len(ms)):
-                ms[i] = ms * alphas[i]
+                ms[i] = ms[i] * alphas[i]
             for m, ct in zip(ms, cts):
                 mtx += m*ct
+            
+            initial = solution
+            first = False
         
         print("External penalty has failed. Returning...")
         return solution
