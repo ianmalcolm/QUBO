@@ -50,7 +50,7 @@ class ExteriorPenaltyMethod:
                 solution = self.solver.solve(mtx)
 
             satisfied = self.problem.check(solution[0])
-            if satisfied:
+            if all(satisfied):
                 print("External penalty has solution. Returning...")
                 return solution
             
@@ -66,5 +66,7 @@ class ExteriorPenaltyMethod:
             initial = solution
             first = False
         
-        print("External penalty has failed. Returning...")
+        print("External penalty has failed. Result is:")
+        for i in range(len(satisfied)):
+            print("ct%d: %s" % (i,satisfied[i]))
         return solution

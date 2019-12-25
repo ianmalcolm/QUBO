@@ -74,7 +74,7 @@ class BunchingQAP(Problem):
             ancillary = np.dot(twos,ancillary_binary)
             ancillaries.append(ancillary)
         '''
-        
+        test_ct1 = True
         # check equality constraint ct1
         test = np.zeros(self.n, dtype=np.int8)
         for k in range(self.k):
@@ -82,17 +82,25 @@ class BunchingQAP(Problem):
             test += solution_mtx[:,k]
         result = test != 1
         if np.any(result):
-            return False
+            test_ct1 = False
 
+        test_ct2 = True
         # check inequality constraint ct2
         test = np.zeros(self.k, dtype=np.int32)
         for i in range(self.n):
             test += solution_mtx[i,:]
         result = test > self.bunch_size
         if np.any(result):
-            return False
+            test_ct2 = False
         
-        return True
+        if test_ct1 and test_ct2:
+            return [True, True]
+        elif test_ct1 and not test_ct2:
+            return [True, False]
+        elif not test_ct1 and test_ct2:
+            return [False, True]
+        else:
+            return [False, False]
 
     def generate_matrix_ct1(self):
         '''
