@@ -34,7 +34,7 @@ class BunchingQAP(Problem):
 
     @property
     def cts(self):
-        ct1_m_0 = 10000
+        ct1_m_0 = 10000.0
         ct1_alpha = 10
         ct2_m_0 = 0.1
         ct2_alpha = 10

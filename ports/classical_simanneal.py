@@ -29,9 +29,9 @@ class ClassicalNeal(Solver):
         if bool(initial):
             response = sampler.sample(bqm, initial_states=dimod.SampleSet.from_samples(initial_sample, vartype='BINARY', energy=[initial[1]]),num_reads=1000)
         else:
-            response = sampler.sample(bqm, num_reads=1000)
+            response = sampler.sample(bqm, num_reads=100)
 
-        #for datum in response.data(fields=['sample','energy','num_occurrences']):
-        #    print(datum)
-
+        for datum in response.data(fields=['energy','num_occurrences']):
+            print(datum)
+        
         return (response.first.sample, response.first.energy)
