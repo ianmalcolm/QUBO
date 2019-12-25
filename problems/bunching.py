@@ -51,7 +51,9 @@ class BunchingQAP(Problem):
             for k in range(1,self.k+1):
                 index = idx.index_1_q_to_l_1(i,k,self.k) - 1
                 solution_mtx[i-1][k-1] = solution[index]
+        np.set_printoptions(threshold=sys.maxsize)
         print(solution_mtx)
+        np.set_printoptions(threshold=6)
         #recovers ancillaries. Not used for now.
         '''
         num_ancillaries = len(solution.keys()) - self.n*self.k
