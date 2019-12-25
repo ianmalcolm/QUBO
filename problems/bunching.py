@@ -36,7 +36,7 @@ class BunchingQAP(Problem):
     def cts(self):
         ct1_m_0 = 10000.0
         ct1_alpha = 10
-        ct2_m_0 = 0.1
+        ct2_m_0 = 10000.0
         ct2_alpha = 10
         cts = [(ct1_m_0, ct1_alpha, self.q['ct1']), (ct2_m_0, ct2_alpha, self.q['ct2'])]
         return cts
