@@ -38,7 +38,7 @@ class ExteriorPenaltyMethod:
 
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
         print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
-        LIMIT = 1000
+        LIMIT = 1
         first = True
         initial = ()
         for i in range(LIMIT):
