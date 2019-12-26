@@ -172,11 +172,14 @@ class BunchingQAP(Problem):
             for i in range(1,self.n+1):
                 xik_idx_linear = idx.index_1_q_to_l_1(i,k,self.k)
                 A[idx.index_1_to_0(k)][idx.index_1_to_0(xik_idx_linear)] = 1
-        
+        np.set_printoptions(threshold=np.inf)
+        print(A)
         s = math.floor(self.m / self.k)
         b = np.zeros(self.n * self.k)
         for i in range(self.k):
             b[i] = s
+        print(b)
+        np.set_printoptions(threshold=6)
         bt_A = np.matmul(np.transpose(b),A)
         print("A has %d nonzeros out of %d" % (np.count_nonzero(A), A.shape[0]*A.shape[1]))
         
