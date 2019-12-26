@@ -39,15 +39,11 @@ class ExteriorPenaltyMethod:
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
         print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
         LIMIT = 1
-        first = True
-        initial = ()
+        initial = self.problem.initial()
         for i in range(LIMIT):
             print("External penalty iteration %d" % i)
             
-            if not first:
-                solution = self.solver.solve(mtx, initial)
-            else:
-                solution = self.solver.solve(mtx)
+            solution = self.solver.solve(mtx, initial)
 
             satisfied = self.problem.check(solution[0])
             if all(satisfied):

@@ -15,6 +15,10 @@ class Problem(abc.ABC):
     def check(self, solution):
         pass
 
+    @abc.abstractmethod
+    def initial(self):
+        pass
+
     @abc.abstractproperty
     def flow(self):
         pass

@@ -4,6 +4,7 @@ import math
 import numpy as np
 import utils.index as idx
 import os
+import random
 
 
 class BunchingQAP(Problem):
@@ -20,6 +21,7 @@ class BunchingQAP(Problem):
         self.m = num_locs
         self.n = num_items
         self.k = num_groups
+        self.num_ancillaries = 0
         self.bunch_size = math.ceil(self.n / self.k)
         self.F = F.copy()
         self.q = self.generate_Q()
@@ -34,12 +36,33 @@ class BunchingQAP(Problem):
 
     @property
     def cts(self):
-        ct1_m_0 = 10000.0
+        ct1_m_0 = 100.0
         ct1_alpha = 10
-        ct2_m_0 = 10000.0
+        ct2_m_0 = 8.0
         ct2_alpha = 10
         cts = [(ct1_m_0, ct1_alpha, self.q['ct1']), (ct2_m_0, ct2_alpha, self.q['ct2'])]
         return cts
+
+    def initial(self):
+        '''
+        returns a (dict,energy) tuple of initial state that assigns each item to a random bunch.
+        '''
+        ret_dict = {}
+        #randomly assign each item to some bunch
+        for i in range(1,self.n+1):
+            grp = random.randint(1,self.k)
+            for k in range(1,self.k+1):
+                index = idx.index_1_q_to_l_1(i,k,self.k) - 1
+                if grp==k:
+                    ret_dict[index] = 1
+                else:
+                    ret_dict[index] = 0
+        
+        for i in range(self.n*self.k, self.n*self.k + self.num_ancillaries):
+            ret_dict[i] = random.randint(0,1)
+
+        print("initial state dict has %d vars" % len(ret_dict.keys()))
+        return (ret_dict,0)
 
     def check(self, solution):
         '''
@@ -160,6 +183,7 @@ class BunchingQAP(Problem):
         #compute number of binary ancillary vars
         num_bits = int.bit_length(self.bunch_size)
         num_ancillaries = num_bits * self.k
+        self.num_ancillaries += num_ancillaries
         
         # P(x,y) = x^t(A^tA-2D)x + b^tb + 2y^tAx - 2b^ty + y^ty
         # Each y_i = <2, u_i>
