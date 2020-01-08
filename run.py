@@ -31,7 +31,7 @@ BIGF_FILENAME = 'bigF.dat'
 BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
-group_num_cols = 20
+group_num_cols = 10
 group_num_rows = 20
 
 def save_array(fname, arrname, arr, prefix=None):
@@ -52,7 +52,7 @@ def main():
 
     qty = order_parser.summary()
 
-    problem = BunchingQAP(800,800,2,F)
+    problem = BunchingQAP(800,800,4,F)
 
     solver = ClassicalNeal()
     method = ExteriorPenaltyMethod(problem, solver)

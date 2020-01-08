@@ -168,7 +168,8 @@ class BunchingQAP(Problem):
                 # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
         b = np.ones(shape=self.n)
-        weights = np.ones(shape=self.n)
+        weights = np.full(shape=self.n, fill_value=1000)
+        print(A)
         return A, b, weights
     
     def generate_matrix_ct2(self):
@@ -194,7 +195,7 @@ class BunchingQAP(Problem):
 
         s = math.floor(self.m / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
-        weights = np.ones(shape=num_constraints)
+        weights = np.full(shape=num_constraints, fill_value=1000)
 
         return coeff, b, weights
 
@@ -213,21 +214,25 @@ class BunchingQAP(Problem):
 
         ct1_coeff, ct1_b, ct1_weights = self.generate_matrix_ct1()
         ct1_len = ct1_coeff.shape[0]
-        A[0:ct1_len, 0:ct1_coeff.shape[1]] = ct1_coeff
+        A[0:self.n, 0:(self.n*self.k)] = ct1_coeff
         b[0:ct1_len] = ct1_b
         weights[0:ct1_len] = ct1_weights
         
         ct2_coeff, ct2_b, ct2_weights = self.generate_matrix_ct2()
         ct2_len = ct2_coeff.shape[0]
-        A[ct1_len: (ct1_len+ct2_len), 0:ct2_coeff.shape[1]] = ct2_coeff
+        A[self.n: self.n+self.k, 0:size_A] = ct2_coeff
         b[ct1_len: (ct1_len+ct2_len)] = ct2_b
         weights[ct1_len: (ct1_len+ct2_len)] = ct2_weights
 
         self.ms = weights[0:(ct1_len+ct2_len)]
-        self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=2)
+        self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
         self.canonical_A = A.copy()
         print("look here", type(self.canonical_A))
         self.canonical_b = b.copy()
+        
+        np.set_printoptions(threshold=8)
+        print("A: ", A)
+        np.set_printoptions(threshold=6)
         return super().A_to_Q(A, b, weights)
     
     def update_weights(self):
