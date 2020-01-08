@@ -14,9 +14,9 @@ from ports.classical_simanneal import ClassicalNeal
 
 import utils.mtx as mtx
 
-NUM_SKUS = 10
-WAREHOUSE_NUM_COLS = 6
-WAREHOUSE_NUM_ROWS = 5
+NUM_SKUS = 100
+WAREHOUSE_NUM_COLS = 40
+WAREHOUSE_NUM_ROWS = 20
 DIST_VERTICAL = 1
 DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
@@ -31,8 +31,8 @@ BIGF_FILENAME = 'bigF.dat'
 BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
-group_num_cols = 2
-group_num_rows = 5
+group_num_cols = 20
+group_num_rows = 20
 
 def save_array(fname, arrname, arr, prefix=None):
     with open(fname,'w') as f:
@@ -52,7 +52,7 @@ def main():
 
     qty = order_parser.summary()
 
-    problem = BunchingQAP(30,30,3,F)
+    problem = BunchingQAP(800,800,2,F)
 
     solver = ClassicalNeal()
     method = ExteriorPenaltyMethod(problem, solver)

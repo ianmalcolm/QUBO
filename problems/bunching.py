@@ -21,10 +21,23 @@ class BunchingQAP(Problem):
         self.m = num_locs
         self.n = num_items
         self.k = num_groups
-        self.num_ancillaries = 0
         self.bunch_size = math.ceil(self.n / self.k)
         self.F = F.copy()
-        self.q = self.generate_Q()
+        self.num_constraints = self.n + self.k
+        self.num_ancillaries = 0
+        self.ancillary_bit_length = 0
+
+        #####mutable variables#####
+        self.ms = []
+        self.alphas = []
+        self.canonical_A = -1
+        self.canonical_b = -1
+        self.count = 1
+        #####end of state#####
+
+        # construct initial Q      
+        self.q = self.initialise_Q()
+
 
     @property
     def isExterior(self):
@@ -36,11 +49,7 @@ class BunchingQAP(Problem):
 
     @property
     def cts(self):
-        ct1_m_0 = 100.0
-        ct1_alpha = 10
-        ct2_m_0 = 8.0
-        ct2_alpha = 10
-        cts = [(ct1_m_0, ct1_alpha, self.q['ct1']), (ct2_m_0, ct2_alpha, self.q['ct2'])]
+        cts = (self.ms, self.alphas, self.q['constraints'])
         return cts
 
     def initial(self):
@@ -125,40 +134,6 @@ class BunchingQAP(Problem):
         else:
             return [False, False]
 
-    def generate_matrix_ct1(self):
-        '''
-        ct1: forall 1<=i<=n, sum(x_ik) = 1 forall 1<=k<=num_groups
-        
-        Remarks:
-            A       (nm by nm) linear constraint matrix Ax = b
-            b       column vector containing n 1's
-            m1_0    initial penalty weight, for exterior method
-            memmap is used for large matrices
-        '''
-        print("generating equality constraint")
-        A = np.zeros(shape=(self.n*self.k, self.n*self.k),dtype=np.float32)
-        for i in range(1,self.n+1):
-            for k in range(1,self.k+1):
-                x_ik_index = idx.index_1_q_to_l_1(i,k,self.k)
-                # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
-                A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
-        b = np.zeros((self.n * self.k),dtype=np.float32)
-        for i in range(self.n):
-            b[i] = 1
-        bt_A = np.zeros(shape=self.n*self.k,dtype=np.float32)
-        bt_A = np.matmul(b,A)
-        # generalise linear terms to quadratic
-        D = np.zeros(shape=(self.n*self.k, self.n*self.k),dtype=np.float32)
-        for i in range(self.n*self.k):
-            D[i][i] = bt_A[i]
-        equality_mtx = np.zeros(shape=(self.n*self.k, self.n*self.k),dtype=np.float32)
-        equality_mtx = np.matmul(np.transpose(A),A) - 2*D
-
-        print(equality_mtx.shape)
-        print("%d nonzeros out of %d" % (np.count_nonzero(equality_mtx), equality_mtx.shape[0]*equality_mtx.shape[1]))
-        print("done")
-        return equality_mtx
-
     def generate_flow_matrix(self):
         print("generating flow")
         ret = np.zeros(shape=(self.n*self.k,self.n*self.k),dtype=np.float32)
@@ -177,91 +152,100 @@ class BunchingQAP(Problem):
         print("%d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
         print("done")
         return ret
+
+    def generate_matrix_ct1(self):
+        '''
+        ct1: forall 1<=i<=n, sum(x_ik) = 1 forall 1<=k<=num_groups
+        
+        Remarks:
+            A       (n by nk) linear constraint coefficients
+        '''
+        print("generating equality constraint")
+        A = np.zeros(shape=(self.n, self.n*self.k),dtype=np.float32)
+        for i in range(1,self.n+1):
+            for k in range(1,self.k+1):
+                x_ik_index = idx.index_1_q_to_l_1(i,k,self.k)
+                # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
+                A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
+        b = np.ones(shape=self.n)
+        weights = np.ones(shape=self.n)
+        return A, b, weights
     
     def generate_matrix_ct2(self):
         print("generating inequality constraint")
+        coeff = np.zeros(shape=(self.k,self.n*self.k + self.num_ancillaries))
+        
+        num_constraints = self.k
+        
+        twos = np.zeros(self.ancillary_bit_length)
+        for i in range(self.ancillary_bit_length):
+            twos[i] = math.pow(2,i)
+
+        ancillary_startpos = self.n*self.k
+        for k in range(1,num_constraints+1):
+            # fill out the coefficients
+            # forall 1<=k<=num_groups, sum(xik) <= s
+            for i in range(1,self.n+1):
+                xik_idx_linear = idx.index_1_q_to_l_1(i,k,self.k)
+                coeff[idx.index_1_to_0(k)][idx.index_1_to_0(xik_idx_linear)] = 1
+            # fill out the twos complement
+            coeff[idx.index_1_to_0(k), ancillary_startpos: ancillary_startpos + self.ancillary_bit_length] = twos
+            ancillary_startpos += self.ancillary_bit_length
+
+        s = math.floor(self.m / self.k)
+        b = np.full(shape=num_constraints, fill_value=s)
+        weights = np.ones(shape=num_constraints)
+
+        return coeff, b, weights
+
+    def generate_constraint_mtx(self):
+        '''generate A for Ax=b'''
         #compute number of binary ancillary vars
         num_bits = int.bit_length(self.bunch_size)
         num_ancillaries = num_bits * self.k
+        self.ancillary_bit_length = num_bits
         self.num_ancillaries += num_ancillaries
         
-        # P(x,y) = x^t(A^tA-2D)x + b^tb + 2y^tAx - 2b^ty + y^ty
-        # Each y_i = <2, u_i>
-        ret_size = self.n*self.k + num_ancillaries
-        ret = np.zeros((ret_size,ret_size))
-        A = np.zeros((self.n*self.k, self.n*self.k))
-        
-        # forall 1<=k<=num_groups, sum(xik) <= s
-        for k in range(1,self.k+1):
-            for i in range(1,self.n+1):
-                xik_idx_linear = idx.index_1_q_to_l_1(i,k,self.k)
-                A[idx.index_1_to_0(k)][idx.index_1_to_0(xik_idx_linear)] = 1
-        np.set_printoptions(threshold=np.inf)
-        print(A)
-        s = math.floor(self.m / self.k)
-        b = np.zeros(self.n * self.k)
-        for i in range(self.k):
-            b[i] = s
-        print(b)
-        np.set_printoptions(threshold=6)
-        bt_A = np.matmul(np.transpose(b),A)
-        print("A has %d nonzeros out of %d" % (np.count_nonzero(A), A.shape[0]*A.shape[1]))
-        
-        D = np.zeros((self.n*self.k, self.n*self.k))
-        for i in range(self.n*self.k):
-            D[i][i] = bt_A[i]
+        size_A = self.n*self.k + self.num_ancillaries
+        A = np.zeros(shape=(size_A,size_A))
+        b = np.zeros(shape=size_A)
+        weights = np.zeros(shape=self.n + self.k)
 
-        print("D has %d nonzeros out of %d" % (np.count_nonzero(D), D.shape[0]*D.shape[1]))
-        # A^tA-2D
-        AtA_2D = np.matmul(np.transpose(A),A) - 2*D
-
-        print("AtA-2D has %d nonzeros out of %d" % (np.count_nonzero(AtA_2D), AtA_2D.shape[0]*AtA_2D.shape[1]))
-        ret[0:self.n*self.k, 0:self.n*self.k] = AtA_2D
+        ct1_coeff, ct1_b, ct1_weights = self.generate_matrix_ct1()
+        ct1_len = ct1_coeff.shape[0]
+        A[0:ct1_len, 0:ct1_coeff.shape[1]] = ct1_coeff
+        b[0:ct1_len] = ct1_b
+        weights[0:ct1_len] = ct1_weights
         
-        twos = np.zeros(num_bits)
-        for i in range(num_bits):
-            twos[i] = math.pow(2,i)
+        ct2_coeff, ct2_b, ct2_weights = self.generate_matrix_ct2()
+        ct2_len = ct2_coeff.shape[0]
+        A[ct1_len: (ct1_len+ct2_len), 0:ct2_coeff.shape[1]] = ct2_coeff
+        b[ct1_len: (ct1_len+ct2_len)] = ct2_b
+        weights[ct1_len: (ct1_len+ct2_len)] = ct2_weights
 
-        # 2y^tAx
-        for k in range(1, self.k+1):
-            for i in range(1,self.n*self.k+1):
-                for l in range(num_bits):
-                    x_idx_1 = i
-                    u_idx_1 = self.m*self.k + 1 + (k-1)*num_bits + l
-                    # upper triangular only, x's index < u's index
-                    ret[idx.index_1_to_0(x_idx_1)][idx.index_1_to_0(u_idx_1)] = 2*A[idx.index_1_to_0(k)][idx.index_1_to_0(i)] * twos[l]
-        
-        # -2b^ty, which is linear on y
-        for k in range(1, self.k+1):
-            for l in range(num_bits):
-                u_idx_1 = self.m*self.k + 1 + (k-1)*num_bits + l
-                ret[idx.index_1_to_0(u_idx_1)][idx.index_1_to_0(u_idx_1)] = (-2) * b[idx.index_1_to_0(k)] * twos[l]
-
-        # y^ty, which is a quadratic form on the vector of y
-        for k in range(1, self.k):
-            for j,l in itertools.product(range(num_bits), range(num_bits)):
-                uj_idx_1 = self.m*self.k + 1 + (k-1)*num_bits + j
-                ul_idx_1 = self.m*self.k + 1 + (k-1)*num_bits + l
-                if j==l:
-                    ret[idx.index_1_to_0(uj_idx_1)][idx.index_1_to_0(uj_idx_1)] = twos[j]*twos[j]
-                elif j<l:
-                    ret[idx.index_1_to_0(uj_idx_1)][idx.index_1_to_0(ul_idx_1)] = 2*twos[j]*twos[l]
-                else:
-                    pass
-        
-        print(ret.shape)
-        print("inequality mtx has %d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
-        test = np.transpose(ret) + ret
-        print("test mtx has %d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
-        print("done")
-        return ret
+        self.ms = weights[0:(ct1_len+ct2_len)]
+        self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=2)
+        self.canonical_A = A.copy()
+        print("look here", type(self.canonical_A))
+        self.canonical_b = b.copy()
+        return super().A_to_Q(A, b, weights)
     
-    def generate_Q(self):
+    def update_weights(self):
+        new_weights = list(map(lambda x,y: x*y, self.ms, self.alphas))
+        A = self.canonical_A.copy()
+        b = self.canonical_b.copy()
+        new_ct_mtx = super().A_to_Q(A,b,new_weights)
+        
+        #state udpate
+        self.ms = new_weights
+        self.q['constraints'] = new_ct_mtx
+        return new_weights, new_ct_mtx
+
+    def initialise_Q(self):
         '''
-        returns: a dict containing three matrices.
+        returns: a dict containing two matrices.
             'flow': original negated flow terms to minimise
-            'ct1': penalty matrix for ct1
-            'ct2': penalty matrix for ct2
+            'constraints': penalised constraint coefficients
         
         remarks:
             1. The returned values are combined with a sequence of penalty weights to get
@@ -274,27 +258,14 @@ class BunchingQAP(Problem):
         flow_matrix = self.generate_flow_matrix()
         print("flow matrix: ")
         print(flow_matrix)
-        # process linear constraint
-        equality_constraint_mtx = self.generate_matrix_ct1()
-        print("equality matrix: ")
-        print(equality_constraint_mtx)
-        # process non-linear constraint
-        inequality_constraint_mtx = self.generate_matrix_ct2()
-        print("inequality matrix: ")
-        print(inequality_constraint_mtx)
-        ret['ct2'] = inequality_constraint_mtx
 
-        #embed all matrices in big matrix with ancillaries
-        _flow_matrix = np.zeros(inequality_constraint_mtx.shape)
+        # process constraints
+        constraint_mtx = self.generate_constraint_mtx()
+        
+        # embed flow into bigger matrix
+        _flow_matrix = np.zeros(constraint_mtx.shape)
         _flow_matrix[0:flow_matrix.shape[0], 0:flow_matrix.shape[0]] = flow_matrix
 
         ret['flow'] = _flow_matrix
-        _equality_constraint_mtx = np.zeros(inequality_constraint_mtx.shape)
-        _equality_constraint_mtx[0:equality_constraint_mtx.shape[0], 0:equality_constraint_mtx.shape[0]] = equality_constraint_mtx
-        ret['ct1'] = _equality_constraint_mtx
-        
-        s = _flow_matrix + _equality_constraint_mtx + inequality_constraint_mtx
-        s = np.transpose(s) +s
-        print("sum mtx has %d nonzeros out of %d" % (np.count_nonzero(s), s.shape[0]*s.shape[1]))
-        
+        ret['constraints'] = constraint_mtx
         return ret

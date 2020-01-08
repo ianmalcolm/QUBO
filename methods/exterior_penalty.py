@@ -25,20 +25,14 @@ class ExteriorPenaltyMethod:
         '''
         print("Running external penalty...")
         flow = self.problem.flow.copy()
+        cts = self.problem.cts
         mtx = flow
-        ms = []
-        alphas = []
-        cts = []
-        for m_0, alpha, ct in self.problem.cts:
-            ms.append(m_0)
-            alphas.append(alpha)
-            cts.append(ct)
-        for m_0, ct in zip(ms,cts):
-            mtx += m_0 * ct
+        ms_read, alphas_read, mtx_ct = cts
+        mtx += mtx_ct
 
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
         print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
-        LIMIT = 1
+        LIMIT = 10
         initial = self.problem.initial()
         for i in range(LIMIT):
             print("External penalty iteration %d" % i)
@@ -51,16 +45,12 @@ class ExteriorPenaltyMethod:
                 return solution
             
             mtx = flow
-            print(type(mtx))
-            for i in range(len(ms)):
-                ms[i] = ms[i] * alphas[i]
-            for m, ct in zip(ms, cts):
-                print(type(m))
-                print(type(ct))
-                mtx += m*ct
+            # generate constraint matrix with updated weights
+            ms_updated, mtx_ct_updated = self.problem.update_weights()
+            print(ms_updated)
+            mtx += mtx_ct_updated
             
             initial = solution
-            first = False
         
         print("External penalty has failed. Result is:")
         for i in range(len(satisfied)):
