@@ -125,14 +125,7 @@ class BunchingQAP(Problem):
         if np.any(result):
             test_ct2 = False
         
-        if test_ct1 and test_ct2:
-            return [True, True]
-        elif test_ct1 and not test_ct2:
-            return [True, False]
-        elif not test_ct1 and test_ct2:
-            return [False, True]
-        else:
-            return [False, False]
+        return [test_ct1,test_ct2]
 
     def generate_flow_matrix(self):
         print("generating flow")
@@ -229,8 +222,8 @@ class BunchingQAP(Problem):
         np.set_printoptions(threshold=6)
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
-        self.alphas[0:ct1_len] = 100
-        self.alphas[ct1_len:(ct1_len+ct2_len)] = 0.25
+        self.alphas[0:ct1_len] = 10
+        self.alphas[ct1_len:(ct1_len+ct2_len)] = 0.025
         self.canonical_A = A.copy()
         print("look here", type(self.canonical_A))
         self.canonical_b = b.copy()

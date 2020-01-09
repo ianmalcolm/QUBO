@@ -14,9 +14,9 @@ from ports.classical_simanneal import ClassicalNeal
 
 import utils.mtx as mtx
 
-NUM_SKUS = 100
-WAREHOUSE_NUM_COLS = 40
-WAREHOUSE_NUM_ROWS = 20
+NUM_SKUS = 10
+WAREHOUSE_NUM_COLS = 6
+WAREHOUSE_NUM_ROWS = 5
 DIST_VERTICAL = 1
 DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
@@ -32,7 +32,7 @@ BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
 group_num_cols = 2
-group_num_rows = 20
+group_num_rows = 5
 
 def save_array(fname, arrname, arr, prefix=None):
     with open(fname,'w') as f:
@@ -52,7 +52,7 @@ def main():
 
     qty = order_parser.summary()
 
-    problem = BunchingQAP(800,800,20,F)
+    problem = BunchingQAP(30,30,3,F)
 
     solver = ClassicalNeal()
     method = ExteriorPenaltyMethod(problem, solver)
@@ -61,7 +61,7 @@ def main():
     
     #calculate D, m+1 by m+1
     D_gen = DistanceGenerator(
-        WAREHOUSE_NUM_ROWS, 
+        WAREHOUSE_NUM_ROWS,
         WAREHOUSE_NUM_COLS, 
         DIST_VERTICAL, 
         DIST_HORIZONTAL,
@@ -71,8 +71,8 @@ def main():
     D = D_gen.gen_S_shape()
     print("D: ", D)
 
-
     #extract Dprime, xy+1 by xy+1, distance matrix for the first few locations
+    # NOTE: Usually Dprime cannot be extrapolated. Exception is no column crossing within a bunch
     Dprime = D_gen.gen_Dprime(D)
     print("Dprime: ", Dprime)
 

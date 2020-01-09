@@ -24,9 +24,9 @@ class Problem(abc.ABC):
     @abc.abstractmethod
     def update_weights(self, new_weights):
         '''
-            returns a tuple (weights, mtx) where
-                weights is updated penalty weights
-                mtx is updated CONSTRAINT matrix
+            returns a tuple (weights, mtx)
+                weights: updated penalty weights
+                mtx: updated CONSTRAINT matrix
         '''
         pass
     
