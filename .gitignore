@@ -2,3 +2,4 @@
 *.dat
 *.txt
 !order.txt
+!__order.txt
