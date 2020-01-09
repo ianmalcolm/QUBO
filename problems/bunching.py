@@ -168,7 +168,7 @@ class BunchingQAP(Problem):
                 # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
         b = np.ones(shape=self.n)
-        weights = np.full(shape=self.n, fill_value=1000)
+        weights = np.full(shape=self.n, fill_value=10)
         print(A)
         return A, b, weights
     
@@ -195,7 +195,7 @@ class BunchingQAP(Problem):
 
         s = math.floor(self.m / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
-        weights = np.full(shape=num_constraints, fill_value=500)
+        weights = np.full(shape=num_constraints, fill_value=10)
 
         return coeff, b, weights
 
@@ -229,6 +229,8 @@ class BunchingQAP(Problem):
         np.set_printoptions(threshold=6)
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
+        self.alphas[0:ct1_len] = 10
+        self.alphas[ct1_len:(ct1_len+ct2_len)] = 2.5
         self.canonical_A = A.copy()
         print("look here", type(self.canonical_A))
         self.canonical_b = b.copy()
@@ -237,9 +239,10 @@ class BunchingQAP(Problem):
         return super().A_to_Q(A, b, weights)
     
     def update_weights(self, solution):
+        solution_arr = np.fromiter(solution.values(),dtype=np.int8)
         new_weights = np.zeros(self.num_constraints)
         for i in range(self.num_constraints):
-            new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.current_A[i,:],solution) - self.current_b[i])
+            new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
         A = self.canonical_A.copy()
         b = self.canonical_b.copy()
         new_ct_mtx = super().A_to_Q(A,b,new_weights)

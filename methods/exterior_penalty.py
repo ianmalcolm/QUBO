@@ -32,7 +32,7 @@ class ExteriorPenaltyMethod:
 
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
         print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
-        LIMIT = 1
+        LIMIT = 10000000
         initial = self.problem.initial()
         for i in range(LIMIT):
             print("External penalty iteration %d" % i)
@@ -43,11 +43,16 @@ class ExteriorPenaltyMethod:
             if all(satisfied):
                 print("External penalty has solution. Returning...")
                 return solution
+            else:
+                for i in range(len(satisfied)):
+                    print("ct%d: %s" % (i,satisfied[i]))
             
             mtx = flow
             # generate constraint matrix with updated weights
-            ms_updated, mtx_ct_updated = self.problem.update_weights()
+            ms_updated, mtx_ct_updated = self.problem.update_weights(solution[0])
+            np.set_printoptions(threshold=np.inf)
             print(ms_updated)
+            np.set_printoptions(threshold=6)
             mtx += mtx_ct_updated
             
             initial = solution
