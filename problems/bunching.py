@@ -229,8 +229,8 @@ class BunchingQAP(Problem):
         np.set_printoptions(threshold=6)
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
-        self.alphas[0:ct1_len] = 10
-        self.alphas[ct1_len:(ct1_len+ct2_len)] = 2.5
+        self.alphas[0:ct1_len] = 100
+        self.alphas[ct1_len:(ct1_len+ct2_len)] = 0.25
         self.canonical_A = A.copy()
         print("look here", type(self.canonical_A))
         self.canonical_b = b.copy()
