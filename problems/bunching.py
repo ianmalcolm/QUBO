@@ -195,7 +195,7 @@ class BunchingQAP(Problem):
 
         s = math.floor(self.m / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
-        weights = np.full(shape=num_constraints, fill_value=1000)
+        weights = np.full(shape=num_constraints, fill_value=500)
 
         return coeff, b, weights
 
@@ -219,24 +219,27 @@ class BunchingQAP(Problem):
         weights[0:ct1_len] = ct1_weights
         
         ct2_coeff, ct2_b, ct2_weights = self.generate_matrix_ct2()
+        
         ct2_len = ct2_coeff.shape[0]
         A[self.n: self.n+self.k, 0:size_A] = ct2_coeff
         b[ct1_len: (ct1_len+ct2_len)] = ct2_b
         weights[ct1_len: (ct1_len+ct2_len)] = ct2_weights
-
+        np.set_printoptions(threshold=np.inf)
+        print("ct2coeff: ", ct2_coeff)
+        np.set_printoptions(threshold=6)
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
         self.canonical_A = A.copy()
         print("look here", type(self.canonical_A))
         self.canonical_b = b.copy()
         
-        np.set_printoptions(threshold=8)
-        print("A: ", A)
-        np.set_printoptions(threshold=6)
+
         return super().A_to_Q(A, b, weights)
     
-    def update_weights(self):
-        new_weights = list(map(lambda x,y: x*y, self.ms, self.alphas))
+    def update_weights(self, solution):
+        new_weights = np.zeros(self.num_constraints)
+        for i in range(self.num_constraints):
+            new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.current_A[i,:],solution) - self.current_b[i])
         A = self.canonical_A.copy()
         b = self.canonical_b.copy()
         new_ct_mtx = super().A_to_Q(A,b,new_weights)
