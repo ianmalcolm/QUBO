@@ -14,7 +14,7 @@ import utils.mtx as mtx
 
 NUM_SKUS = 10
 WAREHOUSE_NUM_COLS = 6
-WAREHOUSE_NUM_ROWS = 5
+WAREHOUSE_NUM_ROWS = 4
 NUM_LOCS = WAREHOUSE_NUM_COLS*WAREHOUSE_NUM_ROWS
 NUM_GROUPS = 3
 DIST_VERTICAL = 1
@@ -22,13 +22,17 @@ DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
 
 group_num_cols = 2
-group_num_rows = 5
+group_num_rows = 4
+group_num_locs = group_num_cols * group_num_rows
 
 def main():
-    order_parser = OrderParser("orders/order.txt", NUM_SKUS, threshold=0)
+    order_parser = OrderParser("orders/order.txt", NUM_SKUS, threshold=1)
     # F: (n by n) upper triangular interaction frequency matrix
     F = order_parser.gen_F()
+    print("F has shape: ", F.shape)
+    np.set_printoptions(threshold=np.inf)
     print(F)
+    np.set_printoptions(threshold=6)
 
     qty = order_parser.summary()
 
@@ -75,16 +79,21 @@ def main():
     Dprime = D_gen.gen_Dprime(D)
     print("Dprime: ", Dprime)
 
+    solution1_mtx = problem.solution_mtx(solution1[0])
     for i in range(NUM_GROUPS):
         index_list = []
-        items_choice_list = solution1[:,i]
-        for j in range(items_choice_list):
+        items_choice_list = solution1_mtx[:,i]
+
+        for j in range(len(items_choice_list)):
             if items_choice_list[j]:
                 index_list.append(j)
         Fprime = extract_F_Prime(F,index_list)
+        np.set_printoptions(threshold=np.inf)
+        print(Fprime)
+        np.set_printoptions(threshold=6)
         problem2 = PlacementQAP(
-            NUM_LOCS,
-            NUM_LOCS,
+            group_num_locs,
+            group_num_locs,
             Fprime,
             Dprime,
             1

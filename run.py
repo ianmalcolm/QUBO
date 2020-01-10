@@ -16,7 +16,7 @@ import utils.mtx as mtx
 
 NUM_SKUS = 10
 WAREHOUSE_NUM_COLS = 6
-WAREHOUSE_NUM_ROWS = 5
+WAREHOUSE_NUM_ROWS = 4
 DIST_VERTICAL = 1
 DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
@@ -32,7 +32,7 @@ BIGD_FILENAME = 'bigD.dat'
 BIGQTY_FILENAME = 'bigQty.dat'
 
 group_num_cols = 2
-group_num_rows = 5
+group_num_rows = 4
 
 def save_array(fname, arrname, arr, prefix=None):
     with open(fname,'w') as f:

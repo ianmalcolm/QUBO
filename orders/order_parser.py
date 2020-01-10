@@ -76,7 +76,8 @@ class OrderParser:
                     elif i<j:
                         # NOTE: when sku_indices[i] == sku_indices[j], 
                         #       the value is on diagonal of old_F which is the nC2 definition.
-                        _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
+                        if old_F[sku_indices[i]][sku_indices[j]] > self.threshold:
+                            _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
                     else:
                         pass
             print("Flow matrix: ")
@@ -91,8 +92,8 @@ class OrderParser:
         
             returns: F (n+1 by n+1). 
                     F is Symmetric. 
-                    Zero-th row and the diagonal are both quantities of SKUs.
-                    Except for the diagonal, interaction frequency is 0 if it does not exceed self.threshold.
+                    Zero-th row represents quantities of SKUs.
+                    Diagonal represents nC2 of a certain SKU appearing in a single order.
         '''
         ret = np.zeros((self.num_SKUs+1, self.num_SKUs+1), dtype=np.int32)
         sku_quantities = {}
@@ -123,8 +124,7 @@ class OrderParser:
                 x,y = (sku_types_ls[i], sku_types_ls[j])
                 #print(x,y)
                 freq = sku_quantities[str(x)] * sku_quantities[str(y)]
-                if freq > self.threshold:
-                    ret[x][y] = freq
+                ret[x][y] = freq
         ret = ret + ret.transpose()
         
         # compute F[i][i]

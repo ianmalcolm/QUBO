@@ -18,7 +18,8 @@ class Dwave(Solver):
                     solution is a tuple (dict, float) representing sample and energy.
         '''
         if bool(initial):
-            initial_sample = dimod.as_samples(initial)
+            initial_sample = list(initial[0].values())
+        print(initial_sample)
         print("solver starts the process...")
         mtx = matrix.copy()
         print("matrix has %d zeros out of %d" % (np.count_nonzero(mtx==0), mtx.shape[0]*mtx.shape[1]))
@@ -28,7 +29,12 @@ class Dwave(Solver):
         sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler(num_qubits__gt=2000)))
         
         if bool(initial):
-            response = sampler.sample(bqm, initial_states=dimod.SampleSet.from_samples(initial_sample))
+            response = sampler.sample(
+                bqm,
+                #anneal_schedule=[[0.0, 0.0], [10.0, 0.3], [20.0, 1.0]],
+                #initial_state=initial_sample,
+                num_reads=10
+            )
         else:
             response = sampler.sample(bqm)
             

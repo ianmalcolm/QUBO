@@ -70,9 +70,10 @@ class Problem(abc.ABC):
         D = np.zeros((size,size))
         for i in range(size):
             D[i][i] = bt_A[i]
-        
+        AtA = np.matmul(np.transpose(_A),_A)
+        print("AtA has %d nonzeros out of %d" % (np.count_nonzero(AtA), AtA.shape[0]*AtA.shape[1]))
         ret = np.zeros((size,size))
-        ret = np.matmul(np.transpose(_A),_A) - 2*D
+        ret = AtA - 2*D
         return ret
         
         

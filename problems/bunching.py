@@ -73,19 +73,28 @@ class BunchingQAP(Problem):
         print("initial state dict has %d vars" % len(ret_dict.keys()))
         return (ret_dict,0)
 
-    def check(self, solution):
+    def solution_mtx(self, solution):
         '''
-            solution is a dict of (var, val)
+            param:
+                solution: dict of (var,val)
+            returns:
+                np array of solution matrix
+
         '''
-        #print(solution)
         solution_mtx = np.zeros((self.n, self.k), dtype=np.int8)
         for i in range(1,self.n+1):
             for k in range(1,self.k+1):
                 index = idx.index_1_q_to_l_1(i,k,self.k) - 1
                 solution_mtx[i-1][k-1] = solution[index]
-        np.set_printoptions(threshold=np.inf)
-        print(solution_mtx)
-        np.set_printoptions(threshold=6)
+        return solution_mtx        
+
+    def check(self, solution):
+        '''
+            solution is a dict of (var, val)
+        '''
+        #print(solution)
+        solution_mtx = self.solution_mtx(solution)
+
         #recovers ancillaries. Not used for now.
         '''
         num_ancillaries = len(solution.keys()) - self.n*self.k

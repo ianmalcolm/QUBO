@@ -17,7 +17,7 @@ class PlacementQAP(Problem):
         for i in range(self.n):
             self.F[i][i] = self.F[i][i] / 2
         self.D = D.copy()
-        self.num_constraints = m + n
+        self.num_constraints = self.m + self.n
         self.gamma = gamma
 
         self.ms = []
@@ -50,7 +50,7 @@ class PlacementQAP(Problem):
                     ret[index] = 1
                 else:
                     ret[index] = 0
-        return ret
+        return (ret,0)
 
     def check(self,solution):
         '''
@@ -84,10 +84,21 @@ class PlacementQAP(Problem):
         return [test_ct1, test_ct2]
 
     def update_weights(self,solution):
+        solution_arr = np.fromiter(solution.values(),dtype=np.int8)
+        new_weights = np.zeros(self.num_constraints)
+        for i in range(self.num_constraints):
+            new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
+        A = self.canonical_A.copy()
+        b = self.canonical_b.copy()
+        new_ct_mtx = super().A_to_Q(A,b,new_weights)
         
+        #state udpate
+        self.ms = new_weights
+        self.q['constraints'] = new_ct_mtx
+        return new_weights, new_ct_mtx
 
     def initialise_flow_matrix(self):
-        ret = np.zeros(self.m*self.n, self.m*self.n)
+        ret = np.zeros((self.m*self.n, self.m*self.n))
         for i in range(1,self.n+1):
             for j in range(1,self.n+1):
                 for k in range(1,self.m+1):
@@ -109,15 +120,16 @@ class PlacementQAP(Problem):
             #       forall i from 1 to n, sum(xik) = 1
             for k in range(1,self.m+1):
                 x_ik = idx.index_1_q_to_l_1(i,k,self.m)
-                A[i-1][x_ik] = 1
+                A[i-1][x_ik-1] = 1
 
         for k in range(1, self.m+1):
             #ct2: each location has exactly one item
             #       forall k from 1 to m, sum(xik) = 1
             for i in range(1,self.n+1):
                 x_ik = idx.index_1_q_to_l_1(i,k,self.m)
-                A[k+self.n][x_ik] = 1
-        
+                A[k+self.n - 1][x_ik-1] = 1
+        print(A)
+
         # prepare b
         b = np.zeros(self.m*self.n)
         for i in range(self.num_constraints):
