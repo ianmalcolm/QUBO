@@ -7,7 +7,7 @@ class DistanceGenerator:
         self.num_cols = num_cols
         self.num_rows = num_rows
         self.num_tot = num_cols * num_rows
-        self.D = np.zeros((self.num_tot+1, self.num_tot+1))
+        self.D = np.zeros((self.num_tot, self.num_tot))
         self.DIST_VERTICAL = DIST_VERTICAL
         self.DIST_HORIZONTAL = DIST_HORIZONTAL
         
@@ -15,13 +15,15 @@ class DistanceGenerator:
         self.group_num_rows = group_num_rows
     
     def gen_Euclidean(self):
+        '''
+            returns a symmetric D
+        '''
         for y in range(self.num_rows):
             for x in range(self.num_cols):
                 #(x,y)
                 index = self.find_D_index(x,y,self.num_rows)
                 dist = math.pow(x,2) + math.pow(y,2)
-                self.D[0][index] = dist
-                self.D[index][0] = dist
+                self.D[index][index] = dist
                 for y_prime in range(self.num_rows):
                     for x_prime in range(self.num_cols):
                         #(x',y'). dist = (y-y')^2 + (x-x')^2
@@ -50,8 +52,8 @@ class DistanceGenerator:
         return Dprime
 
     def find_D_index(self,i,j,num_rows):
-        '''maps 0 based coordinates to 1-based index of D'''
-        return (j*num_rows + i + 1)
+        '''maps 0 based coordinates to 0-based index of D'''
+        return (j*num_rows + i)
 
     def gen_S_shape(self):
         '''computes S-shaped routing distances. 
@@ -59,6 +61,8 @@ class DistanceGenerator:
                             1,2,2,...1 for even #columns
             assumed routing strategy: up, down, up, down, ... until exhaustion
 
+            returns:
+                A symmetric D
         '''
         
         distance_from_depot = self.DIST_HORIZONTAL
@@ -106,9 +110,9 @@ class DistanceGenerator:
         
         for k in range(len(list_even)):
             print(k, list_even[k], list_distances[k])
-            self.D[0][list_even[k]] = list_distances[k]
+            self.D[list_even[k]][list_even[k]] = list_distances[k]
             if list_odd[k] != -1:
-                self.D[0][list_odd[k]] = list_distances[k]
+                self.D[list_odd[k]][list_odd[k]] = list_distances[k]
             for l in range(k+1,len(list_even)):
                 self.D[list_even[k]][list_even[l]] = list_distances[l]-list_distances[k]
                 if list_odd[k] != -1:
@@ -117,5 +121,7 @@ class DistanceGenerator:
                     self.D[list_even[k]][list_odd[l]] = list_distances[l]-list_distances[k]
                     if list_odd[k] != -1:
                         self.D[list_odd[k]][list_odd[l]] = list_distances[l]-list_distances[k]
-        self.D = self.D + self.D.transpose()
+        self.D = self.D + np.transpose(self.D)
+        for i in range(self.D.shape[0]):
+            self.D[i][i] = self.D[i][i] / 2
         return self.D

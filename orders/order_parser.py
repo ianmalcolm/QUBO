@@ -36,7 +36,7 @@ class OrderParser:
     def gen_F(self, is_for_items=True):
         '''generate F for all orders
         
-            returns: if is_for_items then F (n by n)
+            returns: if is_for_items then symmetric F (n by n)
                     else F(num_SKUs by num_SKUs).
                     Everything 0 based.
         '''
@@ -67,19 +67,17 @@ class OrderParser:
 
             print("quantities of SKUs: ")
             print(self.qty)
-            # construct F for items as upper-triangular
+            # construct F for items as fully symmetric
             for i in range(1,num_items+1):
                 for j in range(1,num_items+1):
                     if i==j:
                         # interaction between 2 identical items = its popularity
                         _ret[i-1][i-1] = self.qty[sku_indices[i]]
-                    elif i<j:
+                    else:
                         # NOTE: when sku_indices[i] == sku_indices[j], 
                         #       the value is on diagonal of old_F which is the nC2 definition.
                         if old_F[sku_indices[i]][sku_indices[j]] > self.threshold:
                             _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
-                    else:
-                        pass
             print("Flow matrix: ")
             #np.set_printoptions(threshold=np.inf)
             print(_ret)

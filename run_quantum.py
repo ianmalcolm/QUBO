@@ -43,6 +43,10 @@ def main():
         F
         )
 
+    print("Instantiated bunching QAP.")
+    problem.generate_dwavecsp()
+    print("Instantiated csp.")
+    input()
     solver = ClassicalNeal()
     method = ExteriorPenaltyMethod(problem, solver)
     solution1 = method.run()
