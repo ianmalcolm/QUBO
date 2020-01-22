@@ -272,7 +272,7 @@ class BunchingQAP(Problem):
             args = []
             for k in range(1,self.k+1):
                 var_index = idx.index_1_q_to_l_1(i,k,self.k) - 1
-                args.append('x'+str(var_index))
+                args.append(var_index)
             csp.add_constraint(Aix_1, args)
         
         def Aix_le_s(*args):
@@ -281,10 +281,12 @@ class BunchingQAP(Problem):
             args = []
             for i in range(1,self.n+1):
                 var_index = idx.index_1_q_to_l_1(i,k,self.k)-1
-                args.append('x'+str(var_index))
+                args.append(var_index)
+            print("adding %d inequality" % k)
             csp.add_constraint(Aix_le_s, args)
-        
-        bqm = dwavebinarycsp.stitch(csp,max_graph_size=16)
+
+        print("stitching...")
+        bqm = dwavebinarycsp.stitch(csp,max_graph_size=24)
         mtx = bqm.to_numpy_matrix()
         print(mtx)
         return 0
