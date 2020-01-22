@@ -100,6 +100,10 @@ class BunchingQAP(Problem):
         '''
         #print(solution)
         solution_mtx = self.solution_mtx(solution)
+        
+        np.set_printoptions(threshold=np.inf)
+        print(solution_mtx)
+        np.set_printoptions(threshold=6)
 
         #recovers ancillaries. Not used for now.
         '''

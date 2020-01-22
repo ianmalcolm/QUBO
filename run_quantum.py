@@ -4,9 +4,7 @@ import numpy as np
 
 from orders.order_parser import OrderParser
 from DistanceGenerator import DistanceGenerator
-from methods.exterior_penalty import ExteriorPenaltyMethod
-from problems.bunching import BunchingQAP
-from problems.placement import PlacementQAP
+from methods.QAP import OurHeuristic
 from ports.dwave import Dwave
 from ports.classical_simanneal import ClassicalNeal
 
@@ -18,7 +16,7 @@ WAREHOUSE_NUM_ROWS = 4
 NUM_LOCS = WAREHOUSE_NUM_COLS*WAREHOUSE_NUM_ROWS
 NUM_GROUPS = 3
 DIST_VERTICAL = 1
-DIST_HORIZONTAL = 1
+DIST_HORIZONTAL = 5
 ORDER_DIRNAME = 'orders'
 
 group_num_cols = 2
@@ -31,25 +29,38 @@ def main():
     F = order_parser.gen_F()
     print("F has shape: ", F.shape)
     np.set_printoptions(threshold=np.inf)
-    print(F)
+    print("F: ", F)
+    np.set_printoptions(threshold=6)
+    
+    # D: (m by m) upper triangular distance matrix
+    D_gen = DistanceGenerator(
+        WAREHOUSE_NUM_ROWS,
+        WAREHOUSE_NUM_COLS, 
+        DIST_VERTICAL, 
+        DIST_HORIZONTAL,
+        group_num_rows, 
+        group_num_cols
+        )
+    D = D_gen.gen_S_shape()
+    np.set_printoptions(threshold=np.inf)
+    print("D: ", D)
     np.set_printoptions(threshold=6)
 
     qty = order_parser.summary()
 
-    problem = BunchingQAP(
+    heuristic = OurHeuristic(
         NUM_LOCS,
         NUM_LOCS,
         NUM_GROUPS,
-        F
-        )
+        F,
+        D,
+        DIST_HORIZONTAL,
+        WAREHOUSE_NUM_ROWS,
+        WAREHOUSE_NUM_COLS
+    )
 
-    print("Instantiated bunching QAP.")
-    problem.generate_dwavecsp()
-    print("Instantiated csp.")
+    print(heuristic.run())
     input()
-    solver = ClassicalNeal()
-    method = ExteriorPenaltyMethod(problem, solver)
-    solution1 = method.run()
 
     ######################
     #second stage
@@ -65,18 +76,6 @@ def main():
             for j in range(i,size):
                 FPrime[i][j] = F[index_list[i]][index_list[j]]
         return FPrime
-
-    #calculate D, m+1 by m+1
-    D_gen = DistanceGenerator(
-        WAREHOUSE_NUM_ROWS,
-        WAREHOUSE_NUM_COLS, 
-        DIST_VERTICAL, 
-        DIST_HORIZONTAL,
-        group_num_rows, 
-        group_num_cols
-        )
-    D = D_gen.gen_S_shape()
-    print("D: ", D)
 
     #extract Dprime, xy+1 by xy+1, distance matrix for the first few locations
     # NOTE: Usually Dprime cannot be extrapolated. Exception is no column crossing within a bunch

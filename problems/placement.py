@@ -4,21 +4,25 @@ import utils.index as idx
 import random
 
 class PlacementQAP(Problem):
-    def __init__(self, num_locs, num_items, F, D, gamma):
+    def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False):
         '''
             F is n by n upper triangular with 0 based index
             D is m+1 by m+1, symmetric, with 1 based index
+            gamma is a factor multiplied to all linear terms
+                gamma can be used to control the importance of
+                absolute popularity versus interaction frequency.
+            
         '''
         
         self.m = num_locs
         self.n = num_items
         self.F = F.copy()
-        self.F = np.transpose(self.F) + self.F
-        for i in range(self.n):
-            self.F[i][i] = self.F[i][i] / 2
         self.D = D.copy()
         self.num_constraints = self.m + self.n
         self.gamma = gamma
+        self.weight0 = weight0
+        self.alpha0 = alpha0
+        self.CONST_WEIGHT_INC = const_weight_inc
 
         self.ms = []
         self.alphas = []
@@ -33,6 +37,7 @@ class PlacementQAP(Problem):
     
     @property
     def flow(self):
+        print("flow sum: ", np.sum(np.sum(self.q['flow'],axis=0),axis=0))
         return self.q['flow']
     
     @property
@@ -52,15 +57,20 @@ class PlacementQAP(Problem):
                     ret[index] = 0
         return (ret,0)
 
-    def check(self,solution):
-        '''
-            solution is a dict of (val, val)
-        '''
+    def solution_matrix(self, solution):
         solution_mtx = np.zeros((self.n, self.m), dtype=np.int8)
         for i in range(1,self.n+1):
             for j in range(1,self.m+1):
                 index = idx.index_1_q_to_l_1(i,j,self.m) - 1
                 solution_mtx[i-1][j-1] = solution[index]
+        return solution_mtx
+        
+    def check(self,solution):
+        '''
+            solution is a dict of (val, val)
+        '''
+        solution_mtx = self.solution_matrix(solution)
+        
         np.set_printoptions(threshold=np.inf)
         print(solution_mtx)
         np.set_printoptions(threshold=6)
@@ -87,7 +97,10 @@ class PlacementQAP(Problem):
         solution_arr = np.fromiter(solution.values(),dtype=np.int8)
         new_weights = np.zeros(self.num_constraints)
         for i in range(self.num_constraints):
-            new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
+            if self.CONST_WEIGHT_INC:
+                new_weights[i] = self.ms[i] * self.alphas[i]
+            else:
+                new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
         A = self.canonical_A.copy()
         b = self.canonical_b.copy()
         new_ct_mtx = super().A_to_Q(A,b,new_weights)
@@ -107,9 +120,13 @@ class PlacementQAP(Problem):
                         x_ik = idx.index_1_q_to_l_1(i,k,self.m)
                         x_jl = idx.index_1_q_to_l_1(j,l,self.m)
                         if x_ik == x_jl:
-                            ret[x_ik-1][x_jl-1] = self.gamma * self.F[i-1][j-1] * self.D[0][k]
+                            ret[x_ik-1][x_jl-1] = self.gamma * self.F[i-1][j-1] * self.D[k-1][k-1]
                         elif x_ik < x_jl:
-                            ret[x_ik-1][x_jl-1] = self.F[i-1][j-1] * self.D[k][l]
+                            ret[x_ik-1][x_jl-1] = self.F[i-1][j-1] * self.D[k-1][l-1]
+        np.set_printoptions(threshold=np.inf)
+        print("flow matrix: ", ret)
+        np.set_printoptions(threshold=6)
+
         return ret
 
     def initialise_constraint_matrix(self):
@@ -136,12 +153,12 @@ class PlacementQAP(Problem):
             b[i] = 1
         
         # prepare weights
-        weights = np.full(shape=self.num_constraints, fill_value=10)
+        weights = np.full(shape=self.num_constraints, fill_value=self.weight0)
         
         self.canonical_A = A.copy()
         self.canonical_b = b.copy()
         self.ms = weights
-        self.alphas = np.full(shape=self.num_constraints,fill_value=10)
+        self.alphas = np.full(shape=self.num_constraints,fill_value=self.alpha0)
 
         return super().A_to_Q(A,b,weights)
 

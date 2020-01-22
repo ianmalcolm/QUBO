@@ -1,7 +1,7 @@
 import numpy as np
 
 class ExteriorPenaltyMethod:
-    def __init__(self, problem, solver):
+    def __init__(self, problem, solver, LIMIT):
         '''
             precondition:
                 problem.isExterior = True
@@ -14,6 +14,7 @@ class ExteriorPenaltyMethod:
             raise ValueError("cannot solve a non-exterior problem using exterior penalty method")
         self.problem = problem
         self.solver = solver
+        self.LIMIT = LIMIT
         
     def run(self):
         '''
@@ -32,9 +33,9 @@ class ExteriorPenaltyMethod:
 
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
         print("formula mtx has %d nonzeros out of %d" % (np.count_nonzero(mtx), mtx.shape[0]*mtx.shape[1]))
-        LIMIT = 10000000
+        
         initial = self.problem.initial()
-        for i in range(LIMIT):
+        for i in range(self.LIMIT):
             print("External penalty iteration %d" % i)
             
             solution = self.solver.solve(mtx, initial)
@@ -51,7 +52,7 @@ class ExteriorPenaltyMethod:
             # generate constraint matrix with updated weights
             ms_updated, mtx_ct_updated = self.problem.update_weights(solution[0])
             np.set_printoptions(threshold=np.inf)
-            print(ms_updated)
+            print("using ms: ", ms_updated)
             np.set_printoptions(threshold=6)
             mtx += mtx_ct_updated
             

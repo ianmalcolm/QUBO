@@ -19,7 +19,7 @@ class Dwave(Solver):
         '''
         if bool(initial):
             initial_sample = list(initial[0].values())
-        print(initial_sample)
+        print("initial sample: ",initial_sample)
         print("solver starts the process...")
         mtx = matrix.copy()
         print("matrix has %d zeros out of %d" % (np.count_nonzero(mtx==0), mtx.shape[0]*mtx.shape[1]))

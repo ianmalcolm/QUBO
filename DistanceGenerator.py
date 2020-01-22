@@ -65,7 +65,7 @@ class DistanceGenerator:
                 A symmetric D
         '''
         
-        distance_from_depot = self.DIST_HORIZONTAL
+        distance_from_depot = 0
         goingUp = True
 
         # store D indices
