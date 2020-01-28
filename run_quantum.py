@@ -5,8 +5,11 @@ import numpy as np
 from orders.order_parser import OrderParser
 from DistanceGenerator import DistanceGenerator
 from methods.QAP import OurHeuristic
+from methods.abc import ABCMethod
+from methods.random import RandomMethod
 from ports.dwave import Dwave
 from ports.classical_simanneal import ClassicalNeal
+from sim.test_route import RouteEvaluator
 
 import utils.mtx as mtx
 
@@ -16,7 +19,7 @@ WAREHOUSE_NUM_ROWS = 4
 NUM_LOCS = WAREHOUSE_NUM_COLS*WAREHOUSE_NUM_ROWS
 NUM_GROUPS = 3
 DIST_VERTICAL = 1
-DIST_HORIZONTAL = 5
+DIST_HORIZONTAL = 1
 ORDER_DIRNAME = 'orders'
 
 group_num_cols = 2
@@ -25,6 +28,7 @@ group_num_locs = group_num_cols * group_num_rows
 
 def main():
     order_parser = OrderParser("orders/order.txt", NUM_SKUS, threshold=1)
+    order_set = order_parser.gen_raw_orders()
     # F: (n by n) upper triangular interaction frequency matrix
     F = order_parser.gen_F()
     print("F has shape: ", F.shape)
@@ -58,53 +62,35 @@ def main():
         WAREHOUSE_NUM_ROWS,
         WAREHOUSE_NUM_COLS
     )
-
-    print("heuristic result: ", heuristic.run())
-    input()
-
-    ######################
-    #second stage
-    ######################
+    sol_heuristic = heuristic.run()
+    np.set_printoptions(threshold=np.inf)
+    print("our heuristic has solution:\n", sol_heuristic)
     
-    def extract_F_Prime(F, index_list):
-        '''
-            index_set:      a sorted list of 0 based indices to be extracted
-        '''
-        size = len(index_list)
-        FPrime = np.zeros((size,size))
-        for i in range(size):
-            for j in range(i,size):
-                FPrime[i][j] = F[index_list[i]][index_list[j]]
-        return FPrime
+    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), 3)
+    sol_abc = abc.run()
+    print("abc has solution:\n",sol_abc)
 
-    #extract Dprime, xy+1 by xy+1, distance matrix for the first few locations
-    # NOTE: Usually Dprime cannot be extrapolated. Exception is no column crossing within a bunch
-    Dprime = D_gen.gen_Dprime(D)
-    print("Dprime: ", Dprime)
+    random = RandomMethod(NUM_LOCS, NUM_LOCS)
+    sol_random = random.run()
+    print("random has solution:\n",sol_random)
 
-    solution1_mtx = problem.solution_mtx(solution1[0])
-    for i in range(NUM_GROUPS):
-        index_list = []
-        items_choice_list = solution1_mtx[:,i]
-
-        for j in range(len(items_choice_list)):
-            if items_choice_list[j]:
-                index_list.append(j)
-        Fprime = extract_F_Prime(F,index_list)
-        np.set_printoptions(threshold=np.inf)
-        print(Fprime)
-        np.set_printoptions(threshold=6)
-        problem2 = PlacementQAP(
-            group_num_locs,
-            group_num_locs,
-            Fprime,
-            Dprime,
-            1
+    evaluator = RouteEvaluator(
+        qty,
+        order_set,
+        WAREHOUSE_NUM_COLS,
+        WAREHOUSE_NUM_ROWS,
+        DIST_VERTICAL,
+        DIST_HORIZONTAL,
+        NUM_LOCS,
+        NUM_LOCS
         )
-        solver2 = Dwave()
-        method2 = ExteriorPenaltyMethod(problem2,solver2)
-        solution2 = method2.run()
-        print(solution2)
+    res_heuristic = evaluator.run(sol_heuristic)
+    print("result of our heuristic is %d" % res_heuristic)
+    res_abc = evaluator.run(sol_abc)
+    print("result of abc is %d" % res_abc)
+    res_random = evaluator.run(sol_random)
+    print("result of random is %d" % res_random)
+
 
 if __name__ == "__main__":
     main()

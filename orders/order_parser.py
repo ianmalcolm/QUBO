@@ -30,9 +30,17 @@ class OrderParser:
         return math.factorial(n) / (math.factorial(r) * math.factorial(n-r))
 
     def summary(self):
-        '''returns the qty array'''
-        return self.qty
+        '''returns the 0-based qty array'''
+        return self.qty[1:]
     
+    def gen_raw_orders(self):
+        ret = []
+        orders = self.order_str.splitlines()
+        for o in orders:
+            order = o.split(',')
+            ret.append(order)
+        return ret
+
     def gen_F(self, is_for_items=True):
         '''generate F for all orders
         

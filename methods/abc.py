@@ -15,11 +15,11 @@ class ABCMethod:
 
         indices_item = np.arange(0,n)
         dtype_pop = [('idx',int),('pop',int)]
-        self.popularity = np.sort(np.array(zip(indices_item,popularity.copy()),dtype=dtype_pop), order='pop')
+        self.popularity = np.sort(np.array(list(zip(indices_item,popularity.copy())),dtype=dtype_pop), order='pop')
 
         indices_location = np.arange(0,m)
         dtype_dist = [('idx',int),('dist',int)]
-        self.distance = np.sort(np.array(zip(indices_location,distance.copy()),dtype=dtype_dist), order='dist')
+        self.distance = np.sort(np.array(list(zip(indices_location,distance.copy())),dtype=dtype_dist), order='dist')
         
         self.num_grps = num_grps
         self.grp_sizes = []
@@ -39,8 +39,8 @@ class ABCMethod:
             popularity_grp = self.popularity[start:start+grp_size]
             a=0
             for (idx, _) in popularity_grp:
-                loc = self.distance[start+a]
-                ret[idx][loc] = 1
+                loc = self.distance[start+a]['idx']
+                ret[int(idx)][loc] = 1
                 a+=1
             start += grp_size
         return ret

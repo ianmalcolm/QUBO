@@ -71,7 +71,9 @@ class OurHeuristic:
             100
         )
         solution2 = aggregate_placement_problem.solution_matrix(
-            (aggregate_method.run())[0]
+            (aggregate_method.run())[0],
+            self.k,
+            self.k
         )
 
 
@@ -86,22 +88,31 @@ class OurHeuristic:
         for i in range(self.k):
             for j in range(self.k):
                 if solution2[i][j]:
+                    # 1-based (x,y) = (2*(j+1)-1,r) and neighboring item
                     for r in range(1,self.num_rows+1):
-                        locations[i].append(idx.index_1_q_to_l_1(r,2*j,self.num_rows))
-                        locations[i].append(idx.index_1_q_to_l_1(r,2*j+1,self.num_rows))
+                        locations[i].append(idx.index_1_q_to_l_1(2*j+1,r,self.num_rows) - 1)
+                        locations[i].append(idx.index_1_q_to_l_1(2*j+2,r,self.num_rows) - 1)
 
         solution3 = {}
+        np.set_printoptions(threshold=np.inf)
+        print(members)
+        print(locations)
         for i in range(self.k):
             bunch_i = np.sort(members[i])
             locations_i = np.sort(locations[i])
 
+            # idx_map is from global to local
+            # inverse is from local to global
             bunch_i_idx_map = {}
+            bunch_i_idx_map_inv = {}
             locations_i_idx_map = {}
+            locations_i_idx_map_inv = {}
             for a in range(bunch_size):
                 bunch_i_idx_map[bunch_i[a]] = a
+                bunch_i_idx_map_inv[a] = bunch_i[a]
             for b in range(s):
                 locations_i_idx_map[locations_i[b]] = b
-
+                locations_i_idx_map_inv[b] = locations_i[b]
             FPrime = np.zeros((bunch_size,bunch_size))
             DPrime = np.zeros((s,s))
 
@@ -110,18 +121,17 @@ class OurHeuristic:
 
             for j1,j2 in itertools.product(locations_i,locations_i):
                 DPrime[locations_i_idx_map[j1]][locations_i_idx_map[j2]] = self.D[j1][j2]
-            np.set_printoptions(threshold=np.inf)
-            np.set_printoptions(threshold=6)
+
             fine_placement_problem = PlacementQAP(
-                s,
                 bunch_size,
+                s,
                 FPrime,
                 DPrime,
                 weight0=500,
                 alpha0=2,
                 const_weight_inc=False
             )
-            solver_i = Dwave()
+            solver_i = ClassicalNeal()
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,
@@ -130,14 +140,18 @@ class OurHeuristic:
             
             solution3[i] = PlacementQAP.solution_matrix(
                 (fine_placement_method.run())[0],
-                self.n,
-                self.m
+                bunch_size,
+                s
             )
-
-            for r in range(bunch_size):
-                for c in range(s):
-                    ret[bunch_i[r]][locations_i[c]] = (solution3[i])[r][c]
-        
+            np.set_printoptions(threshold=np.inf)
+            print(bunch_i, locations_i)
+            for local_item in range(bunch_size):
+                for local_loc in range(s):
+                    global_item = bunch_i_idx_map_inv[local_item]
+                    global_loc = locations_i_idx_map_inv[local_loc]
+                    if((solution3[i])[local_item][local_loc]):
+                        print(global_item, global_loc)
+                    ret[global_item][global_loc] = (solution3[i])[local_item][local_loc]
         return ret
             
             
