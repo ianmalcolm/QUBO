@@ -59,7 +59,7 @@ def main():
         WAREHOUSE_NUM_COLS
     )
 
-    print(heuristic.run())
+    print("heuristic result: ", heuristic.run())
     input()
 
     ######################

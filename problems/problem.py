@@ -2,6 +2,8 @@ import abc
 import numpy as np
 import math
 
+import utils.mtx as mtx
+
 class Problem(abc.ABC):
     '''
         An abstract problem contains a dict with:
@@ -74,6 +76,4 @@ class Problem(abc.ABC):
         print("AtA has %d nonzeros out of %d" % (np.count_nonzero(AtA), AtA.shape[0]*AtA.shape[1]))
         ret = np.zeros((size,size))
         ret = AtA - 2*D
-        return ret
-        
-        
+        return mtx.to_upper_triangular(ret)

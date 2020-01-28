@@ -6,8 +6,8 @@ import random
 class PlacementQAP(Problem):
     def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False):
         '''
-            F is n by n upper triangular with 0 based index
-            D is m+1 by m+1, symmetric, with 1 based index
+            F is n by n symmetric with 0 based index
+            D is m by m symmetric with 0 based index
             gamma is a factor multiplied to all linear terms
                 gamma can be used to control the importance of
                 absolute popularity versus interaction frequency.
@@ -47,7 +47,7 @@ class PlacementQAP(Problem):
     
     def initial(self):
         ret = {}
-        for i in range(self.n):
+        for i in range(1,self.n+1):
             loc = random.randint(1,self.m)
             for j in range(1,self.m+1):
                 index = idx.index_1_q_to_l_1(i,j,self.m) - 1
@@ -57,11 +57,12 @@ class PlacementQAP(Problem):
                     ret[index] = 0
         return (ret,0)
 
-    def solution_matrix(self, solution):
-        solution_mtx = np.zeros((self.n, self.m), dtype=np.int8)
-        for i in range(1,self.n+1):
-            for j in range(1,self.m+1):
-                index = idx.index_1_q_to_l_1(i,j,self.m) - 1
+    @staticmethod
+    def solution_matrix(solution,n,m):
+        solution_mtx = np.zeros((n, m), dtype=np.int8)
+        for i in range(1,n+1):
+            for j in range(1,m+1):
+                index = idx.index_1_q_to_l_1(i,j,m) - 1
                 solution_mtx[i-1][j-1] = solution[index]
         return solution_mtx
         
@@ -69,7 +70,7 @@ class PlacementQAP(Problem):
         '''
             solution is a dict of (val, val)
         '''
-        solution_mtx = self.solution_matrix(solution)
+        solution_mtx = PlacementQAP.solution_matrix(solution, self.n, self.m)
         
         np.set_printoptions(threshold=np.inf)
         print(solution_mtx)
@@ -123,10 +124,11 @@ class PlacementQAP(Problem):
                             ret[x_ik-1][x_jl-1] = self.gamma * self.F[i-1][j-1] * self.D[k-1][k-1]
                         elif x_ik < x_jl:
                             ret[x_ik-1][x_jl-1] = self.F[i-1][j-1] * self.D[k-1][l-1]
+        '''
         np.set_printoptions(threshold=np.inf)
         print("flow matrix: ", ret)
         np.set_printoptions(threshold=6)
-
+        '''
         return ret
 
     def initialise_constraint_matrix(self):
@@ -145,8 +147,11 @@ class PlacementQAP(Problem):
             for i in range(1,self.n+1):
                 x_ik = idx.index_1_q_to_l_1(i,k,self.m)
                 A[k+self.n - 1][x_ik-1] = 1
+        '''
+        np.set_printoptions(threshold=np.inf)
         print(A)
-
+        np.set_printoptions(threshold=6)
+        '''
         # prepare b
         b = np.zeros(self.m*self.n)
         for i in range(self.num_constraints):

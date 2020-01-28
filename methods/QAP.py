@@ -33,7 +33,6 @@ class OurHeuristic:
 
         bunch_method = ExteriorPenaltyMethod(bunch,solver,100)
         solution1 = bunch.solution_mtx((bunch_method.run())[0])
-        print(solution1)
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
@@ -65,7 +64,7 @@ class OurHeuristic:
             bigF,
             bigD
         )
-        dwave_solver = Dwave()
+        dwave_solver = ClassicalNeal()
         aggregate_method = ExteriorPenaltyMethod(
             aggregate_placement_problem,
             dwave_solver,
@@ -112,16 +111,15 @@ class OurHeuristic:
             for j1,j2 in itertools.product(locations_i,locations_i):
                 DPrime[locations_i_idx_map[j1]][locations_i_idx_map[j2]] = self.D[j1][j2]
             np.set_printoptions(threshold=np.inf)
-            print(FPrime, DPrime)
             np.set_printoptions(threshold=6)
             fine_placement_problem = PlacementQAP(
                 s,
                 bunch_size,
                 FPrime,
                 DPrime,
-                weight0=1000,
-                alpha0=20,
-                const_weight_inc=True
+                weight0=500,
+                alpha0=2,
+                const_weight_inc=False
             )
             solver_i = Dwave()
             fine_placement_method = ExteriorPenaltyMethod(
@@ -130,10 +128,11 @@ class OurHeuristic:
                 100
             )
             
-            solution3[i] = fine_placement_problem.solution_matrix(
-                (fine_placement_method.run())[0]
+            solution3[i] = PlacementQAP.solution_matrix(
+                (fine_placement_method.run())[0],
+                self.n,
+                self.m
             )
-            print(solution3[i])
 
             for r in range(bunch_size):
                 for c in range(s):
