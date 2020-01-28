@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import utils.index as idx
 
 class RouteEvaluator:
     def __init__(self, qty, order_set, num_cols, num_rows, dist_ver, dist_hor, n,m):
@@ -44,12 +45,10 @@ class RouteEvaluator:
     def make_c(self):
         c = np.zeros(self.m)
         columns = int(math.ceil(self.m / (self.num_rows * 2)))
-        for i in range(columns):
-            for x in
-                for y in :
-                    c[] = i
-            for j in range(self.num_rows * self.num_cols):
-                c[j] = i
+        for x in range(columns):
+            for y in range(1,self.num_rows+1):
+                c[idx.index_1_q_to_l_1(2*x+1,y,self.num_rows) - 1] = x
+                c[idx.index_1_q_to_l_1(2*x+2,y,self.num_rows) - 1] = x
         return c
 
     def run(self, solution_mtx):
