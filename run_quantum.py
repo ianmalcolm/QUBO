@@ -1,10 +1,13 @@
 import os
 import math
 import numpy as np
+from datetime import datetime
 
 from orders.order_parser import OrderParser
 from DistanceGenerator import DistanceGenerator
 from methods.QAP import OurHeuristic
+from methods.pureQAP import PureQAP
+from methods.pureQAP_exact import ExactQAP
 from methods.abc import ABCMethod
 from methods.random import RandomMethod
 from ports.dwave import Dwave
@@ -12,6 +15,8 @@ from ports.classical_simanneal import ClassicalNeal
 from sim.test_route import RouteEvaluator
 
 import utils.mtx as mtx
+
+RESULT_FOLDER = "simdata"
 
 NUM_SKUS = 10
 WAREHOUSE_NUM_COLS = 6
@@ -65,10 +70,20 @@ def main():
     sol_heuristic = heuristic.run()
     np.set_printoptions(threshold=np.inf)
     print("our heuristic has solution:\n", sol_heuristic)
-    
+
+    pureQAP = PureQAP(
+        F,
+        D
+    )
+    sol_pureQAP = pureQAP.run()
+    print("pure QAP has solution:\n", sol_pureQAP)
+
     abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), 3)
     sol_abc = abc.run()
     print("abc has solution:\n",sol_abc)
+
+    coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
+    sol_coi = coi.run()
 
     random = RandomMethod(NUM_LOCS, NUM_LOCS)
     sol_random = random.run()
@@ -84,13 +99,38 @@ def main():
         NUM_LOCS,
         NUM_LOCS
         )
-    res_heuristic = evaluator.run(sol_heuristic)
-    print("result of our heuristic is %d" % res_heuristic)
-    res_abc = evaluator.run(sol_abc)
-    print("result of abc is %d" % res_abc)
-    res_random = evaluator.run(sol_random)
-    print("result of random is %d" % res_random)
 
+    with open(os.path.join(RESULT_FOLDER, filename()), 'w') as f:
+        res_heuristic = evaluator.run(sol_heuristic)
+        str_heuristic = "result of our heuristic is " + str(res_heuristic) + '\n'
+        print(str_heuristic)
+        f.writelines([str_heuristic])
+
+        res_abc = evaluator.run(sol_abc)
+        str_abc = "result of abc is " + str(res_abc) + '\n'
+        print(str_abc)
+        f.writelines([str_abc])
+
+        res_coi = evaluator.run(sol_coi)
+        str_coi = "result of coi is " + str(res_coi) + '\n'
+        print(str_coi)
+        f.writelines([str_coi])
+
+        res_random = evaluator.run(sol_random)
+        str_random = "result of random is " + str(res_random) + '\n'
+        print(str_random)
+        f.writelines([str_random])
+
+        res_pure = evaluator.run(sol_pureQAP)
+        str_pure = "result of pure QAP is " + str(res_pure) + '\n'
+        print(str_pure)
+        f.writelines([str_pure])
+        
+
+def filename():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    return "res_"+current_time+".txt"
 
 if __name__ == "__main__":
     main()
