@@ -38,13 +38,13 @@ class Dwave(Solver):
                     Q[(i,j)] = mtx[i][j]
             else:
                 pass
-        input()
         
         print("Solver engages Dwave quantum hardware!")
         sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler()))
-        response = sampler.sample_qubo(Q,num_reads=100,chain_strength=3000)
+        response = sampler.sample_qubo(Q,num_reads=100)
             
         for datum in response.data(fields=['sample','energy','num_occurrences']):
             print(datum)
+            break
 
         return (response.first.sample, response.first.energy)

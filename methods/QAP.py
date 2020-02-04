@@ -127,11 +127,11 @@ class OurHeuristic:
                 s,
                 FPrime,
                 DPrime,
-                weight0=500,
-                alpha0=2,
+                weight0=50,
+                alpha0=15,
                 const_weight_inc=False
-            )
-            solver_i = ClassicalNeal()
+            )        
+            solver_i = Dwave()
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,
