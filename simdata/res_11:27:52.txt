@@ -1,0 +1,1 @@
+result of our heuristic is 156result of abc is 154.0result of coi is 154.0result of random is 148.0result of pure QAP is 128.0
