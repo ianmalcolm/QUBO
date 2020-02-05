@@ -23,7 +23,6 @@ class OurHeuristic:
     def run(self):
         #######bunching########
         bunch = BunchingQAP(
-            self.m,
             self.n,
             self.k,
             self.F
@@ -33,6 +32,16 @@ class OurHeuristic:
 
         bunch_method = ExteriorPenaltyMethod(bunch,solver,100)
         solution1 = bunch.solution_mtx((bunch_method.run())[0])
+
+        #######grouping########
+        group = BunchingQAP(
+            self.m,
+            self.k,
+            -self.D
+        )
+        solver_group = ClassicalNeal()
+        group_method = ExteriorPenaltyMethod(group,solver_group,100)
+        solution1_5 = group.solution_mtx((group_method.run())[0])
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
@@ -53,10 +62,21 @@ class OurHeuristic:
                     interaction += self.F[item1][item2]
                 bigF[i1][i2] = interaction
 
+        locations = []
+        for i in range(self.k):
+            locations.append([])
+        for i in range(self.m):
+            for j in range(self.k):
+                if solution1_5[i][j]:
+                    locations[j].append(i)
+
         bigD = np.zeros((self.k,self.k))
         for j1 in range(self.k):
             for j2 in range(j1+1,self.k):
-                bigD[j1][j2] = self.DIST_HOR * (j2-j1)
+                distance = 0
+                for loc1, loc2 in itertools.product(locations[j1], locations[j2]):
+                    distance += self.D[loc1][loc2]
+                bigD[j1][j2] = distance
 
         aggregate_placement_problem = PlacementQAP(
             self.k,
@@ -82,21 +102,11 @@ class OurHeuristic:
         s = (int)(math.floor(self.m / self.k))
         bunch_size = (int)(math.ceil(self.n / self.k))
 
-        locations = []
-        for i in range(self.k):
-            locations.append([])
-        for i in range(self.k):
-            for j in range(self.k):
-                if solution2[i][j]:
-                    # 1-based (x,y) = (2*(j+1)-1,r) and neighboring item
-                    for r in range(1,self.num_rows+1):
-                        locations[i].append(idx.index_1_q_to_l_1(2*j+1,r,self.num_rows) - 1)
-                        locations[i].append(idx.index_1_q_to_l_1(2*j+2,r,self.num_rows) - 1)
-
         solution3 = {}
         np.set_printoptions(threshold=np.inf)
         print(members)
         print(locations)
+        input()
         for i in range(self.k):
             bunch_i = np.sort(members[i])
             locations_i = np.sort(locations[i])
@@ -131,7 +141,7 @@ class OurHeuristic:
                 alpha0=15,
                 const_weight_inc=False
             )        
-            solver_i = Dwave()
+            solver_i = ClassicalNeal()
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,

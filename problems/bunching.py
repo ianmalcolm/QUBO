@@ -11,7 +11,7 @@ import dimod
 import operator
 
 class BunchingQAP(Problem):
-    def __init__(self, num_locs, num_items, num_groups, F):
+    def __init__(self, num_items, num_groups, F):
         '''
         Let m = num_locs
             n = num_items
@@ -24,7 +24,6 @@ class BunchingQAP(Problem):
         outputs:
             upper-triangular Q
         '''
-        self.m = num_locs
         self.n = num_items
         self.k = num_groups
         self.bunch_size = math.ceil(self.n / self.k)
@@ -205,7 +204,7 @@ class BunchingQAP(Problem):
             coeff[idx.index_1_to_0(k), ancillary_startpos: ancillary_startpos + self.ancillary_bit_length] = twos
             ancillary_startpos += self.ancillary_bit_length
 
-        s = math.floor(self.m / self.k)
+        s = math.floor(self.n / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
         weights = np.full(shape=num_constraints, fill_value=10)
 

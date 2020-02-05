@@ -15,7 +15,7 @@ class ABCMethod:
 
         indices_item = np.arange(0,n)
         dtype_pop = [('idx',int),('pop',int)]
-        self.popularity = np.sort(np.array(list(zip(indices_item,popularity.copy())),dtype=dtype_pop), order='pop')
+        self.popularity = np.sort(np.array(list(zip(indices_item,popularity.copy())),dtype=dtype_pop), order='pop')[::-1]
 
         indices_location = np.arange(0,m)
         dtype_dist = [('idx',int),('dist',int)]
