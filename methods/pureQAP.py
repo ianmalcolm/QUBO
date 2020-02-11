@@ -8,7 +8,12 @@ class PureQAP:
     def __init__(self, F, D):
         self.F = F.copy()
         self.D = D.copy()
-    
+
+        self.timing = 0
+
+    def get_timing(self):
+        return self.timing
+
     def run(self):
         size = self.F.shape[0]
         problem = PlacementQAP(
@@ -16,15 +21,15 @@ class PureQAP:
             size,
             self.F,
             self.D,
-            weight0=50,
-            alpha0=2
+            weight0=80,
+            alpha0=10
         )
         
         solver = ClassicalNeal()
         method = ExteriorPenaltyMethod(
             problem,
             solver,
-            100
+            1000
         )
 
         solution = PlacementQAP.solution_matrix(
@@ -32,4 +37,6 @@ class PureQAP:
             size,
             size
         )
+        self.timing = method.get_timing()
+        
         return solution

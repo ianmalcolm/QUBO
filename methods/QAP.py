@@ -10,7 +10,7 @@ from .exterior_penalty import ExteriorPenaltyMethod
 import utils.index as idx
 
 class OurHeuristic:
-    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols):
+    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols, use_dwave=True):
         self.n = n
         self.m = m
         self.k = k
@@ -19,6 +19,12 @@ class OurHeuristic:
         self.DIST_HOR = DIST_HOR
         self.num_rows = num_rows
         self.num_cols = num_cols
+        self.use_dwave = use_dwave
+
+        self.timing = 0
+    
+    def get_timing(self):
+        return self.timing
     
     def run(self):
         #######bunching########
@@ -33,6 +39,8 @@ class OurHeuristic:
         bunch_method = ExteriorPenaltyMethod(bunch,solver,100)
         solution1 = bunch.solution_mtx((bunch_method.run())[0])
 
+        self.timing += bunch_method.get_timing()
+
         #######grouping########
         group = BunchingQAP(
             self.m,
@@ -41,7 +49,10 @@ class OurHeuristic:
         )
         solver_group = ClassicalNeal()
         group_method = ExteriorPenaltyMethod(group,solver_group,100)
+        # solution 1.5
         solution1_5 = group.solution_mtx((group_method.run())[0])
+
+        self.timing += group_method.get_timing()
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
@@ -96,6 +107,7 @@ class OurHeuristic:
             self.k
         )
 
+        self.timing += aggregate_method.get_timing()
 
         #######placement within bunches########
         ret = np.zeros((self.n, self.m))
@@ -106,7 +118,7 @@ class OurHeuristic:
         np.set_printoptions(threshold=np.inf)
         print(members)
         print(locations)
-        input()
+
         for i in range(self.k):
             bunch_i = np.sort(members[i])
             locations_i = np.sort(locations[i])
@@ -137,11 +149,14 @@ class OurHeuristic:
                 s,
                 FPrime,
                 DPrime,
-                weight0=50,
-                alpha0=15,
+                weight0=100,
+                alpha0=0.5,
                 const_weight_inc=False
-            )        
-            solver_i = ClassicalNeal()
+            )
+            if self.use_dwave:
+                solver_i = Dwave()
+            else:
+                solver_i = ClassicalNeal()
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,
@@ -153,6 +168,8 @@ class OurHeuristic:
                 bunch_size,
                 s
             )
+            self.timing += fine_placement_method.get_timing()
+            
             np.set_printoptions(threshold=np.inf)
             print(bunch_i, locations_i)
             for local_item in range(bunch_size):

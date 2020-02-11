@@ -11,7 +11,10 @@ import itertools
 class Dwave(Solver):
     def __init__(self):
         print("Dwave solver created...")
-        pass
+        self.timing = 0
+
+    def get_timing(self):
+        return self.timing
 
     def solve(self, matrix, initial=()):
         '''
@@ -41,8 +44,10 @@ class Dwave(Solver):
         
         print("Solver engages Dwave quantum hardware!")
         sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler()))
-        response = sampler.sample_qubo(Q,num_reads=100)
-            
+        response = sampler.sample_qubo(Q,num_reads=50)
+
+        self.timing += (response.info['timing']['qpu_sampling_time'] / 1000000)
+
         for datum in response.data(fields=['sample','energy','num_occurrences']):
             print(datum)
             break

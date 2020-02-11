@@ -1,6 +1,7 @@
+import time
+
 from .solver import Solver
 import neal
-
 import dimod
 import utils.index as idx
 import utils.mtx as mt
@@ -9,7 +10,10 @@ import numpy as np
 class ClassicalNeal(Solver):
     def __init__(self):
         print("Classical simanneal solver created...")
-        pass
+        self.timing = 0
+
+    def get_timing(self):
+        return self.timing
 
     def solve(self, matrix, initial=()):
         '''
@@ -34,10 +38,14 @@ class ClassicalNeal(Solver):
         print("Classical simanneal starts now!")
         sampler = neal.SimulatedAnnealingSampler()
         
+        start_time = time.time()
         if bool(initial):
             response = sampler.sample(bqm, initial_states=dimod.SampleSet.from_samples(initial_sample, vartype='BINARY', energy=[initial[1]]),num_reads=10,initial_states_generator='tile')
         else:
             response = sampler.sample(bqm, num_reads=10)
+        end_time = time.time()
+
+        self.timing += (end_time - start_time)
 
         for datum in response.data(fields=['energy','num_occurrences']):
             print(datum)

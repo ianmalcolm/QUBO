@@ -10,3 +10,7 @@ class Solver(abc.ABC):
     @abc.abstractmethod
     def solve(self, mtx):
         pass
+
+    @abc.abstractmethod
+    def get_timing(self):
+        pass

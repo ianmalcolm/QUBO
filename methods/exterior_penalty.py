@@ -16,6 +16,11 @@ class ExteriorPenaltyMethod:
         self.solver = solver
         self.LIMIT = LIMIT
         
+        self.timing = 0
+
+    def get_timing(self):
+        return self.timing
+
     def run(self):
         '''
         repeat:
@@ -42,6 +47,8 @@ class ExteriorPenaltyMethod:
 
             satisfied = self.problem.check(solution[0])
             if all(satisfied):
+                # at the end of rounds, get timing for the entire run
+                self.timing = self.solver.get_timing()
                 print("External penalty has solution. Returning...")
                 return solution
             else:

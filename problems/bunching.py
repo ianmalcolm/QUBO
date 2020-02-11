@@ -180,7 +180,7 @@ class BunchingQAP(Problem):
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
         b = np.ones(shape=self.n)
         weights = np.full(shape=self.n, fill_value=10)
-        print(A)
+        #print(A)
         return A, b, weights
     
     def generate_matrix_ct2(self):
@@ -235,9 +235,9 @@ class BunchingQAP(Problem):
         A[self.n: self.n+self.k, 0:size_A] = ct2_coeff
         b[ct1_len: (ct1_len+ct2_len)] = ct2_b
         weights[ct1_len: (ct1_len+ct2_len)] = ct2_weights
-        np.set_printoptions(threshold=np.inf)
-        print("ct2coeff: ", ct2_coeff)
-        np.set_printoptions(threshold=6)
+        #np.set_printoptions(threshold=np.inf)
+        #print("ct2coeff: ", ct2_coeff)
+        #np.set_printoptions(threshold=6)
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
         self.alphas[0:ct1_len] = 10
@@ -311,8 +311,8 @@ class BunchingQAP(Problem):
 
         # process flow terms
         flow_matrix = self.generate_flow_matrix()
-        print("flow matrix: ")
-        print(flow_matrix)
+        #print("flow matrix: ")
+        #print(flow_matrix)
 
         # process constraints
         constraint_mtx = self.generate_constraint_mtx()
