@@ -37,6 +37,8 @@ class OrderParser:
         ret = []
         orders = self.order_str.splitlines()
         for o in orders:
+            if not o:
+                continue
             order = o.split(',')
             ret.append(order)
         return ret
@@ -52,6 +54,8 @@ class OrderParser:
         old_F = np.zeros((self.num_SKUs+1, self.num_SKUs+1),dtype=np.int32)
         orders = self.order_str.splitlines()
         for order in orders:
+            if not order:
+                continue
             old_F += self.gen_interaction_frequency(order)
 
         #qty stores quantities of SKUs with 1-based index

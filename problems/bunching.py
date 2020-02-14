@@ -179,7 +179,7 @@ class BunchingQAP(Problem):
                 # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
         b = np.ones(shape=self.n)
-        weights = np.full(shape=self.n, fill_value=10)
+        weights = np.full(shape=self.n, fill_value=500)
         #print(A)
         return A, b, weights
     
@@ -206,7 +206,7 @@ class BunchingQAP(Problem):
 
         s = math.floor(self.n / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
-        weights = np.full(shape=num_constraints, fill_value=10)
+        weights = np.full(shape=num_constraints, fill_value=500)
 
         return coeff, b, weights
 
@@ -241,7 +241,7 @@ class BunchingQAP(Problem):
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
         self.alphas[0:ct1_len] = 10
-        self.alphas[ct1_len:(ct1_len+ct2_len)] = 0.025
+        self.alphas[ct1_len:(ct1_len+ct2_len)] = 20
         self.canonical_A = A.copy()
         self.canonical_b = b.copy()
         

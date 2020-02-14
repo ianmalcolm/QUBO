@@ -10,7 +10,7 @@ solution = port.solve(mtx)
 solution_mtx = PlacementQAP.solution_matrix(solution[0], 8,8)
 np.set_printoptions(threshold=np.inf)
 print(solution_mtx)
-
+input()
 port = Dwave()
 solution = port.solve(mtx)
 solution_mtx = PlacementQAP.solution_matrix(solution[0], 8,8)

@@ -26,11 +26,10 @@ class ClassicalNeal(Solver):
         mtx = matrix.copy()
         print("Converting matrix to upper triangular...")
         mtx = mt.to_upper_triangular(mtx)
-        
+        np.savetxt("mtx.txt", mtx, fmt='%d')
         #np.set_printoptions(threshold=np.inf)
         #print(mtx)
-        np.savetxt("mtx.txt", mtx, fmt='%d')
-        np.set_printoptions(threshold=6)
+        #np.set_printoptions(threshold=6)
 
         print("matrix has %d zeros out of %d" % (np.count_nonzero(mtx==0), mtx.shape[0]*mtx.shape[1]))
         print("Constructing bqm out of matrix...")
@@ -45,7 +44,9 @@ class ClassicalNeal(Solver):
             response = sampler.sample(bqm, num_reads=10)
         end_time = time.time()
 
-        self.timing += (end_time - start_time)
+        timing_iter = end_time - start_time
+        print("one iteration takes ", timing_iter)
+        self.timing += timing_iter
 
         for datum in response.data(fields=['energy','num_occurrences']):
             print(datum)

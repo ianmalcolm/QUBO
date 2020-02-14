@@ -149,9 +149,9 @@ class OurHeuristic:
                 s,
                 FPrime,
                 DPrime,
-                weight0=100,
-                alpha0=0.5,
-                const_weight_inc=False
+                weight0=1000,
+                alpha0=1.05,
+                const_weight_inc=True
             )
             if self.use_dwave:
                 solver_i = Dwave()
@@ -160,7 +160,7 @@ class OurHeuristic:
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,
-                100
+                1000
             )
             
             solution3[i] = PlacementQAP.solution_matrix(

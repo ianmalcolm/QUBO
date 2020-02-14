@@ -30,6 +30,8 @@ class Dwave(Solver):
         mtx = mt.to_upper_triangular(mtx)
         print("matrix has %d zeros out of %d" % (np.count_nonzero(mtx==0), mtx.shape[0]*mtx.shape[1]))
 
+        np.savetxt("mtx.txt", mtx, fmt='%d')
+
         Q = {}
         size = mtx.shape[0]
         for i,j in itertools.product(range(size),range(size)):
@@ -44,10 +46,19 @@ class Dwave(Solver):
         
         print("Solver engages Dwave quantum hardware!")
         sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler()))
-        response = sampler.sample_qubo(Q,num_reads=50)
 
-        self.timing += (response.info['timing']['qpu_sampling_time'] / 1000000)
+        anneal_schedule = [(0,1),(40,0.5),(140,0.5),(200,1)]
+        if bool(initial):
+            print(initial)
+            initial_state_dict = initial[0]
+            response = sampler.sample_qubo(Q,num_reads=100, anneal_schedule=anneal_schedule, initial_state=initial_state_dict)
+        else:
+            response = sampler.sample_qubo(Q,num_reads=100, annealing_time=100)
 
+        timing_iter = (response.info['timing']['qpu_sampling_time'] / 1000000)
+        self.timing += timing_iter
+        print(timing_iter)
+        print(response.info)
         for datum in response.data(fields=['sample','energy','num_occurrences']):
             print(datum)
             break

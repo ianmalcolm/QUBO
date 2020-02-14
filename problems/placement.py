@@ -129,6 +129,7 @@ class PlacementQAP(Problem):
         print("flow matrix: ", ret)
         np.set_printoptions(threshold=6)
         '''
+        np.savetxt("flow.txt",ret,fmt='%d')
         return ret
 
     def initialise_constraint_matrix(self):
@@ -165,7 +166,9 @@ class PlacementQAP(Problem):
         self.ms = weights
         self.alphas = np.full(shape=self.num_constraints,fill_value=self.alpha0)
 
-        return super().A_to_Q(A,b,weights)
+        ret = super().A_to_Q(A,b,weights)
+        np.savetxt("constraint.txt",ret,fmt='%d')
+        return ret
 
     def initialise_Q(self):
         '''

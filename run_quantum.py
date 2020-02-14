@@ -19,7 +19,7 @@ import utils.mtx as mtx
 
 RESULT_FOLDER = "simdata"
 
-NUM_SKUS = 15
+NUM_SKUS = 5
 WAREHOUSE_NUM_COLS = 16
 WAREHOUSE_NUM_ROWS = 4
 NUM_LOCS = WAREHOUSE_NUM_COLS*WAREHOUSE_NUM_ROWS
@@ -70,7 +70,7 @@ def run(order_path, order_filename):
     ifhoos = IFHOOS(F,D)
     sol_ifhoos = ifhoos.run()
     print(sol_ifhoos)
-
+    '''
     heuristic_qpu = OurHeuristic(
         NUM_LOCS,
         NUM_LOCS,
@@ -85,7 +85,7 @@ def run(order_path, order_filename):
     t_heuristic_qpu = heuristic_qpu.get_timing()
     np.set_printoptions(threshold=np.inf)
     print("our heuristic has solution:\n", sol_heuristic_qpu)
-
+    '''
     heuristic_sw = OurHeuristic(
         NUM_LOCS,
         NUM_LOCS,
