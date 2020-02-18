@@ -70,7 +70,7 @@ def run(order_path, order_filename):
     ifhoos = IFHOOS(F,D)
     sol_ifhoos = ifhoos.run()
     print(sol_ifhoos)
-    '''
+    
     heuristic_qpu = OurHeuristic(
         NUM_LOCS,
         NUM_LOCS,
@@ -80,12 +80,16 @@ def run(order_path, order_filename):
         DIST_HORIZONTAL,
         WAREHOUSE_NUM_ROWS,
         WAREHOUSE_NUM_COLS,
+        fine_weight0=40000,
+        fine_alpha0=0,
+        const_weight_inc=False,
+        use_dwave=True
     )
     sol_heuristic_qpu = heuristic_qpu.run()
     t_heuristic_qpu = heuristic_qpu.get_timing()
     np.set_printoptions(threshold=np.inf)
     print("our heuristic has solution:\n", sol_heuristic_qpu)
-    '''
+    
     heuristic_sw = OurHeuristic(
         NUM_LOCS,
         NUM_LOCS,
@@ -95,6 +99,9 @@ def run(order_path, order_filename):
         DIST_HORIZONTAL,
         WAREHOUSE_NUM_ROWS,
         WAREHOUSE_NUM_COLS,
+        fine_weight0=40000,
+        fine_alpha0=0,
+        const_weight_inc=False,
         use_dwave=False
     )
     sol_heuristic_sw = heuristic_sw.run()

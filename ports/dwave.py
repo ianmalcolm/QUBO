@@ -47,13 +47,13 @@ class Dwave(Solver):
         print("Solver engages Dwave quantum hardware!")
         sampler = dimod.ScaleComposite(EmbeddingComposite(DWaveSampler()))
 
-        anneal_schedule = [(0,1),(40,0.5),(140,0.5),(200,1)]
+        anneal_schedule = [(0,1),(4,0.5),(14,0.5),(20,1)]
         if bool(initial):
             print(initial)
             initial_state_dict = initial[0]
-            response = sampler.sample_qubo(Q,num_reads=100, anneal_schedule=anneal_schedule, initial_state=initial_state_dict)
+            response = sampler.sample_qubo(Q,num_reads=50, anneal_schedule=anneal_schedule, initial_state=initial_state_dict)
         else:
-            response = sampler.sample_qubo(Q,num_reads=100, annealing_time=100)
+            response = sampler.sample_qubo(Q,num_reads=50, annealing_time=20)
 
         timing_iter = (response.info['timing']['qpu_sampling_time'] / 1000000)
         self.timing += timing_iter

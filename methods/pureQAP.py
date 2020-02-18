@@ -21,8 +21,9 @@ class PureQAP:
             size,
             self.F,
             self.D,
-            weight0=80,
-            alpha0=10
+            weight0=50000,
+            alpha0=1.1,
+            const_weight_inc=True
         )
         
         solver = ClassicalNeal()

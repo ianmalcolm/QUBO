@@ -10,7 +10,7 @@ from .exterior_penalty import ExteriorPenaltyMethod
 import utils.index as idx
 
 class OurHeuristic:
-    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols, use_dwave=True):
+    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave=True):
         self.n = n
         self.m = m
         self.k = k
@@ -21,11 +21,53 @@ class OurHeuristic:
         self.num_cols = num_cols
         self.use_dwave = use_dwave
 
+        self.fine_weight0 = fine_weight0
+        self.fine_alpha0 = fine_alpha0
+        self.const_weight_inc = const_weight_inc
         self.timing = 0
     
     def get_timing(self):
         return self.timing
     
+
+    def get_feasible_solution(self, members, locations, solution2):
+        ret = np.zeros((self.n, self.m))
+        k = len(members)
+        for i in range(k):
+            for j in range(k):
+                if solution2[i][j]:
+                    members_list = members[i]
+                    locations_list = locations[j]
+                    for m, l in zip(members_list, locations_list):
+                        ret[m][l] = 1
+        return ret
+
+    def specialise_bunch(self, initial_solution,
+                bunch_i_idx_map,
+                locations_i_idx_map,
+            ):
+        bunch_size = len(bunch_i_idx_map.keys())
+        linear = np.zeros(bunch_size*bunch_size)
+
+        members = bunch_i_idx_map.keys()
+        locations = locations_i_idx_map.keys()
+        for item_global_idx, item_local_idx in bunch_i_idx_map.items():
+            #i=item_global_idx
+            for loc_global_idx, loc_local_idx in locations_i_idx_map.items():
+                k = loc_global_idx
+            
+                x_ik_local = idx.index_1_q_to_l_1(item_local_idx+1,loc_local_idx+1,bunch_size) - 1
+                print(x_ik_local)
+                #j=i
+                #l=j
+                for i in range(self.n):
+                    for j in range(self.m):
+                        if i in members or j in locations:
+                            continue
+                        if initial_solution[i][j]:
+                            linear[x_ik_local] += self.F[item_global_idx][i] *self.D[k][j]
+        return linear
+            
     def run(self):
         #######bunching########
         bunch = BunchingQAP(
@@ -109,6 +151,12 @@ class OurHeuristic:
 
         self.timing += aggregate_method.get_timing()
 
+        bunch_to_group = {}
+        for i in range(self.k):
+            for j in range(self.k):
+                if solution2[i][j]:
+                    bunch_to_group[i] = j
+
         #######placement within bunches########
         ret = np.zeros((self.n, self.m))
         s = (int)(math.floor(self.m / self.k))
@@ -119,9 +167,12 @@ class OurHeuristic:
         print(members)
         print(locations)
 
+        initial_solution = self.get_feasible_solution(members, locations, solution2)
+        #print(initial_solution)
+
         for i in range(self.k):
             bunch_i = np.sort(members[i])
-            locations_i = np.sort(locations[i])
+            locations_i = np.sort(locations[bunch_to_group[i]])
 
             # idx_map is from global to local
             # inverse is from local to global
@@ -144,14 +195,23 @@ class OurHeuristic:
             for j1,j2 in itertools.product(locations_i,locations_i):
                 DPrime[locations_i_idx_map[j1]][locations_i_idx_map[j2]] = self.D[j1][j2]
 
+            linear=self.specialise_bunch(
+                initial_solution,
+                bunch_i_idx_map,
+                locations_i_idx_map
+            )
+
+            print(linear)
+
             fine_placement_problem = PlacementQAP(
                 bunch_size,
                 s,
                 FPrime,
                 DPrime,
-                weight0=1000,
-                alpha0=1.05,
-                const_weight_inc=True
+                weight0=self.fine_weight0,
+                alpha0=self.fine_alpha0,
+                const_weight_inc=self.const_weight_inc,
+                linear=linear
             )
             if self.use_dwave:
                 solver_i = Dwave()
@@ -172,17 +232,19 @@ class OurHeuristic:
             
             np.set_printoptions(threshold=np.inf)
             print(bunch_i, locations_i)
+
             for local_item in range(bunch_size):
                 for local_loc in range(s):
                     global_item = bunch_i_idx_map_inv[local_item]
                     global_loc = locations_i_idx_map_inv[local_loc]
                     if((solution3[i])[local_item][local_loc]):
                         print(global_item, global_loc)
+                    initial_solution[global_item][global_loc] = (solution3[i])[local_item][local_loc]
                     ret[global_item][global_loc] = (solution3[i])[local_item][local_loc]
+        check = PlacementQAP.check_mtx(ret)
+        if not all(check):
+            raise ValueError("unfeasible solution error")
         return ret
-            
-            
-
 
                 
 

@@ -4,14 +4,16 @@ import utils.index as idx
 import random
 
 class PlacementQAP(Problem):
-    def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False):
+    def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False,
+        linear = None
+        ):
         '''
             F is n by n symmetric with 0 based index
             D is m by m symmetric with 0 based index
             gamma is a factor multiplied to all linear terms
                 gamma can be used to control the importance of
                 absolute popularity versus interaction frequency.
-            
+            linear          a bunch of additional linear terms used during specialisation
         '''
         
         self.m = num_locs
@@ -29,6 +31,8 @@ class PlacementQAP(Problem):
         self.canonical_A = -1
         self.canonical_b = -1
         self.count = -1
+
+        self.linear = linear
 
         self.q = self.initialise_Q()
     @property
@@ -65,7 +69,28 @@ class PlacementQAP(Problem):
                 index = idx.index_1_q_to_l_1(i,j,m) - 1
                 solution_mtx[i-1][j-1] = solution[index]
         return solution_mtx
+    
+    @staticmethod
+    def check_mtx(solution_mtx):
+        size = solution_mtx.shape[0]
+        test_ct1 = True
+        test = np.zeros(size)
+        for i in range(size):
+            test += solution_mtx[i,:]
+        result = test !=1
+        if np.any(result):
+            test_ct1 = False
         
+        test_ct2 = True
+        test = np.zeros(size)
+        for i in range(size):
+            test += solution_mtx[:,i]
+        result = test != 1
+        if np.any(result):
+            test_ct2 = False
+        
+        return [test_ct1, test_ct2]
+
     def check(self,solution):
         '''
             solution is a dict of (val, val)
@@ -129,6 +154,8 @@ class PlacementQAP(Problem):
         print("flow matrix: ", ret)
         np.set_printoptions(threshold=6)
         '''
+        if not (self.linear is None):
+            ret = ret + np.diag(self.linear)
         np.savetxt("flow.txt",ret,fmt='%d')
         return ret
 
