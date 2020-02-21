@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import utils.mtx as mtx
 
 class IFHOOS:
     def __init__(self, F, D):
@@ -31,12 +32,12 @@ class IFHOOS:
         self.distance = np.sort(np.array(list(zip(indices_location,np.diag(self.D))),dtype=dtype_dist), order='dist')
 
         # a map from item index to allocated location
-        item_allocated = np.full(self.size, fill_value=-1)
+        item_allocated = np.full(self.size, fill_value=None)
         # a map from location index to allocated item
-        loc_allocated = np.full(self.size,fill_value=-1)
+        loc_allocated = np.full(self.size,fill_value=None)
 
         ret = self.allocate_singles(ret, item_allocated, loc_allocated)
-        ret = self.allocate_pairs(ret, pairs, self.distance, item_allocated, loc_allocated, 0.01)
+        ret = self.allocate_pairs(ret, pairs, self.distance, item_allocated, loc_allocated, 0.1)
         ret = self.sweep(ret, item_allocated, loc_allocated, self.popularity, self.distance)
 
         return ret
@@ -45,16 +46,20 @@ class IFHOOS:
         items_unallocated = []
         locs_unallocated = []
         for i in range(len(item_allocated)):
-            if item_allocated[i] == -1:
+            if item_allocated[i] is None:
                 items_unallocated.append(i)
         for i in range(len(loc_allocated)):
-            if loc_allocated[i] == -1:
+            if loc_allocated[i] is None:
                 locs_unallocated.append(i)
         
+        print(items_unallocated)
+        print(locs_unallocated)
+        input()
+
         for i in range(len(items_unallocated)):
             item = items_unallocated[i]
             coi_loc = self.get_coi_location(item)
-            if loc_allocated[coi_loc] == -1:
+            if loc_allocated[coi_loc] is None:
                 ret[item][coi_loc] = 1
                 item_allocated[item] = coi_loc
                 loc_allocated[coi_loc] = item
@@ -75,9 +80,13 @@ class IFHOOS:
         remainder_items = np.sort(np.array(remainder_items, dtype=dtype_pop), order='pop')[::-1]
         remainder_locs = np.sort(np.array(remainder_locs, dtype=dtype_dist), order='dist')
 
+        print(remainder_items)
+        print(remainder_locs)
+        input()
         for i in range(len(remainder_items)):
-            item = remainder_items[i]
-            loc = remainder_locs[i]
+            item = remainder_items[i]['idx']
+            loc = remainder_locs[i]['idx']
+            print(item,loc)
             ret[item][loc] = 1
 
         return ret
@@ -116,7 +125,18 @@ class IFHOOS:
         return loc_final
 
     def allocate_pairs(self, ret, pairs, distance, item_allocated, loc_allocated, beta):
+        np.set_printoptions(threshold=np.inf)
+        print(item_allocated)
+        print(loc_allocated)
         def update_records(j1,j2,loc_j1,loc_j2):
+            if loc_j1==63:
+                print("loc of 63: ",j1)
+            if loc_j2==63:
+                print("loc of 63: ",j2)
+            if j1 == 32:
+                print("j1 of 32:",loc_j1)
+            if j2 == 32:
+                print("j2 of 32:",loc_j2)
             item_allocated[j1] = loc_j1
             item_allocated[j2] = loc_j2
             loc_allocated[loc_j1] = j1
@@ -134,17 +154,19 @@ class IFHOOS:
             
             curr_index = coi_location_index
             curr_location = coi_location
+            count = 0
             while curr_index >= 0 and d_minus<=distance[curr_index]['dist']:
                 curr_location = distance[curr_index]['idx']
-                if loc_allocated[curr_location] == -1:
+                if loc_allocated[curr_location] is None:
                     loc_set.add(curr_location)
                 curr_index -= 1
+                count += 1
             
             curr_index = coi_location_index
             curr_location = coi_location
             while curr_index < self.size and distance[curr_index]['dist']<=d_plus:
                 curr_location = distance[curr_index]['idx']
-                if loc_allocated[curr_location] == -1:
+                if loc_allocated[curr_location] is None:
                     loc_set.add(curr_location)
                 curr_index += 1
 
@@ -156,30 +178,31 @@ class IFHOOS:
             loc_j1_final = item_allocated[j1]
             loc_j2_final = item_allocated[j2]
             
-            if item_allocated[j1]==-1 and item_allocated[j2]==-1:
+            if item_allocated[j1] is None and item_allocated[j2] is None:
                 locs_j1 = prepare_loc_set(j1)
                 locs_j2 = prepare_loc_set(j2)
                 
                 loc_j1_final, loc_j2_final = self.find_closest_locs_diff(locs_j1,locs_j2)
                 update_records(j1,j2,loc_j1_final,loc_j2_final)
 
-            elif item_allocated[j1]!=-1 and item_allocated[j2]!=-1:
+            elif (not item_allocated[j1] is None) and (not item_allocated[j2] is None):
                 pass
 
-            elif item_allocated[j1]!=-1 and item_allocated[j2]==-1:
+            elif (not item_allocated[j1] is None) and item_allocated[j2] is None:
                 locs_j2 = prepare_loc_set(j2)
                 loc_j2_final = self.find_nearest_loc(loc_j1_final, locs_j2)
                 update_records(j1,j2,loc_j1_final,loc_j2_final)
                 
-            elif item_allocated[j1]==-1 and item_allocated[j2]!=-1:
+            elif (item_allocated[j1] is None) and (not item_allocated[j2] is None):
                 locs_j1 = prepare_loc_set(j1)
                 loc_j1_final = self.find_nearest_loc(loc_j2_final, locs_j1)
                 update_records(j1,j2,loc_j1_final,loc_j2_final)
             
             ret[j1][loc_j1_final] = ret[j2][loc_j2_final] = 1
-        np.set_printoptions(threshold=np.inf)
         print(item_allocated)
         print(loc_allocated)
+        print(mtx.find_duplicate(item_allocated))
+        print(mtx.find_duplicate(loc_allocated))
         return ret
 
     def allocate_singles(self, ret, item_allocated, loc_allocated):

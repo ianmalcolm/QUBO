@@ -31,7 +31,7 @@ class OrderParser:
 
     def summary(self):
         '''returns the 0-based qty array'''
-        return self.qty[1:]
+        return (self.qty[1:])
     
     def gen_raw_orders(self):
         ret = []

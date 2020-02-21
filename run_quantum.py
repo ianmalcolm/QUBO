@@ -66,6 +66,8 @@ def run(order_path, order_filename):
     np.set_printoptions(threshold=6)
 
     qty = order_parser.summary()
+    print(qty)
+    input()
 
     ifhoos = IFHOOS(F,D)
     sol_ifhoos = ifhoos.run()
@@ -170,7 +172,7 @@ def run(order_path, order_filename):
         str_pure = "result of pure QAP is " + str(res_pure) + '\n'
         print(str_pure)
 
-        str_ifhoos = "result of pure QAP is " + str(res_ifhoos) + '\n'
+        str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
         print(str_ifhoos)
 
     filename_t = str(NUM_SKUS) + "SKUs_" + str(WAREHOUSE_NUM_ROWS) + "*" + str(WAREHOUSE_NUM_COLS) + "_time.txt"
