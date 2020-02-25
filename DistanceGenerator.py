@@ -8,6 +8,7 @@ class DistanceGenerator:
         self.num_rows = num_rows
         self.num_tot = num_cols * num_rows
         self.D = np.zeros((self.num_tot, self.num_tot))
+        self.D_euclidean = np.zeros((self.num_tot,self.num_tot))
         self.DIST_VERTICAL = DIST_VERTICAL
         self.DIST_HORIZONTAL = DIST_HORIZONTAL
         
@@ -18,19 +19,23 @@ class DistanceGenerator:
         '''
             returns a symmetric D
         '''
+        def find_D_index(x,y,num_rows):
+            return x*num_rows + y
         for y in range(self.num_rows):
             for x in range(self.num_cols):
                 #(x,y)
-                index = self.find_D_index(x,y,self.num_rows)
+                index = find_D_index(x,y,self.num_rows)
                 dist = math.pow(x,2) + math.pow(y,2)
-                self.D[index][index] = dist
+                print(x,y,index,dist)
+                self.D_euclidean[index][index] = dist
                 for y_prime in range(self.num_rows):
                     for x_prime in range(self.num_cols):
                         #(x',y'). dist = (y-y')^2 + (x-x')^2
-                        dist = math.pow((y_prime-y),2) + math.pow((x_prime-x),2)
-                        index_prime = self.find_D_index(x_prime,y_prime,self.num_rows)
-                        self.D[index][index_prime] = dist
-        return self.D
+                        if x_prime !=x and y_prime!=y:
+                            dist = math.pow((y_prime-y),2) + math.pow((x_prime-x),2)
+                            index_prime = find_D_index(x_prime,y_prime,self.num_rows)
+                            self.D_euclidean[index][index_prime] = dist
+        return self.D_euclidean
     
     def gen_Dprime(self,D):
         Dprime_length = self.group_num_rows * self.group_num_cols + 1
@@ -77,7 +82,7 @@ class DistanceGenerator:
         j=0
         hasNeighbor=True
         while j < self.num_cols:
-            print("considering column ", j)
+            #print("considering column ", j)
             
             if (self.num_cols % 2 and j==self.num_cols-1):
                 hasNeighbor=False
@@ -92,10 +97,10 @@ class DistanceGenerator:
             
             i = starting_row
             while i != ending_row:
-                print("considering item at", i, j)
+                #print("considering item at", i, j)
                 list_even.append(self.find_D_index(i,j,self.num_rows))
                 if hasNeighbor:
-                    print("considering neighboring item at", i, j+1)
+                    #print("considering neighboring item at", i, j+1)
                     list_odd.append(self.find_D_index(i,j+1,self.num_rows))
                 else:
                     list_odd.append(-1)

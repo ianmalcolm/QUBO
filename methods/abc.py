@@ -21,6 +21,13 @@ class ABCMethod:
         dtype_dist = [('idx',int),('dist',int)]
         self.distance = np.sort(np.array(list(zip(indices_location,distance.copy())),dtype=dtype_dist), order='dist')
         
+        if(num_grps)==1:
+            print("coi distance array: ")
+            print(self.distance)
+        else:
+            print("abc distance array: ")
+            print(self.distance)
+
         self.num_grps = num_grps
         self.grp_sizes = []
         default_grp_size = math.floor(self.n / self.num_grps)

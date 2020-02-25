@@ -61,6 +61,7 @@ def run(order_path, order_filename):
         group_num_cols
         )
     D = D_gen.gen_S_shape()
+    D_euclidean = D_gen.gen_Euclidean()
     np.set_printoptions(threshold=np.inf)
     print("D: ", D)
     np.set_printoptions(threshold=6)
@@ -117,7 +118,7 @@ def run(order_path, order_filename):
     t_pureQAP = pureQAP.get_timing()
     print("pure QAP has solution:\n", sol_pureQAP)
 
-    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), 3)
+    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 3)
     sol_abc = abc.run()
     print("abc has solution:\n",sol_abc)
 

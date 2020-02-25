@@ -52,10 +52,6 @@ class IFHOOS:
             if loc_allocated[i] is None:
                 locs_unallocated.append(i)
         
-        print(items_unallocated)
-        print(locs_unallocated)
-        input()
-
         for i in range(len(items_unallocated)):
             item = items_unallocated[i]
             coi_loc = self.get_coi_location(item)
@@ -80,9 +76,6 @@ class IFHOOS:
         remainder_items = np.sort(np.array(remainder_items, dtype=dtype_pop), order='pop')[::-1]
         remainder_locs = np.sort(np.array(remainder_locs, dtype=dtype_dist), order='dist')
 
-        print(remainder_items)
-        print(remainder_locs)
-        input()
         for i in range(len(remainder_items)):
             item = remainder_items[i]['idx']
             loc = remainder_locs[i]['idx']
@@ -103,8 +96,8 @@ class IFHOOS:
 
     def find_closest_locs_diff(self, set1, set2):
         min_dist = np.inf
-        min_loc1 = -1
-        min_loc2 = -1
+        min_loc1 = None
+        min_loc2 = None
         for loc1, loc2 in itertools.product(set1,set2):
             if not loc1==loc2:
                 dist = self.D[loc1][loc2]
@@ -116,7 +109,7 @@ class IFHOOS:
     
     def find_nearest_loc(self, reference_loc, locset):
         min_dist = np.inf
-        loc_final = -1
+        loc_final = None
         for loc in locset:
             dist = self.D[reference_loc][loc]
             if dist <= min_dist:
@@ -126,8 +119,6 @@ class IFHOOS:
 
     def allocate_pairs(self, ret, pairs, distance, item_allocated, loc_allocated, beta):
         np.set_printoptions(threshold=np.inf)
-        print(item_allocated)
-        print(loc_allocated)
         def update_records(j1,j2,loc_j1,loc_j2):
             if loc_j1==63:
                 print("loc of 63: ",j1)
@@ -139,8 +130,10 @@ class IFHOOS:
                 print("j2 of 32:",loc_j2)
             item_allocated[j1] = loc_j1
             item_allocated[j2] = loc_j2
-            loc_allocated[loc_j1] = j1
-            loc_allocated[loc_j2] = j2
+            if not loc_j1 is None:
+                loc_allocated[loc_j1] = j1
+            if not loc_j2 is None:
+                loc_allocated[loc_j2] = j2
             return
         
         def prepare_loc_set(index):
@@ -201,8 +194,6 @@ class IFHOOS:
             ret[j1][loc_j1_final] = ret[j2][loc_j2_final] = 1
         print(item_allocated)
         print(loc_allocated)
-        print(mtx.find_duplicate(item_allocated))
-        print(mtx.find_duplicate(loc_allocated))
         return ret
 
     def allocate_singles(self, ret, item_allocated, loc_allocated):

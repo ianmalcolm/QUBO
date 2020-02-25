@@ -25,7 +25,7 @@ WAREHOUSE_NUM_ROWS = 4
 NUM_LOCS = WAREHOUSE_NUM_COLS*WAREHOUSE_NUM_ROWS
 NUM_GROUPS = 8
 DIST_VERTICAL = 1
-DIST_HORIZONTAL = 5
+DIST_HORIZONTAL = 3
 ORDER_DIRNAME = 'orders'
 
 group_num_cols = 2
@@ -35,11 +35,20 @@ group_num_locs = group_num_cols * group_num_rows
 NUM_ITERATIONS = 10
 
 def main():
+    test_abc = []
+    test_coi = []
+    test_ifhoos = []
     for i in range(NUM_ITERATIONS):
         order_filename = 'order'+str(i)+'.txt'
         order_name = 'order'+str(i)
         order_path = os.path.join(ORDER_DIRNAME,order_filename)
-        run(order_path, order_name)
+        str_abc, str_coi, str_ifhoos = run(order_path, order_name)
+        test_abc.append(str_abc)
+        test_coi.append(str_coi)
+        test_ifhoos.append(str_ifhoos)
+    print(test_abc)
+    print(test_coi)
+    print(test_ifhoos)
 
 def run(order_path, order_filename):
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
@@ -55,6 +64,7 @@ def run(order_path, order_filename):
         group_num_cols
         )
     D = D_gen.gen_S_shape()
+    D_euclidean = D_gen.gen_Euclidean()
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
@@ -62,7 +72,7 @@ def run(order_path, order_filename):
     ifhoos = IFHOOS(F,D)
     sol_ifhoos = ifhoos.run()
 
-    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), 8)
+    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
     sol_abc = abc.run()
 
     coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
@@ -95,6 +105,11 @@ def run(order_path, order_filename):
     
     str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
     print(str_ifhoos)
+
+    print(np.diag(D))
+    print(np.diag(D_euclidean))
+
+    return res_abc, res_coi, res_ifhoos
 
 if __name__ == "__main__":
     main()
