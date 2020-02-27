@@ -74,7 +74,11 @@ class OurHeuristic:
         bunch = BunchingQAP(
             self.n,
             self.k,
-            self.F
+            self.F,
+            euqality_weight=100,
+            equality_alpha=100,
+            inequality_weight=100,
+            inequality_alpha=100
         )
 
         solver = ClassicalNeal()
@@ -88,7 +92,11 @@ class OurHeuristic:
         group = BunchingQAP(
             self.m,
             self.k,
-            -self.D
+            -self.D,
+            euqality_weight=10,
+            equality_alpha=10,
+            inequality_weight=10,
+            inequality_alpha=10
         )
         solver_group = ClassicalNeal()
         group_method = ExteriorPenaltyMethod(group,solver_group,100)

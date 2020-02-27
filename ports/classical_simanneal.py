@@ -1,4 +1,5 @@
 import time
+import itertools
 
 from .solver import Solver
 import neal
@@ -31,22 +32,35 @@ class ClassicalNeal(Solver):
         #print(mtx)
         #np.set_printoptions(threshold=6)
 
-        print("matrix has %d zeros out of %d" % (np.count_nonzero(mtx==0), mtx.shape[0]*mtx.shape[1]))
-        print("Constructing bqm out of matrix...")
-        bqm = dimod.BinaryQuadraticModel.from_numpy_matrix(mtx)
-        print("Classical simanneal starts now!")
+        #print("matrix has %d zeros out of %d" % (np.count_nonzero(mtx==0), mtx.shape[0]*mtx.shape[1]))
+        #print("Constructing bqm out of matrix...")
+        #bqm = dimod.BinaryQuadraticModel.from_numpy_matrix(mtx)
+        #print("Classical simanneal starts now!")
+        
         sampler = neal.SimulatedAnnealingSampler()
         
+        Q = {}
+        size = mtx.shape[0]
+        for i,j in itertools.product(range(size),range(size)):
+            if i==j:
+                if mtx[i][i]:
+                    Q[(i,i)] = mtx[i][i]
+            elif i<j:
+                if mtx[i][j]:
+                    Q[(i,j)] = mtx[i][j]
+            else:
+                pass
+
         start_time = time.time()
         if bool(initial):
-            response = sampler.sample(
-                bqm, 
+            response = sampler.sample_qubo(
+                Q, 
                 initial_states=dimod.SampleSet.from_samples(initial_sample, vartype='BINARY', energy=[initial[1]]),
                 num_reads=100,
                 initial_states_generator='tile'
                 )
         else:
-            response = sampler.sample(bqm, num_reads=10)
+            response = sampler.sample_qubo(Q, num_reads=10)
         end_time = time.time()
 
         timing_iter = end_time - start_time

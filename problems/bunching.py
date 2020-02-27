@@ -11,7 +11,11 @@ import dimod
 import operator
 
 class BunchingQAP(Problem):
-    def __init__(self, num_items, num_groups, F):
+    def __init__(self, num_items, num_groups, F,
+        euqality_weight=500,
+        equality_alpha=10,
+        inequality_weight=500,
+        inequality_alpha=20):
         '''
         Let m = num_locs
             n = num_items
@@ -31,6 +35,11 @@ class BunchingQAP(Problem):
         self.num_constraints = self.n + self.k
         self.num_ancillaries = 0
         self.ancillary_bit_length = 0
+
+        self.euqality_weight = euqality_weight
+        self.inequality_weight = inequality_weight
+        self.equality_alpha = equality_alpha
+        self.inequality_alpha = inequality_alpha
 
         #####mutable variables#####
         self.ms = []
@@ -179,7 +188,7 @@ class BunchingQAP(Problem):
                 # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
         b = np.ones(shape=self.n)
-        weights = np.full(shape=self.n, fill_value=500)
+        weights = np.full(shape=self.n, fill_value=self.euqality_weight)
         #print(A)
         return A, b, weights
     
@@ -206,7 +215,7 @@ class BunchingQAP(Problem):
 
         s = math.floor(self.n / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
-        weights = np.full(shape=num_constraints, fill_value=500)
+        weights = np.full(shape=num_constraints, fill_value=self.inequality_weight)
 
         return coeff, b, weights
 
@@ -240,8 +249,8 @@ class BunchingQAP(Problem):
         #np.set_printoptions(threshold=6)
         self.ms = weights[0:(ct1_len+ct2_len)]
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
-        self.alphas[0:ct1_len] = 10
-        self.alphas[ct1_len:(ct1_len+ct2_len)] = 20
+        self.alphas[0:ct1_len] = self.equality_alpha
+        self.alphas[ct1_len:(ct1_len+ct2_len)] = self.inequality_alpha
         self.canonical_A = A.copy()
         self.canonical_b = b.copy()
         
