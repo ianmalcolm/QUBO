@@ -5,12 +5,13 @@ import math
 from problems.bunching import BunchingQAP
 from problems.placement import PlacementQAP
 from ports.dwave import Dwave
+from ports.da.da_solver import DASolver
 from ports.classical_simanneal import ClassicalNeal
 from .exterior_penalty import ExteriorPenaltyMethod
 import utils.index as idx
 
 class OurHeuristic:
-    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave=True):
+    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave_da_sw="dwave"):
         self.n = n
         self.m = m
         self.k = k
@@ -19,7 +20,7 @@ class OurHeuristic:
         self.DIST_HOR = DIST_HOR
         self.num_rows = num_rows
         self.num_cols = num_cols
-        self.use_dwave = use_dwave
+        self.use_dwave_da_sw = use_dwave_da_sw
 
         self.fine_weight0 = fine_weight0
         self.fine_alpha0 = fine_alpha0
@@ -213,10 +214,12 @@ class OurHeuristic:
                 const_weight_inc=self.const_weight_inc,
                 linear=linear
             )
-            if self.use_dwave:
+            if self.use_dwave_da_sw == 'dwave':
                 solver_i = Dwave()
-            else:
+            elif self.use_dwave_da_sw == 'sw':
                 solver_i = ClassicalNeal()
+            elif self.use_dwave_da_sw == 'da':
+                solver_i = DASolver()
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,

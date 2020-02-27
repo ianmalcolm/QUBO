@@ -65,3 +65,6 @@ def find_duplicate(arr):
             return elem
     
     return None
+
+def convert_to_int(arr):
+    return [int(elem) for elem in arr]

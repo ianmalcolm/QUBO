@@ -1,9 +1,14 @@
 import numpy as np
 from ports.classical_simanneal import ClassicalNeal
 from ports.dwave import Dwave
+from ports.da.da_solver import DASolver
 from problems.placement import PlacementQAP
 
 mtx = np.loadtxt("mtx.txt")
+
+port = DASolver()
+solution = port.solve(mtx)
+input()
 
 port = ClassicalNeal()
 solution = port.solve(mtx)

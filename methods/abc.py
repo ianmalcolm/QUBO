@@ -43,11 +43,16 @@ class ABCMethod:
         start = 0
         for i in range(self.num_grps):
             grp_size = self.grp_sizes[i]
-            popularity_grp = self.popularity[start:start+grp_size]
+            popularity_grp = self.popularity[start:start+grp_size].copy()
+            
+            permutation = np.random.permutation(grp_size)
+    
             a=0
-            for (idx, _) in popularity_grp:
+            for i in range(len(popularity_grp)):
+                (idx,_) = popularity_grp[i]
+                (permuted_idx,_) = popularity_grp[permutation[i]]
                 loc = self.distance[start+a]['idx']
-                ret[int(idx)][loc] = 1
+                ret[int(permuted_idx)][loc] = 1
                 a+=1
             start += grp_size
         return ret

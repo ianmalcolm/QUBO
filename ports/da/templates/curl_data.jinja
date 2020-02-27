@@ -1,0 +1,1 @@
+{ "{{solver_name}}": { {% for p,v in params.items() %} "{{p}}":{{v}}{%if loop.index<len(params)%},{%endif%} {% endfor %} } , {{'\n'}}"qubo_matrix": { "qubo":[{% for r in rows%} {"qubo_row": {{r}}} {%if loop.index < len(rows) %},{%endif%} {{'\n'}} {% endfor %}] } }

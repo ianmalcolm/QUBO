@@ -95,6 +95,7 @@ class PlacementQAP(Problem):
         '''
             solution is a dict of (val, val)
         '''
+        print(solution)
         solution_mtx = PlacementQAP.solution_matrix(solution, self.n, self.m)
         
         np.set_printoptions(threshold=np.inf)
