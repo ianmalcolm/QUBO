@@ -256,6 +256,4 @@ class OurHeuristic:
         if not all(check):
             raise ValueError("unfeasible solution error")
         return ret
-
-                
-
+        
