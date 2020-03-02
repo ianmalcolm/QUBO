@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 def inspect_entries(F):
     size = F.shape[0]

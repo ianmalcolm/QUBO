@@ -3,6 +3,6 @@
 *.txt
 !order.txt
 !__order.txt
-!mtx.txt
+mtx.txt
 !simdata/*
 !qaplib/*.dat
