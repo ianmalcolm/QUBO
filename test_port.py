@@ -18,7 +18,8 @@ for filename in os.listdir('qaplib'):
             F,
             D,
             weight0=200,
-            alpha0=100
+            alpha0=2,
+            const_weight_inc=True
         )
         method = ExteriorPenaltyMethod(problem,solver,1000)
         method.run()
