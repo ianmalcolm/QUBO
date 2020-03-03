@@ -1,6 +1,7 @@
 import numpy as np
 from problems.placement import PlacementQAP
 from ports.classical_simanneal import ClassicalNeal
+from ports.da.da_solver import DASolver
 import qaplib.readqaplib as qaplib
 from methods.exterior_penalty import ExteriorPenaltyMethod
 
@@ -11,7 +12,7 @@ for filename in os.listdir('qaplib'):
     if filename.endswith('.dat'):
         F, D = qaplib.readqaplib(os.path.join('qaplib',filename))
         size = F.shape[0]
-        solver = ClassicalNeal()
+        solver = DASolver()
         problem = PlacementQAP(
             size,
             size,
