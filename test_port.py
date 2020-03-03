@@ -12,7 +12,7 @@ for filename in os.listdir('qaplib'):
     if filename.endswith('.dat'):
         F, D = qaplib.readqaplib(os.path.join('qaplib',filename))
         size = F.shape[0]
-        solver = DASolver()
+        solver = DASolver() 
         problem = PlacementQAP(
             size,
             size,

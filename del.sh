@@ -3,4 +3,4 @@ curl -H 'X-DA-Access-Key:NB7wphN6nRhjE94wOhV9j7hWFJKKNI67' \
 -H 'Accept: application/json' \
 -H 'Content-type:application/json' \
 -X DELETE \
-https://ucp.unicen.smu.edu.sg/da/v2/async/jobs/result/xujun-200582106412797
+https://ucp.unicen.smu.edu.sg/da/v2/async/jobs/result/xujun-200594314601154

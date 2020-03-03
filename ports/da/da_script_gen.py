@@ -4,18 +4,23 @@ import json
 import utils.mtx as mt
 
 class DAScriptGen:
-    def __init__(self, api_key, cmd, mtx, solver_name, guidance_config=None):
+    def __init__(self, api_key, cmd, mtx, solver_name, params, guidance_config=None):
         self.api_key = api_key
         self.cmd = cmd
         self.mtx = mtx
         self.solver_name = solver_name
         self.guidance_config = guidance_config
+        self.params = params
     
     def run(self):
         curl_data_dict = {}
         params = {}
-        params['number_iterations'] = 1000000
-        params['num_replicas'] = 100
+        params['number_iterations'] = self.params['number_iterations']
+        params['offset_increase_rate'] = self.params['offset_increase_rate']
+        if self.solver_name == 'fujitsuDA2':
+            params['number_runs'] = self.params['number_runs']
+        elif self.solver_name == 'fujitsuDA2PT':
+            params['number_replicas'] = 26
 
         if not self.guidance_config is None:
             params['guidance_config'] = self.guidance_config.copy()

@@ -14,5 +14,7 @@ def readqaplib(filename):
     half_point = size * size
     mtx1 = np.array(data[:half_point],dtype=int).reshape((size,size))
     mtx2 = np.array(data[half_point:],dtype=int).reshape((size,size))
-
+    np.set_printoptions(threshold=np.inf)
+    #print(mtx1)
+    #print(mtx2)
     return (mtx1,mtx2)
