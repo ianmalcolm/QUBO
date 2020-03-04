@@ -60,7 +60,8 @@ class ClassicalNeal(Solver):
                 Q, 
                 initial_states=dimod.SampleSet.from_samples(initial_sample, vartype='BINARY', energy=[initial[1]]),
                 num_reads=params['number_runs'],
-                initial_states_generator='tile'            
+                initial_states_generator='tile',
+                num_sweeps=1000            
             )
         else:
             response = sampler.sample_qubo(
@@ -71,6 +72,9 @@ class ClassicalNeal(Solver):
 
         timing_iter = end_time - start_time
         print("one iteration takes ", timing_iter)
+
+        if test_mode:
+            self.timing = 0
         self.timing += timing_iter
 
         for datum in response.data(fields=['energy','num_occurrences']):

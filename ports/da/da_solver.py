@@ -1,7 +1,9 @@
 from .da_script_gen import DAScriptGen
 from ..solver import Solver
+import delete
 import numpy as np
 import utils.mtx as mt
+
 
 import subprocess
 import json
@@ -42,6 +44,15 @@ class DASolver(Solver):
                 subprocess.call(['chmod', '+x', 'del.sh'])
                 subprocess.call(['./del.sh'])
     
+    def delete_if_full(self):
+        with open('jobs.txt','wb') as f:
+            subprocess.call(["./jobs.sh"],stdout=f)
+
+        with open('jobs.txt', 'r') as f:
+            jobs = json.load(f)['job_status_list']
+            if len(jobs) > 15:
+                delete.delete_all()
+
     def prepare_guidance_config(self, config_dict):
         ''' converts input dict of (int,int) into (str, boolean) '''
         ret = {}
@@ -59,8 +70,8 @@ class DASolver(Solver):
 
         if initial:
             guidance_config = self.prepare_guidance_config(initial[0])
-            print("guidance config:")
-            print(guidance_config)
+            #print("guidance config:")
+            #print(guidance_config)
             #input()
         else:
             guidance_config = None
@@ -69,7 +80,7 @@ class DASolver(Solver):
         script_generator = DAScriptGen(API_KEY, CMD, mtx, SOLVER_NAME, params, guidance_config)
         script = script_generator.run()
 
-        self.dequeue_if_full()
+        self.delete_if_full()
 
         # start and block until done
         subprocess.call(["./"+MAIN_SCRIPT])
@@ -89,6 +100,8 @@ class DASolver(Solver):
                 else:
                     solution_dict[int(k)] = 0
             
+            if test_mode:
+                self.timing = 0
             timing = response['qubo_solution']['timing']['detailed']['anneal_time']
             self.timing += float(timing) / 1000
 

@@ -22,8 +22,10 @@ class Solver(abc.ABC):
         params = {}
         params['number_iterations'] = 1000000
         params['number_runs'] = 100
+        params['number_replicas'] = 100
         size = mtx.shape[0]
         
+        '''
         #compute default temperature range
         one_step_energy_changes = []
         for i in range(size):
@@ -42,7 +44,7 @@ class Solver(abc.ABC):
                 energy_changes[i] += abs(mtx[i][j])
                 energy_changes[j] += abs(mtx[i][j])
         max_energy_change = max(energy_changes.values())
-        
+
             #at high temperature, min energy change should have 50% chance of being accepeted
         high_temp = -(min_energy_change / np.log(0.5))
             #at low temperature, max energy change should have a low chance, say 0.01, of being accepted
@@ -62,5 +64,5 @@ class Solver(abc.ABC):
         params['temperature_decay'] = temperature_decay
         params['temperature_mode'] = 'EXPONENTIAL'
         params['temperature_range'] = temperature_range
-
+        '''
         return params

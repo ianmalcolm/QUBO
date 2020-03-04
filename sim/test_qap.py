@@ -20,6 +20,5 @@ class QAPEvaluator:
             for j in range(self.n):
                 for k in range(self.m):
                     for l in range(self.m):
-                        if i <= j and k <= l:
-                            energy += self.F[i][j] * self.D[k][l] * solution_mtx[i][k] * solution_mtx[j][l]
+                        energy += self.F[i][j] * self.D[k][l] * solution_mtx[i][k] * solution_mtx[j][l]
         return energy

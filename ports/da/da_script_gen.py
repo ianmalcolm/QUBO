@@ -16,11 +16,11 @@ class DAScriptGen:
         curl_data_dict = {}
         params = {}
         params['number_iterations'] = self.params['number_iterations']
-        params['offset_increase_rate'] = self.params['offset_increase_rate']
         if self.solver_name == 'fujitsuDA2':
             params['number_runs'] = self.params['number_runs']
+            params['offset_increase_rate'] = self.params['offset_increase_rate']
         elif self.solver_name == 'fujitsuDA2PT':
-            params['number_replicas'] = 26
+            params['number_replicas'] = self.params['number_replicas']
 
         if not self.guidance_config is None:
             params['guidance_config'] = self.guidance_config.copy()
