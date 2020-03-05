@@ -5,7 +5,7 @@ import random
 
 class PlacementQAP(Problem):
     def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False,
-        linear = None
+        linear = None, initial_weight_estimate=False
         ):
         '''
             F is n by n symmetric with 0 based index
@@ -33,6 +33,7 @@ class PlacementQAP(Problem):
         self.count = -1
 
         self.linear = linear
+        self.initial_weight_estimate = initial_weight_estimate
 
         self.q = self.initialise_Q()
     @property
@@ -160,7 +161,7 @@ class PlacementQAP(Problem):
         np.savetxt("flow.txt",ret,fmt='%d')
         return ret
 
-    def initialise_constraint_matrix(self):
+    def initialise_constraint_matrix(self, flow_matrix):
         # prepare A
         A = np.zeros((self.m*self.n,self.m*self.n))
         for i in range(1,self.n+1):
@@ -187,12 +188,18 @@ class PlacementQAP(Problem):
             b[i] = 1
         
         # prepare weights
-        weights = np.full(shape=self.num_constraints, fill_value=self.weight0)
+        if self.initial_weight_estimate:
+            initial_weight = self.estimate_initial_weight(flow_matrix)
+            weights = np.full(shape=self.num_constraints, fill_value=initial_weight)
+            alphas = np.full(shape=self.num_constraints, fill_value=1.2)
+        else:
+            weights = np.full(shape=self.num_constraints, fill_value=self.weight0)
+            alphas = np.full(shape=self.num_constraints,fill_value=self.alpha0)
         
         self.canonical_A = A.copy()
         self.canonical_b = b.copy()
         self.ms = weights
-        self.alphas = np.full(shape=self.num_constraints,fill_value=self.alpha0)
+        self.alphas = alphas
 
         ret = super().A_to_Q(A,b,weights)
         np.savetxt("constraint.txt",ret,fmt='%d')
@@ -204,9 +211,13 @@ class PlacementQAP(Problem):
         '''
         ret = {}
         flow_matrix = self.initialise_flow_matrix()
-        constraint_matrix = self.initialise_constraint_matrix()
+        constraint_matrix = self.initialise_constraint_matrix(flow_matrix)
         
         ret['flow'] = flow_matrix
         ret['constraints'] = constraint_matrix
         return ret
-        
+    
+    def estimate_initial_weight(self, flow_matrix):
+        # add all entries in matrix and divide by n
+        size = flow_matrix.shape[0]
+        return np.sum(flow_matrix) / size

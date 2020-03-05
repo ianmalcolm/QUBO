@@ -11,15 +11,12 @@ from .exterior_penalty import ExteriorPenaltyMethod
 import utils.index as idx
 
 class OurHeuristic:
-    def __init__(self,n,m,k,F,D, DIST_HOR, num_rows, num_cols, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave_da_sw="dwave"):
+    def __init__(self,n,m,k,F,D, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave_da_sw="dwave"):
         self.n = n
         self.m = m
         self.k = k
         self.F = F.copy()
         self.D = D.copy()
-        self.DIST_HOR = DIST_HOR
-        self.num_rows = num_rows
-        self.num_cols = num_cols
         self.use_dwave_da_sw = use_dwave_da_sw
 
         self.fine_weight0 = fine_weight0
@@ -93,10 +90,10 @@ class OurHeuristic:
             self.m,
             self.k,
             -self.D,
-            euqality_weight=10,
-            equality_alpha=10,
-            inequality_weight=10,
-            inequality_alpha=10
+            euqality_weight=100,
+            equality_alpha=100,
+            inequality_weight=100,
+            inequality_alpha=100
         )
         solver_group = ClassicalNeal()
         group_method = ExteriorPenaltyMethod(group,solver_group,100)
@@ -217,9 +214,8 @@ class OurHeuristic:
                 s,
                 FPrime,
                 DPrime,
-                weight0=self.fine_weight0,
-                alpha0=self.fine_alpha0,
-                const_weight_inc=self.const_weight_inc,
+                initial_weight_estimate=True,
+                const_weight_inc=True,
                 linear=linear
             )
             if self.use_dwave_da_sw == 'dwave':

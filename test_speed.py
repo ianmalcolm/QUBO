@@ -61,20 +61,21 @@ for filename in os.listdir('qaplib'):
                 filepath_sw = generate_filepath(filename,'sw',timing_sw)
                 solution_sw_df.to_csv(filepath_sw)
             
-                all_energy_da = [evaluator.run(PlacementQAP.solution_matrix(sol[0],size,size)) for sol in solution_da]
-                avg_energy_da = np.average(all_energy_da)
-                std_energy_da = np.std(all_energy_da)
-                all_energy_sw = [evaluator.run(PlacementQAP.solution_matrix(sol[0],size,size)) for sol in solution_sw]
-                avg_energy_sw = np.average(all_energy_sw)
-                std_energy_sw = np.std(all_energy_sw)
+                #all_energy_da = [evaluator.run(PlacementQAP.solution_matrix(sol[0],size,size)) for sol in solution_da]
+                #avg_energy_da = np.average(all_energy_da)
+                #std_energy_da = np.std(all_energy_da)
+                #all_energy_sw = [evaluator.run(PlacementQAP.solution_matrix(sol[0],size,size)) for sol in solution_sw]
+                #avg_energy_sw = np.average(all_energy_sw)
+                #std_energy_sw = np.std(all_energy_sw)
+                
                 best_energy_da = evaluator.run(PlacementQAP.solution_matrix(solution_da[0][0],size,size))
                 best_energy_sw = evaluator.run(PlacementQAP.solution_matrix(solution_sw[0][0],size,size))
 
                 result_string = (filename +
                 " " + str(best_energy_da) + 
-                " " + str(avg_energy_da) + 
+                #" " + str(avg_energy_da) + 
                 " " + str(timing_da) + 
                 " " + str(best_energy_sw) + 
-                " " + str(avg_energy_sw) + 
+                #" " + str(avg_energy_sw) + 
                 " " + str(timing_sw) + '\n')
                 f.write(result_string)
