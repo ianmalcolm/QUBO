@@ -1,4 +1,5 @@
 import numpy as np
+import gc
 
 from problems.placement import PlacementQAP
 from methods.exterior_penalty import ExteriorPenaltyMethod
@@ -6,8 +7,9 @@ from ports.classical_simanneal import ClassicalNeal
 
 class PureQAP:
     def __init__(self, F, D):
-        self.F = F.copy()
-        self.D = D.copy()
+        gc.collect()
+        self.F = F
+        self.D = D
 
         self.timing = 0
 
@@ -15,6 +17,7 @@ class PureQAP:
         return self.timing
 
     def run(self):
+        print("start running pure QAP.")
         size = self.F.shape[0]
         problem = PlacementQAP(
             size,
@@ -23,7 +26,8 @@ class PureQAP:
             self.D,
             weight0=50000,
             alpha0=1.1,
-            const_weight_inc=True
+            const_weight_inc=True,
+            initial_weight_estimate=True
         )
         
         solver = ClassicalNeal()

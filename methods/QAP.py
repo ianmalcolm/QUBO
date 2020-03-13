@@ -15,8 +15,8 @@ class OurHeuristic:
         self.n = n
         self.m = m
         self.k = k
-        self.F = F.copy()
-        self.D = D.copy()
+        self.F = F
+        self.D = D
         self.use_dwave_da_sw = use_dwave_da_sw
 
         self.fine_weight0 = fine_weight0
@@ -73,9 +73,11 @@ class OurHeuristic:
             self.k,
             self.F,
             euqality_weight=100,
-            equality_alpha=100,
+            equality_alpha=1.2,
             inequality_weight=100,
-            inequality_alpha=100
+            inequality_alpha=1.2,
+            initial_weight_estimate=True,
+            const_weight_inc=True
         )
 
         solver = ClassicalNeal()
@@ -90,10 +92,12 @@ class OurHeuristic:
             self.m,
             self.k,
             -self.D,
-            euqality_weight=100,
-            equality_alpha=100,
-            inequality_weight=100,
-            inequality_alpha=100
+            euqality_weight=1000,
+            equality_alpha=1.2,
+            inequality_weight=1000,
+            inequality_alpha=1.2,
+            initial_weight_estimate=True,
+            const_weight_inc=True
         )
         solver_group = ClassicalNeal()
         group_method = ExteriorPenaltyMethod(group,solver_group,100)

@@ -1,5 +1,6 @@
 import time
 import itertools
+import gc
 
 from .solver import Solver
 import neal
@@ -39,6 +40,7 @@ class ClassicalNeal(Solver):
         
         sampler = neal.SimulatedAnnealingSampler()
         
+        gc.collect()
         Q = {}
         size = mtx.shape[0]
         for i,j in itertools.product(range(size),range(size)):

@@ -16,6 +16,7 @@ from methods.ifhoos import IFHOOS
 from ports.dwave import Dwave
 from ports.classical_simanneal import ClassicalNeal
 from sim.test_route import RouteEvaluator
+from sim.test_qap import QAPEvaluator
 
 import utils.mtx as mtx
 
@@ -92,11 +93,18 @@ def run(order_filename, config):
         NUM_LOCS,
         NUM_LOCS
     )
+    evaluator_qap = QAPEvaluator(
+        NUM_SKUS,
+        NUM_LOCS,
+        F,
+        D
+    )
     res_dict = {}
 
     USE_DWAVE = config["USE_DWAVE"]
     USE_PURE = config["USE_PURE"]
     USE_DA = config["USE_DA"]
+    USE_SW = config["USE_SW"]
 
 ######################################################################
     ifhoos = IFHOOS(F,D)
@@ -119,7 +127,9 @@ def run(order_filename, config):
         sol_heuristic_da = heuristic_da.run()
         t_heuristic_da = heuristic_da.get_timing()
         res_heuristic_da = evaluator.run(sol_heuristic_da)
+        qapres_heuristic_da = evaluator_qap.run(sol_heuristic_da)
         res_dict['res_heu_da']=res_heuristic_da
+        res_dict['qapres_heu_da'] = qapres_heuristic_da
         res_dict['t_heu_da']=t_heuristic_da
 
     if USE_DWAVE=="y":
@@ -135,27 +145,32 @@ def run(order_filename, config):
             use_dwave_da_sw='dwave'
         )
         sol_heuristic_qpu = heuristic_qpu.run()
-        t_heuristic_qpu = heuristic_qpu.get_timing() 
+        t_heuristic_qpu = heuristic_qpu.get_timing()
         res_heuristic_qpu = evaluator.run(sol_heuristic_qpu)
+        qapres_heuristic_qpu = evaluator_qap.run(heuristic_qpu)
         res_dict['res_heu_qpu']= res_heuristic_qpu
+        res_dict['qapres_heu_qpu']=qapres_heuristic_qpu
         res_dict['t_heu_qpu']= t_heuristic_qpu
 
-    heuristic_sw = OurHeuristic(
-        NUM_LOCS,
-        NUM_LOCS,
-        NUM_GROUPS,
-        F,
-        D,
-        fine_weight0=40000,
-        fine_alpha0=0,
-        const_weight_inc=False,
-        use_dwave_da_sw='sw'
-    )
-    sol_heuristic_sw = heuristic_sw.run()
-    t_heuristic_sw = heuristic_sw.get_timing()
-    res_heuristic_sw = evaluator.run(sol_heuristic_sw)
-    res_dict['res_heu_sw']= res_heuristic_sw
-    res_dict['time_heu_sw']= t_heuristic_sw
+    if USE_SW == 'y':
+        heuristic_sw = OurHeuristic(
+            NUM_LOCS,
+            NUM_LOCS,
+            NUM_GROUPS,
+            F,
+            D,
+            fine_weight0=40000,
+            fine_alpha0=0,
+            const_weight_inc=False,
+            use_dwave_da_sw='sw'
+        )
+        sol_heuristic_sw = heuristic_sw.run()
+        t_heuristic_sw = heuristic_sw.get_timing()
+        res_heuristic_sw = evaluator.run(sol_heuristic_sw)
+        qapres_heuristic_sw = evaluator_qap.run(sol_heuristic_sw)
+        res_dict['qapres_heu_sw']= qapres_heuristic_sw
+        res_dict['res_heu_sw']= res_heuristic_sw
+        res_dict['time_heu_sw']= t_heuristic_sw
 
     if USE_PURE=='y':
         pureQAP = PureQAP(
@@ -165,6 +180,8 @@ def run(order_filename, config):
         sol_pureQAP = pureQAP.run()
         t_pureQAP = pureQAP.get_timing()
         res_pure = evaluator.run(sol_pureQAP)
+        qapres_pure = evaluator_qap.run(sol_pureQAP)
+        res_dict['qapres_pure'] = qapres_pure
         res_dict['res_pure']= res_pure
         res_dict['time_pure'] = t_pureQAP
 

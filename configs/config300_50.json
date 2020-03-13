@@ -11,5 +11,6 @@
     "NUM_SKUS": 50,
     "USE_DWAVE": "n",
     "USE_PURE": "y",
-    "USE_DA": "y"
+    "USE_DA": "y",
+    "USE_SW": "n"
 }
