@@ -20,6 +20,13 @@ def computeQ(F,D):
             upper_left_x, upper_left_y = (i*m, j*m)
             Q[upper_left_x:upper_left_x+m,upper_left_y:upper_left_y+m] += submatrix
     
+<<<<<<< HEAD
+=======
+    np.set_printoptions(threshold=np.inf)
+    print("Q: ", Q)
+    np.set_printoptions(threshold=6)
+    
+>>>>>>> 8f25e07989c378f9ae7d63446f3cc3700070cadf
     return Q
 
 def initialise_flow_matrix(F,D):
@@ -38,6 +45,12 @@ def initialise_flow_matrix(F,D):
                     elif x_ik < x_jl:
                         ret[x_ik-1][x_jl-1] = F[i-1][j-1] * D[k-1][l-1]
     
+<<<<<<< HEAD
+=======
+    np.set_printoptions(threshold=np.inf)
+    print("flow matrix: ", ret)
+    np.set_printoptions(threshold=6)
+>>>>>>> 8f25e07989c378f9ae7d63446f3cc3700070cadf
     
     return ret
 
