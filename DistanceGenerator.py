@@ -7,8 +7,8 @@ class DistanceGenerator:
         self.num_cols = num_cols
         self.num_rows = num_rows
         self.num_tot = num_cols * num_rows
-        self.D = np.zeros((self.num_tot, self.num_tot))
-        self.D_euclidean = np.zeros((self.num_tot,self.num_tot))
+        self.D = np.zeros((self.num_tot, self.num_tot),dtype=np.int32)
+        self.D_euclidean = np.zeros((self.num_tot,self.num_tot),dtype=np.int32)
         self.DIST_VERTICAL = DIST_VERTICAL
         self.DIST_HORIZONTAL = DIST_HORIZONTAL
         

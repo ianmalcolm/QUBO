@@ -1,4 +1,6 @@
 from .problem import Problem
+from utils.bigarray import BigArray
+
 import itertools
 import math
 import numpy as np
@@ -15,7 +17,9 @@ class BunchingQAP(Problem):
         euqality_weight=500,
         equality_alpha=10,
         inequality_weight=500,
-        inequality_alpha=20):
+        inequality_alpha=20,
+        initial_weight_estimate=False,
+        const_weight_inc=False):
         '''
         Let m = num_locs
             n = num_items
@@ -31,7 +35,7 @@ class BunchingQAP(Problem):
         self.n = num_items
         self.k = num_groups
         self.bunch_size = math.ceil(self.n / self.k)
-        self.F = F.copy()
+        self.F = F
         self.num_constraints = self.n + self.k
         self.num_ancillaries = 0
         self.ancillary_bit_length = 0
@@ -40,6 +44,8 @@ class BunchingQAP(Problem):
         self.inequality_weight = inequality_weight
         self.equality_alpha = equality_alpha
         self.inequality_alpha = inequality_alpha
+        self.initial_weight_estimate = initial_weight_estimate
+        self.const_weight_inc = const_weight_inc
 
         #####mutable variables#####
         self.ms = []
@@ -47,6 +53,7 @@ class BunchingQAP(Problem):
         self.canonical_A = -1
         self.canonical_b = -1
         self.count = 1
+        self.initial_weight = 0
         #####end of state#####
 
         # construct initial Q      
@@ -156,7 +163,12 @@ class BunchingQAP(Problem):
 
     def generate_flow_matrix(self):
         print("generating flow")
-        ret = np.zeros(shape=(self.n*self.k,self.n*self.k),dtype=np.float32)
+        shape = (self.n*self.k,self.n*self.k)
+        array_memory_gb = BigArray.get_size_GB(shape,16) 
+        print(array_memory_gb)
+        if array_memory_gb > 500:
+            ret = BigArray(shape, dtype=np.int16)
+        ret = np.zeros(shape=shape,dtype=np.int16)
         for k in range(1,self.k+1):
             for i,j in itertools.product(range(1,self.n+1), range(1,self.n+1)):
                 # NOTE: define interaction between identical items to be 0 because popularity is not relevant here.
@@ -169,7 +181,7 @@ class BunchingQAP(Problem):
                     ret[x_ik_idx_linear][x_jk_idx_linear] = -self.F[i-1][j-1]
                 else:
                     pass
-        print("%d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
+        # print("%d nonzeros out of %d" % (np.count_nonzero(ret), ret.shape[0]*ret.shape[1]))
         print("done")
         return ret
 
@@ -188,7 +200,11 @@ class BunchingQAP(Problem):
                 # forall 1<=i<=n, (a)i,xik = 1 forall k, where 1<=k<=num_groups
                 A[idx.index_1_to_0(i)][idx.index_1_to_0(x_ik_index)] = 1
         b = np.ones(shape=self.n)
-        weights = np.full(shape=self.n, fill_value=self.euqality_weight)
+        
+        if self.initial_weight_estimate:
+            weights = np.full(shape=self.n, fill_value=self.initial_weight)            
+        else:
+            weights = np.full(shape=self.n, fill_value=self.euqality_weight)
         #print(A)
         return A, b, weights
     
@@ -215,7 +231,11 @@ class BunchingQAP(Problem):
 
         s = math.floor(self.n / self.k)
         b = np.full(shape=num_constraints, fill_value=s)
-        weights = np.full(shape=num_constraints, fill_value=self.inequality_weight)
+        
+        if self.initial_weight_estimate:
+            weights = np.full(shape=num_constraints, fill_value=self.initial_weight)
+        else:
+            weights = np.full(shape=num_constraints, fill_value=self.inequality_weight)
 
         return coeff, b, weights
 
@@ -251,8 +271,8 @@ class BunchingQAP(Problem):
         self.alphas = np.full(shape=(ct1_len+ct2_len),fill_value=10)
         self.alphas[0:ct1_len] = self.equality_alpha
         self.alphas[ct1_len:(ct1_len+ct2_len)] = self.inequality_alpha
-        self.canonical_A = A.copy()
-        self.canonical_b = b.copy()
+        self.canonical_A = A
+        self.canonical_b = b
         
 
         return super().A_to_Q(A, b, weights)
@@ -261,9 +281,12 @@ class BunchingQAP(Problem):
         solution_arr = np.fromiter(solution.values(),dtype=np.int8)
         new_weights = np.zeros(self.num_constraints)
         for i in range(self.num_constraints):
-            new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
-        A = self.canonical_A.copy()
-        b = self.canonical_b.copy()
+            if not self.const_weight_inc:
+                new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
+            else:
+                new_weights[i] = self.ms[i] * self.alphas[i]
+        A = self.canonical_A
+        b = self.canonical_b
         new_ct_mtx = super().A_to_Q(A,b,new_weights)
         
         #state udpate
@@ -322,6 +345,9 @@ class BunchingQAP(Problem):
         flow_matrix = self.generate_flow_matrix()
         #print("flow matrix: ")
         #print(flow_matrix)
+        
+        if self.initial_weight_estimate:
+            self.initial_weight = self.estimate_initial_weights(flow_matrix)
 
         # process constraints
         constraint_mtx = self.generate_constraint_mtx()
@@ -333,3 +359,8 @@ class BunchingQAP(Problem):
         ret['flow'] = _flow_matrix
         ret['constraints'] = constraint_mtx
         return ret
+    
+    def estimate_initial_weights(self, flow_matrix):
+        # add all entries in matrix and divide by n
+        size = flow_matrix.shape[0]
+        return abs(np.sum(flow_matrix)) / size

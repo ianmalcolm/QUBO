@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 import math
+import gc
 
 import utils.mtx as mtx
 
@@ -53,14 +54,15 @@ class Problem(abc.ABC):
             penalty_weights     a list of positive floats
         
         '''
+        gc.collect()
         size = A.shape[0]
         _root_penalty_weights = list(map(lambda x: math.sqrt(x), penalty_weights))
         num_constraints = len(penalty_weights)
-        _A = A.copy()
-        _b = b.copy()
+        _A = A
+        _b = b
         
         # populate penalty weights
-        multiplicand_mtx = np.identity(size)
+        multiplicand_mtx = np.identity(size,dtype=np.float32)
         for i in range(num_constraints):
             multiplicand_mtx[i][i] = _root_penalty_weights[i]
 

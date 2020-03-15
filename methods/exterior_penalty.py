@@ -21,7 +21,7 @@ class ExteriorPenaltyMethod:
     def get_timing(self):
         return self.timing
 
-    def run(self):
+    def run(self, test_mode=False):
         '''
         repeat:
             squashes the flow and the constraints into a single matrix.
@@ -43,9 +43,12 @@ class ExteriorPenaltyMethod:
         for i in range(self.LIMIT):
             print("External penalty iteration %d" % i)
             
-            solution = self.solver.solve(mtx, initial)
-
-            satisfied = self.problem.check(solution[0])
+            solution = self.solver.solve(mtx, initial, test_mode=test_mode)
+            if test_mode:
+                to_check = solution[0][0]
+            else:
+                to_check = solution[0]
+            satisfied = self.problem.check(to_check)
             if all(satisfied):
                 # at the end of rounds, get timing for the entire run
                 self.timing = self.solver.get_timing()
@@ -55,8 +58,12 @@ class ExteriorPenaltyMethod:
                 for i in range(len(satisfied)):
                     print("ct%d: %s" % (i,satisfied[i]))
             
+            if test_mode:
+                best_solution = solution[0][0]
+            else:
+                best_solution = solution[0]
             # generate constraint matrix with updated weights
-            ms_updated, updated_ct = self.problem.update_weights(solution[0])
+            ms_updated, updated_ct = self.problem.update_weights(best_solution)
             np.set_printoptions(threshold=np.inf)
             print("using ms: ", ms_updated)
             np.set_printoptions(threshold=6)
@@ -66,6 +73,7 @@ class ExteriorPenaltyMethod:
             
             initial = solution
         
+        self.timing = self.solver.get_timing()
         print("External penalty has failed. Result is:")
         for i in range(len(satisfied)):
             print("ct%d: %s" % (i,satisfied[i]))
