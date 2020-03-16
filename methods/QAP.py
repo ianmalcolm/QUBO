@@ -55,7 +55,7 @@ class OurHeuristic:
                 k = loc_global_idx
             
                 x_ik_local = idx.index_1_q_to_l_1(item_local_idx+1,loc_local_idx+1,bunch_size) - 1
-                print(x_ik_local)
+                #print(x_ik_local)
                 #j=i
                 #l=j
                 for i in range(self.n):
@@ -173,9 +173,9 @@ class OurHeuristic:
         bunch_size = (int)(math.ceil(self.n / self.k))
 
         solution3 = {}
-        np.set_printoptions(threshold=np.inf)
-        print(members)
-        print(locations)
+        # np.set_printoptions(threshold=np.inf)
+        # print(members)
+        # print(locations)
 
         initial_solution = self.get_feasible_solution(members, locations, solution2)
         #print(initial_solution)
@@ -242,14 +242,14 @@ class OurHeuristic:
             self.timing += fine_placement_method.get_timing()
             
             np.set_printoptions(threshold=np.inf)
-            print(bunch_i, locations_i)
+            #print(bunch_i, locations_i)
 
             for local_item in range(bunch_size):
                 for local_loc in range(s):
                     global_item = bunch_i_idx_map_inv[local_item]
                     global_loc = locations_i_idx_map_inv[local_loc]
                     if((solution3[i])[local_item][local_loc]):
-                        print(global_item, global_loc)
+                        #print(global_item, global_loc)
                     initial_solution[global_item][global_loc] = (solution3[i])[local_item][local_loc]
                     ret[global_item][global_loc] = (solution3[i])[local_item][local_loc]
         check = PlacementQAP.check_mtx(ret)
