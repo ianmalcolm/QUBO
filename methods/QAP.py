@@ -248,8 +248,8 @@ class OurHeuristic:
                 for local_loc in range(s):
                     global_item = bunch_i_idx_map_inv[local_item]
                     global_loc = locations_i_idx_map_inv[local_loc]
-                    if((solution3[i])[local_item][local_loc]):
-                        #print(global_item, global_loc)
+                    # if((solution3[i])[local_item][local_loc]):
+                    #     print(global_item, global_loc)
                     initial_solution[global_item][global_loc] = (solution3[i])[local_item][local_loc]
                     ret[global_item][global_loc] = (solution3[i])[local_item][local_loc]
         check = PlacementQAP.check_mtx(ret)
