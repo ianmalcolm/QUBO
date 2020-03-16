@@ -27,6 +27,7 @@ CONFIG_DIRNAME = 'configs'
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
         if filename.endswith('.txt'):
+            print(filename)
             order_character = filename.split('_')
             num_items = num_locs = int(order_character[1])
             num_skus = int(order_character[2])
