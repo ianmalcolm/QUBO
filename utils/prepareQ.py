@@ -18,7 +18,7 @@ def computeQ(F,D):
             submatrix = _Q[a,:]
             submatrix = submatrix.reshape(m,m)
             upper_left_x, upper_left_y = (i*m, j*m)
-            Q[upper_left_x:upper_left_x+m,upper_left_y:upper_left_y+m] += submatrix
+            Q[upper_left_x:upper_left_x+m,upper_left_y:upper_left_y+m] += submatrix.astype(np.int16)
     
     return Q
 
