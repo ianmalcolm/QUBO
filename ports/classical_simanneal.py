@@ -79,8 +79,8 @@ class ClassicalNeal(Solver):
             self.timing = 0
         self.timing += timing_iter
 
-        for datum in response.data(fields=['energy','num_occurrences']):
-            print(datum)
+        # for datum in response.data(fields=['energy','num_occurrences']):
+        #     print(datum)
         
         if not test_mode:
             return (response.first.sample, response.first.energy)
