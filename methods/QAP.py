@@ -82,7 +82,7 @@ class OurHeuristic:
 
         solver = ClassicalNeal()
 
-        bunch_method = ExteriorPenaltyMethod(bunch,solver,100)
+        bunch_method = ExteriorPenaltyMethod(bunch,solver,100000000)
         solution1 = bunch.solution_mtx((bunch_method.run())[0])
 
         self.timing += bunch_method.get_timing()
@@ -100,7 +100,7 @@ class OurHeuristic:
             const_weight_inc=True
         )
         solver_group = ClassicalNeal()
-        group_method = ExteriorPenaltyMethod(group,solver_group,100)
+        group_method = ExteriorPenaltyMethod(group,solver_group,100000000)
         # solution 1.5
         solution1_5 = group.solution_mtx((group_method.run())[0])
 
@@ -151,7 +151,7 @@ class OurHeuristic:
         aggregate_method = ExteriorPenaltyMethod(
             aggregate_placement_problem,
             dwave_solver,
-            100
+            100000000
         )
         solution2 = aggregate_placement_problem.solution_matrix(
             (aggregate_method.run())[0],
@@ -231,7 +231,7 @@ class OurHeuristic:
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,
-                1000
+                100000000
             )
             
             solution3[i] = PlacementQAP.solution_matrix(
