@@ -47,7 +47,7 @@ def main():
             else:
                 df = pd.DataFrame()
             new_results=postprocess(result_dict_list)
-            df.append(new_results, ignore_index=True)
+            df = df.append(new_results, ignore_index=True)
             df.to_csv(os.path.join(RESULT_FOLDER,result_filename))
 
 def run(order_filename, config):

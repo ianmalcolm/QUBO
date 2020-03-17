@@ -3,6 +3,7 @@ import numpy as np
 import utils.index as idx
 import utils.prepareQ as Q
 import random
+import time
 
 class PlacementQAP(Problem):
     def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False,
@@ -36,7 +37,12 @@ class PlacementQAP(Problem):
         self.linear = linear
         self.initial_weight_estimate = initial_weight_estimate
 
+        self.timing = 0
+        start = time.time()
         self.q = self.initialise_Q()
+        end = time.time()
+
+        self.timing = end-start
     @property
     def isExterior(self):
         return True

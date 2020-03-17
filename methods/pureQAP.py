@@ -1,5 +1,6 @@
 import numpy as np
 import gc
+import time
 
 from problems.placement import PlacementQAP
 from methods.exterior_penalty import ExteriorPenaltyMethod
@@ -11,12 +12,13 @@ class PureQAP:
         self.F = F
         self.D = D
 
-        self.timing = 0
+        self.timing = []
 
     def get_timing(self):
         return self.timing
 
     def run(self):
+        start = time.time()
         print("start running pure QAP.")
         size = self.F.shape[0]
         problem = PlacementQAP(
@@ -29,7 +31,7 @@ class PureQAP:
             const_weight_inc=True,
             initial_weight_estimate=True
         )
-        
+        self.timing.append(problem.timing)
         solver = ClassicalNeal()
         method = ExteriorPenaltyMethod(
             problem,
@@ -42,6 +44,7 @@ class PureQAP:
             size,
             size
         )
-        self.timing = method.get_timing()
-        
+        self.timing.append(method.get_timing())
+        end = time.time()
+        self.timing.append(end-start)
         return solution

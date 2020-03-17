@@ -1,6 +1,7 @@
 import numpy as np
 import itertools
 import math
+import time
 
 from problems.bunching import BunchingQAP
 from problems.placement import PlacementQAP
@@ -22,7 +23,7 @@ class OurHeuristic:
         self.fine_weight0 = fine_weight0
         self.fine_alpha0 = fine_alpha0
         self.const_weight_inc = const_weight_inc
-        self.timing = 0
+        self.timing = []
     
     def get_timing(self):
         return self.timing
@@ -67,6 +68,7 @@ class OurHeuristic:
         return linear
             
     def run(self):
+        start = time.time()
         #######bunching########
         bunch = BunchingQAP(
             self.n,
@@ -85,7 +87,9 @@ class OurHeuristic:
         bunch_method = ExteriorPenaltyMethod(bunch,solver,100000000)
         solution1 = bunch.solution_mtx((bunch_method.run())[0])
 
-        self.timing += bunch_method.get_timing()
+        self.timing.append(bunch.timing)
+        self.timing.append(bunch_method.get_timing())
+        
 
         #######grouping########
         group = BunchingQAP(
@@ -104,7 +108,8 @@ class OurHeuristic:
         # solution 1.5
         solution1_5 = group.solution_mtx((group_method.run())[0])
 
-        self.timing += group_method.get_timing()
+        self.timing.append(group.timing)
+        self.timing.append(group_method.get_timing())
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
@@ -180,6 +185,8 @@ class OurHeuristic:
         initial_solution = self.get_feasible_solution(members, locations, solution2)
         #print(initial_solution)
 
+        timing_construction = 0
+        timing_anneal = 0
         for i in range(self.k):
             bunch_i = np.sort(members[i])
             locations_i = np.sort(locations[bunch_to_group[i]])
@@ -233,13 +240,13 @@ class OurHeuristic:
                 solver_i,
                 100000000
             )
-            
+            timing_construction += fine_placement_problem.timing
             solution3[i] = PlacementQAP.solution_matrix(
                 (fine_placement_method.run())[0],
                 bunch_size,
                 s
             )
-            self.timing += fine_placement_method.get_timing()
+            timing_anneal += fine_placement_method.get_timing()
             
             np.set_printoptions(threshold=np.inf)
             #print(bunch_i, locations_i)
@@ -255,5 +262,11 @@ class OurHeuristic:
         check = PlacementQAP.check_mtx(ret)
         if not all(check):
             raise ValueError("unfeasible solution error")
+        
+        self.timing.append(timing_construction)
+        self.timing.append(timing_anneal)
+        end = time.time()
+        self.timing.append(end-start)
+        
         return ret
         

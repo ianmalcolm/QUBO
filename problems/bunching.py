@@ -7,6 +7,7 @@ import numpy as np
 import utils.index as idx
 import os
 import random
+import time
 
 import dwavebinarycsp
 import dimod
@@ -54,11 +55,15 @@ class BunchingQAP(Problem):
         self.canonical_b = -1
         self.count = 1
         self.initial_weight = 0
+        self.timing = 0
         #####end of state#####
 
-        # construct initial Q      
+        # construct initial Q
+        start = time.time()
         self.q = self.initialise_Q()
+        end = time.time()
 
+        self.timing = end-start
 
     @property
     def isExterior(self):
