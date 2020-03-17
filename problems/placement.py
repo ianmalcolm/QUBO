@@ -164,7 +164,6 @@ class PlacementQAP(Problem):
         '''
         if not (self.linear is None):
             ret = ret + np.diag(self.linear)
-        np.savetxt("flow.txt",ret,fmt='%d')
         return ret
 
     def initialise_constraint_matrix(self, flow_matrix):

@@ -92,9 +92,9 @@ class OrderParser:
                             _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
             print("Flow matrix: ")
             #np.set_printoptions(threshold=np.inf)
-            print(_ret)
-            np.savetxt("Flow.txt",_ret, fmt='%d')
-            np.set_printoptions(threshold=6)
+            # print(_ret)
+            # np.savetxt("Flow.txt",_ret, fmt='%d')
+            # np.set_printoptions(threshold=6)
             return _ret
     
     def gen_interaction_frequency(self, order):
