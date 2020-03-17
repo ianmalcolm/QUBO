@@ -42,7 +42,12 @@ def main():
                 result_dict_list.append(result_dict)
             
             result_filename = filename + ".csv"
-            df=postprocess(result_dict_list)
+            if os.path.exists(result_filename):
+                df = pd.read_csv(result_filename)
+            else:
+                df = pd.DataFrame()
+            new_results=postprocess(result_dict_list)
+            df.append(new_results, ignore_index=True)
             df.to_csv(os.path.join(RESULT_FOLDER,result_filename))
 
 def run(order_filename, config):
@@ -106,6 +111,8 @@ def run(order_filename, config):
     res_dict['qapres_pure'] = qapres_pure
     res_dict['res_pure']= res_pure
     res_dict['time_pure'] = t_pureQAP
+
+    return res_dict
 
 def postprocess(result_dict):
     return pd.DataFrame(result_dict)
