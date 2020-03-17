@@ -70,4 +70,13 @@ def gen_144():
     o = order_generator.generate_exact(NO)
     order_generator.save("order"+"_"+str(NO)+"_"+str(NO_SKU)+"_"+chr(start)+".txt")
 
-gen_144()
+def gen_8():
+    NO = 8
+    MAX = 3
+    NO_SKU = 3
+    start = ord('a')
+    order_generator = OrderGen(NO_SKU,MAX)
+    o = order_generator.generate_exact(NO)
+    order_generator.save("order"+"_"+str(NO)+"_"+str(NO_SKU)+"_"+chr(start)+".txt")
+
+gen_8()
