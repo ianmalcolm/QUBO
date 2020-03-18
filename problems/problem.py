@@ -63,12 +63,12 @@ class Problem(abc.ABC):
         print("done.")
 
         print("populate penalty on A")
-        for i in range(size):
+        for i in range(num_constraints):
             _A[i,:] = math.sqrt(penalty_weights[i]) * _A[i,:]
         print("done.")
 
         print('populate penalty on b')
-        for i in range(size):
+        for i in range(num_constraints):
             _b[i] = math.sqrt(penalty_weights[i]) * _b[i]
         print("done")
 
@@ -87,7 +87,7 @@ class Problem(abc.ABC):
         ret = np.zeros((size,size))
         for i in range(size):
             ret = AtA[i][i] - 2*bt_A[i]
-            
+
         del AtA
         del bt_A
         
