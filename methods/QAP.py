@@ -70,55 +70,32 @@ class OurHeuristic:
             
     def run(self):
         start = time.time()
-        #######bunching########
-        # bunch = BunchingQAP(
-        #     self.n,
-        #     self.k,
-        #     self.F,
-        #     euqality_weight=100,
-        #     equality_alpha=1.2,
-        #     inequality_weight=100,
-        #     inequality_alpha=1.2,
-        #     initial_weight_estimate=True,
-        #     const_weight_inc=True
-        # )
-
-        # solver = ClassicalNeal()
-
-        # bunch_method = ExteriorPenaltyMethod(bunch,solver,100000000)
-        # solution1 = bunch.solution_mtx((bunch_method.run())[0])
         print("setting up bunching with cplex")
         bunch = GroupingProblem(
             self.k,
-            self.F
+            self.F,
         )
         print("starting to solve bunching with cplex")
-        bunch.solve()
+        response1 = bunch.solve()
         print("done solving bunching with cplex")
-        input()
-        self.timing.append(bunch.timing)
-        self.timing.append(bunch_method.get_timing())
+        solution1 = bunch.solution_mtx(response1)
+        self.timing.append(bunch.get_timing())
         
 
         #######grouping########
-        group = BunchingQAP(
-            self.m,
+        print("setting up grouping with cplex")
+        group = GroupingProblem(
             self.k,
-            -self.D,
-            euqality_weight=1000,
-            equality_alpha=1.2,
-            inequality_weight=1000,
-            inequality_alpha=1.2,
-            initial_weight_estimate=True,
-            const_weight_inc=True
+            -self.D
         )
-        solver_group = ClassicalNeal()
-        group_method = ExteriorPenaltyMethod(group,solver_group,100000000)
-        # solution 1.5
-        solution1_5 = group.solution_mtx((group_method.run())[0])
+        print("starting to solve grouping with cplex")
+        response1_5 = group.solve()
+        print("Done grouping with cplex")
+        solution1_5 = group.solution_mtx(response1_5)
+        self.timing.append(group.get_timing())
 
-        self.timing.append(group.timing)
-        self.timing.append(group_method.get_timing())
+        print(solution1)
+        print(solution1_5)
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)

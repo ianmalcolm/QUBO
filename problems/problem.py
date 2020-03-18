@@ -84,11 +84,10 @@ class Problem(abc.ABC):
         del _A
         del _b
         #print("AtA has %d nonzeros out of %d" % (np.count_nonzero(AtA), AtA.shape[0]*AtA.shape[1]))
-        ret = np.zeros((size,size))
         for i in range(size):
-            ret = AtA[i][i] - 2*bt_A[i]
-
-        del AtA
+            AtA[i][i] = AtA[i][i] - 2*bt_A[i]
+        
         del bt_A
+        ret = AtA
         print(ret.shape)
         return mtx.to_upper_triangular(ret)
