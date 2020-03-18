@@ -90,5 +90,5 @@ class Problem(abc.ABC):
 
         del AtA
         del bt_A
-        
+        print(ret.shape)
         return mtx.to_upper_triangular(ret)

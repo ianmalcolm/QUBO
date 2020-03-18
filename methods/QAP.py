@@ -5,6 +5,7 @@ import time
 
 from problems.bunching import BunchingQAP
 from problems.placement import PlacementQAP
+from problems.grouping import GroupingProblem
 from ports.dwave import Dwave
 from ports.da.da_solver import DASolver
 from ports.classical_simanneal import ClassicalNeal
@@ -70,23 +71,31 @@ class OurHeuristic:
     def run(self):
         start = time.time()
         #######bunching########
-        bunch = BunchingQAP(
-            self.n,
+        # bunch = BunchingQAP(
+        #     self.n,
+        #     self.k,
+        #     self.F,
+        #     euqality_weight=100,
+        #     equality_alpha=1.2,
+        #     inequality_weight=100,
+        #     inequality_alpha=1.2,
+        #     initial_weight_estimate=True,
+        #     const_weight_inc=True
+        # )
+
+        # solver = ClassicalNeal()
+
+        # bunch_method = ExteriorPenaltyMethod(bunch,solver,100000000)
+        # solution1 = bunch.solution_mtx((bunch_method.run())[0])
+        print("setting up bunching with cplex")
+        bunch = GroupingProblem(
             self.k,
-            self.F,
-            euqality_weight=100,
-            equality_alpha=1.2,
-            inequality_weight=100,
-            inequality_alpha=1.2,
-            initial_weight_estimate=True,
-            const_weight_inc=True
+            self.F
         )
-
-        solver = ClassicalNeal()
-
-        bunch_method = ExteriorPenaltyMethod(bunch,solver,100000000)
-        solution1 = bunch.solution_mtx((bunch_method.run())[0])
-
+        print("starting to solve bunching with cplex")
+        bunch.solve()
+        print("done solving bunching with cplex")
+        input()
         self.timing.append(bunch.timing)
         self.timing.append(bunch_method.get_timing())
         
