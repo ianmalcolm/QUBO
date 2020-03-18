@@ -67,21 +67,21 @@ class Problem(abc.ABC):
             multiplicand_mtx[i][i] = _root_penalty_weights[i]
 
         print("populate penalty on A")
-        _A = np.matmul(multiplicand_mtx,_A)
+        _A = np.dot(multiplicand_mtx,_A)
         print("done.")
         print('populate penalty on b')
-        _b = np.matmul(multiplicand_mtx,_b)
+        _b = np.dot(multiplicand_mtx,_b)
         print("done")
 
         # xt(AtA-2D)x, where D = diagonal generalisation of btA
-        bt_A = np.matmul(_b,_A)
-        D = np.zeros((size,size))
-        for i in range(size):
-            D[i][i] = bt_A[i]
+        print("computing btA")
+        bt_A = np.dot(_b,_A)
+        print("done")
         print("compute AtA")
-        AtA = np.matmul(np.transpose(_A),_A)
+        AtA = np.dot(np.transpose(_A),_A)
         print("done")
         #print("AtA has %d nonzeros out of %d" % (np.count_nonzero(AtA), AtA.shape[0]*AtA.shape[1]))
         ret = np.zeros((size,size))
-        ret = AtA - 2*D
+        for i in range(size):
+            ret = AtA[i][i] - 2*bt_A[i]
         return mtx.to_upper_triangular(ret)
