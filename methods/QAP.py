@@ -163,8 +163,8 @@ class OurHeuristic:
             self.k,
             self.k
         )
-
-        self.timing += aggregate_method.get_timing()
+        self.timing.append(aggregate_placement_problem.timing)
+        self.timing.append(aggregate_method.get_timing())
 
         bunch_to_group = {}
         for i in range(self.k):
