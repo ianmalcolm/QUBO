@@ -39,7 +39,7 @@ class GroupingProblem:
     def solve(self):
         grouping = []
         print("\nsolving model...\n")
-        solution = self.model.solve(TimeLimit=600)
+        solution = self.model.solve(TimeLimit=60)
         print(type(solution))
         if solution:
             all_vars = solution.get_all_var_solutions()
