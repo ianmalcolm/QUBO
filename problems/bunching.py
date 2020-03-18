@@ -242,6 +242,7 @@ class BunchingQAP(Problem):
         else:
             weights = np.full(shape=num_constraints, fill_value=self.inequality_weight)
 
+        print("Done generating inequality")
         return coeff, b, weights
 
     def generate_constraint_mtx(self):
@@ -264,7 +265,7 @@ class BunchingQAP(Problem):
         weights[0:ct1_len] = ct1_weights
         
         ct2_coeff, ct2_b, ct2_weights = self.generate_matrix_ct2()
-        
+        print("Mashing constraints together")
         ct2_len = ct2_coeff.shape[0]
         A[self.n: self.n+self.k, 0:size_A] = ct2_coeff
         b[ct1_len: (ct1_len+ct2_len)] = ct2_b
@@ -279,9 +280,11 @@ class BunchingQAP(Problem):
         self.canonical_A = A
         self.canonical_b = b
         
+        print("converting contraints to qubo entries")
+        ret = super().A_to_Q(A, b, weights)
+        print("done converting constraints to qubo entries")
+        return ret
 
-        return super().A_to_Q(A, b, weights)
-    
     def update_weights(self, solution):
         solution_arr = np.fromiter(solution.values(),dtype=np.int8)
         new_weights = np.zeros(self.num_constraints)
