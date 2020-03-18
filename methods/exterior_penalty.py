@@ -30,9 +30,8 @@ class ExteriorPenaltyMethod:
             else, update penalty weight
         '''
         print("Running external penalty...")
-        initial_flow = self.problem.flow.copy()
-        cts = self.problem.cts
-        ms_read, alphas_read, initial_ct = cts
+        initial_flow = self.problem.flow
+        ms_read, alphas_read, initial_ct = self.problem.cts
         initial_mtx = initial_flow + initial_ct
 
         print("flow mtx has %d nonzeros out of %d" % (np.count_nonzero(self.problem.flow), self.problem.flow.shape[0]*self.problem.flow.shape[1]))
@@ -63,7 +62,9 @@ class ExteriorPenaltyMethod:
             else:
                 best_solution = solution[0]
             # generate constraint matrix with updated weights
-            ms_updated, updated_ct = self.problem.update_weights(best_solution)
+            self.problem.update_weights(best_solution)
+            ms_updated, alphas, updated_ct = self.problem.cts
+
             np.set_printoptions(threshold=np.inf)
             print("using ms: ", ms_updated)
             np.set_printoptions(threshold=6)

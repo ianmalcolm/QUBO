@@ -25,9 +25,9 @@ class ClassicalNeal(Solver):
         #print("solver starts the process...")
         if bool(initial):
             initial_sample = dimod.as_samples(initial[0])
-        mtx = matrix.copy()
-        print("Converting matrix to upper triangular...")
-        mtx = mt.to_upper_triangular(mtx)
+        mtx = matrix
+        # print("Converting matrix to upper triangular...")
+        # mtx = mt.to_upper_triangular(mtx)
         # np.savetxt("mtx.txt", mtx, fmt='%d')
         #np.set_printoptions(threshold=np.inf)
         #print(mtx)
@@ -75,6 +75,7 @@ class ClassicalNeal(Solver):
         timing_iter = end_time - start_time
         print("one iteration takes ", timing_iter)
 
+        del Q
         if test_mode:
             self.timing = 0
         self.timing += timing_iter

@@ -215,11 +215,11 @@ class BunchingQAP(Problem):
     
     def generate_matrix_ct2(self):
         print("generating inequality constraint")
-        coeff = np.zeros(shape=(self.k,self.n*self.k + self.num_ancillaries))
+        coeff = np.zeros(shape=(self.k,self.n*self.k + self.num_ancillaries), dtype=np.int16)
         
         num_constraints = self.k
         
-        twos = np.zeros(self.ancillary_bit_length)
+        twos = np.zeros(shape=self.ancillary_bit_length, dtype=np.int16)
         for i in range(self.ancillary_bit_length):
             twos[i] = math.pow(2,i)
 
@@ -297,7 +297,6 @@ class BunchingQAP(Problem):
         #state udpate
         self.ms = new_weights
         self.q['constraints'] = new_ct_mtx
-        return new_weights, new_ct_mtx
 
     def generate_dwavecsp(self):
         '''

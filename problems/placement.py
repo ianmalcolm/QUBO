@@ -138,12 +138,10 @@ class PlacementQAP(Problem):
                 new_weights[i] = self.ms[i] + self.alphas[i]*abs(np.dot(self.canonical_A[i,:],solution_arr) - self.canonical_b[i])
         A = self.canonical_A.copy()
         b = self.canonical_b.copy()
-        new_ct_mtx = super().A_to_Q(A,b,new_weights)
-        
+
         #state udpate
         self.ms = new_weights
-        self.q['constraints'] = new_ct_mtx
-        return new_weights, new_ct_mtx
+        self.q['constraints'] = super().A_to_Q(A,b,new_weights)
 
     # def initialise_flow_matrix(self):
     #     answer = Q.computeQ(self.F,self.D)
