@@ -4,7 +4,7 @@ import math
 import gc
 import utils.mtx as mtx
 
-A = np.random(shape=(8100,8100), dtype=np.int32)
+A = np.random.rand(8100,8100)
 b = np.ones(shape=8100,dtype=np.int32)
 penalty_weights = np.full(shape=8100, fill_value=10, dtype=np.int32)
 
