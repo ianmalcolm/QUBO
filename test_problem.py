@@ -8,33 +8,6 @@ A = np.random.rand(3600*40,3600*40)
 b = np.ones(shape=3600*40,dtype=np.int32)
 penalty_weights = np.full(shape=3600*40, fill_value=10, dtype=np.int32)
 
-def A_to_Q(self, A, b, penalty_weights):
-    '''
-    Converts the linear constraint Ax=b into quadratic coefficient matrix Q via square penalty
-    inputs:
-        A                   a numpy square matrix
-        b                   a numpy vector
-        penalty_weights     a list of positive floats
-    
-    '''
-    gc.collect()
-    size = A.shape[0]
-    num_constraints = len(penalty_weights)
-    print("copying")
-    _A = A.copy()
-    _b = b.copy()
-    print("done.")
-
-    print("populate penalty on A")
-    for i in range(num_constraints):
-        _A[i,:] = math.sqrt(penalty_weights[i]) * _A[i,:]
-    print("done.")
-
-    print('populate penalty on b')
-    for i in range(num_constraints):
-        _b[i] = math.sqrt(penalty_weights[i]) * _b[i]
-    print("done")
-
 def A_to_Q(A, b, penalty_weights):
     '''
     Converts the linear constraint Ax=b into quadratic coefficient matrix Q via square penalty
