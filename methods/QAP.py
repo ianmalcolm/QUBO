@@ -6,6 +6,7 @@ import time
 from problems.bunching import BunchingQAP
 from problems.placement import PlacementQAP
 from problems.grouping import GroupingProblem
+from problems.QMKP import QMKP
 from ports.dwave import Dwave
 from ports.da.da_solver import DASolver
 from ports.classical_simanneal import ClassicalNeal
@@ -70,32 +71,41 @@ class OurHeuristic:
             
     def run(self):
         start = time.time()
-        print("setting up bunching with cplex")
-        bunch = GroupingProblem(
-            self.k,
-            self.F,
+        print("setting up bunching with simanneal")
+        bunch = QMKP(
+            -self.F,
+            self.k
         )
-        print("starting to solve bunching with cplex")
-        response1 = bunch.solve()
-        print("done solving bunching with cplex")
-        solution1 = bunch.solution_mtx(response1)
-        self.timing.append(bunch.get_timing())
+        bunch_auto_schedule = bunch.auto(minutes=1)
+        bunch.set_schedule(bunch_auto_schedule)
+        bunch.copy_strategy = "deepcopy"
+        print("starting to solve bunching with simanneal")
+        state1, energy1 = bunch.anneal()
+        bunch_end = time.time()
+        print(state1)
+        print("done bunching with simanneal. energy: %d" % energy1)
+        solution1 = QMKP.solution_matrix(state1, self.n, self.k)
+        print(solution1)
+        self.timing.append(bunch_end - start)
         
 
         #######grouping########
-        print("setting up grouping with cplex")
-        group = GroupingProblem(
-            self.k,
-            -self.D
+        print("setting up grouping with simanneal")
+        group_start = time.time()
+        group = QMKP(
+            self.D,
+            self.k
         )
-        print("starting to solve grouping with cplex")
-        response1_5 = group.solve()
-        print("Done grouping with cplex")
-        solution1_5 = group.solution_mtx(response1_5)
-        self.timing.append(group.get_timing())
-
-        print(solution1)
+        group_auto_schedule = group.auto(minutes=1)
+        group.set_schedule(group_auto_schedule)
+        group.copy_strategy = "deepcopy"
+        print("starting to solve grouping with simanneal")
+        state1_5, energy1_5 = group.anneal()
+        group_end = time.time()
+        print("Done grouping with simanneal. Energy: %d" % energy1_5)
+        solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
         print(solution1_5)
+        self.timing.append(group_end - group_start)
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)

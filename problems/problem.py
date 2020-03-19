@@ -74,7 +74,7 @@ class Problem(abc.ABC):
 
         # xt(AtA-2D)x, where D = diagonal generalisation of btA
         print("computing btA")
-        bt_A = np.dot(_b,_A)
+        bt_A = np.matmul(_b,_A)
         print("done")
 
         print("compute AtA")
