@@ -4,9 +4,9 @@ import math
 import gc
 import utils.mtx as mtx
 
-A = np.random.rand(8100,8100)
-b = np.ones(shape=8100,dtype=np.int32)
-penalty_weights = np.full(shape=8100, fill_value=10, dtype=np.int32)
+A = np.random.rand(3600*40,3600*40)
+b = np.ones(shape=3600*40,dtype=np.int32)
+penalty_weights = np.full(shape=3600*40, fill_value=10, dtype=np.int32)
 
 def A_to_Q(self, A, b, penalty_weights):
     '''
