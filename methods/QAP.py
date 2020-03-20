@@ -43,30 +43,38 @@ class OurHeuristic:
                         ret[m][l] = 1
         return ret
 
-    def specialise_bunch(self, initial_solution,
-                bunch_i_idx_map,
-                locations_i_idx_map,
-            ):
+    def specialise_bunch(
+        self, 
+        initial_solution,
+        bunch_i_idx_map,
+        locations_i_idx_map,
+    ):
         bunch_size = len(bunch_i_idx_map.keys())
         linear = np.zeros(bunch_size*bunch_size)
 
-        members = bunch_i_idx_map.keys()
-        locations = locations_i_idx_map.keys()
+        # collect a list of item index pairs in the bunch, arranged in
+        # order of linear's corresponding local indices,
+        variable_list = np.empty(shape=bunch_size*bunch_size,dtype=object)
+        # print(bunch_i_idx_map.values())
+        # print(locations_i_idx_map.values())
+        # input()
         for item_global_idx, item_local_idx in bunch_i_idx_map.items():
-            #i=item_global_idx
             for loc_global_idx, loc_local_idx in locations_i_idx_map.items():
-                k = loc_global_idx
-            
-                x_ik_local = idx.index_1_q_to_l_1(item_local_idx+1,loc_local_idx+1,bunch_size) - 1
-                #print(x_ik_local)
-                #j=i
-                #l=j
-                for i in range(self.n):
-                    for j in range(self.m):
-                        if i in members or j in locations:
-                            continue
-                        if initial_solution[i][j]:
-                            linear[x_ik_local] += self.F[item_global_idx][i] *self.D[k][j]
+                # note that local indices run from 0 to bunch_size-1
+                local_variable_index = idx.index_1_q_to_l_1(item_local_idx+1,loc_local_idx+1,bunch_size) - 1
+                variable_list[local_variable_index]= (item_global_idx, loc_global_idx)
+        
+        # extract the columns of F and D in variable_list order
+        columns_F, columns_D = zip(*variable_list)
+        F1 = self.F[:, columns_F]
+        D1 = self.D[:, columns_D]
+
+        linear = np.zeros(shape=bunch_size*bunch_size,dtype=np.float32)
+        for n0 in range(self.n):
+            for m0 in range(self.m):
+                if initial_solution[n0][m0]:
+                    linear += F1[n0, :] * D1[m0, :]
+
         return linear
             
     def run(self):

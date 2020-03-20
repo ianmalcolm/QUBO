@@ -4,6 +4,7 @@ import utils.index as idx
 import utils.prepareQ as Q
 import random
 import time
+import utils.mtx as mtx
 
 class PlacementQAP(Problem):
     def __init__(self, num_locs, num_items, F, D, gamma=1, weight0=10, alpha0=60, const_weight_inc=False,
@@ -148,30 +149,42 @@ class PlacementQAP(Problem):
     #     if not (self.linear is None):
     #         answer = answer + np.diag(self.linear)
     #     return answer
+    
+    # def initialise_flow_matrix(self):
+    #     print("initialising flow matrix")
+    #     ret = np.zeros((self.m*self.n, self.m*self.n),dtype=np.float32)
+    #     for i in range(1,self.n+1):
+    #         for j in range(1,self.n+1):
+    #             for k in range(1,self.m+1):
+    #                 for l in range(1,self.m+1):
+    #                     # X is n by m
+    #                     x_ik = idx.index_1_q_to_l_1(i,k,self.m)
+    #                     x_jl = idx.index_1_q_to_l_1(j,l,self.m)
+    #                     if x_ik == x_jl:
+    #                         ret[x_ik-1][x_jl-1] = self.gamma * self.F[i-1][j-1] * self.D[k-1][k-1]
+    #                     elif x_ik < x_jl:
+    #                         ret[x_ik-1][x_jl-1] = self.F[i-1][j-1] * self.D[k-1][l-1]
+    #     '''
+    #     np.set_printoptions(threshold=np.inf)
+    #     print("flow matrix: ", ret)
+    #     np.set_printoptions(threshold=6)
+    #     '''
+    #     np.savetxt("flow.txt",ret,fmt='%.3f')
+    #     if not (self.linear is None):
+    #         ret = ret + np.diag(self.linear)
+    #     print("done")
+    #     return ret
     def initialise_flow_matrix(self):
-        ret = np.zeros((self.m*self.n, self.m*self.n),dtype=np.float32)
-        for i in range(1,self.n+1):
-            for j in range(1,self.n+1):
-                for k in range(1,self.m+1):
-                    for l in range(1,self.m+1):
-                        # X is n by m
-                        x_ik = idx.index_1_q_to_l_1(i,k,self.m)
-                        x_jl = idx.index_1_q_to_l_1(j,l,self.m)
-                        if x_ik == x_jl:
-                            ret[x_ik-1][x_jl-1] = self.gamma * self.F[i-1][j-1] * self.D[k-1][k-1]
-                        elif x_ik < x_jl:
-                            ret[x_ik-1][x_jl-1] = self.F[i-1][j-1] * self.D[k-1][l-1]
-        '''
-        np.set_printoptions(threshold=np.inf)
-        print("flow matrix: ", ret)
-        np.set_printoptions(threshold=6)
-        '''
-        np.savetxt("flow.txt",ret,fmt='%.3f')
-        if not (self.linear is None):
-            ret = ret + np.diag(self.linear)
+        print("initialising flow matrix")
+        F_upper = mtx.to_upper_triangular(self.F)
+        D_upper = mtx.to_upper_triangular(self.D)
+        ret = np.einsum("ij,kl->ikjl", F_upper, D_upper).astype(np.float32)
+        ret = ret.reshape((self.n*self.m,self.n*self.m))
+        print("done")
         return ret
 
     def initialise_constraint_matrix(self, flow_matrix):
+        print("constructing constraint matrix")
         # prepare A
         A = np.zeros((self.m*self.n,self.m*self.n),dtype=np.float32)
         for i in range(1,self.n+1):
@@ -213,6 +226,7 @@ class PlacementQAP(Problem):
 
         ret = super().A_to_Q(A,b,weights)
         # np.savetxt("constraint.txt",ret,fmt='%d')
+        print("done")
         return ret
 
     def initialise_Q(self):
