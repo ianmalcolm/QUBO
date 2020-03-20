@@ -142,11 +142,14 @@ class OurHeuristic:
                     distance += self.D[loc1][loc2]
                 bigD[j1][j2] = distance
 
+        print("=====================computing aggregate placement======================")
         aggregate_placement_problem = PlacementQAP(
             self.k,
             self.k,
             bigF,
-            bigD
+            bigD,
+            initial_weight_estimate=True,
+            const_weight_inc=True
         )
         dwave_solver = ClassicalNeal()
         aggregate_method = ExteriorPenaltyMethod(
