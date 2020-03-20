@@ -262,26 +262,26 @@ class Annealer(object):
                 # print(self.state[0])
                 dE = self.move()
                 # print(self.state[0])
-                E1 = self.energy()
-                dE1 = E1 - prevEnergy
-                print(dE,dE1, E1, prevEnergy)
+                # E1 = self.energy()
+                # dE1 = E1 - prevEnergy
+                # print(dE,dE1, E1, prevEnergy)
                 if dE is None:
                     E = self.energy()
                     dE = E - prevEnergy
                 else:
                     E = prevEnergy + dE
                 if dE > 0.0 and math.exp(-dE / T) < random.random():
-                    print("not accepted")
+                    # print("not accepted")
                     self.state = self.copy_state(prevState)
                     E = prevEnergy
                 else:
-                    print("accepted")
+                    # print("accepted")
                     accepts += 1
                     if dE < 0.0:
                         improves += 1
                     prevState = self.copy_state(self.state)
                     prevEnergy = E
-                input()
+                # input()
                 
             return E, float(accepts) / steps, float(improves) / steps
 
