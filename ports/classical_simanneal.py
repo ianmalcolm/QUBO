@@ -28,7 +28,7 @@ class ClassicalNeal(Solver):
         mtx = matrix
         # print("Converting matrix to upper triangular...")
         mtx = mt.to_upper_triangular(mtx)
-        np.savetxt("mtx.txt", mtx, fmt='%d')
+        np.savetxt("mtx.txt", mtx, fmt='%.3f')
         #np.set_printoptions(threshold=np.inf)
         #print(mtx)
         #np.set_printoptions(threshold=6)

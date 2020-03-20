@@ -149,7 +149,7 @@ class PlacementQAP(Problem):
     #         answer = answer + np.diag(self.linear)
     #     return answer
     def initialise_flow_matrix(self):
-        ret = np.zeros((self.m*self.n, self.m*self.n),dtype=np.int32)
+        ret = np.zeros((self.m*self.n, self.m*self.n),dtype=np.float32)
         for i in range(1,self.n+1):
             for j in range(1,self.n+1):
                 for k in range(1,self.m+1):
@@ -166,13 +166,14 @@ class PlacementQAP(Problem):
         print("flow matrix: ", ret)
         np.set_printoptions(threshold=6)
         '''
+        np.savetxt("flow.txt",ret,fmt='%.3f')
         if not (self.linear is None):
             ret = ret + np.diag(self.linear)
         return ret
 
     def initialise_constraint_matrix(self, flow_matrix):
         # prepare A
-        A = np.zeros((self.m*self.n,self.m*self.n),dtype=np.int32)
+        A = np.zeros((self.m*self.n,self.m*self.n),dtype=np.float32)
         for i in range(1,self.n+1):
             #ct1: each item in exactly one location
             #       forall i from 1 to n, sum(xik) = 1
@@ -229,4 +230,4 @@ class PlacementQAP(Problem):
     def estimate_initial_weight(self, flow_matrix):
         # add all entries in matrix and divide by n
         size = flow_matrix.shape[0]
-        return np.sum(flow_matrix) / size
+        return abs(np.sum(flow_matrix) / size)

@@ -54,6 +54,7 @@ class Problem(abc.ABC):
             penalty_weights     a list of positive floats
         
         '''
+        print(penalty_weights)
         gc.collect()
         size = A.shape[0]
         _root_penalty_weights = list(map(lambda x: math.sqrt(x), penalty_weights))
