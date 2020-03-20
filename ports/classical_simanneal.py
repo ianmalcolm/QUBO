@@ -27,8 +27,8 @@ class ClassicalNeal(Solver):
             initial_sample = dimod.as_samples(initial[0])
         mtx = matrix
         # print("Converting matrix to upper triangular...")
-        # mtx = mt.to_upper_triangular(mtx)
-        # np.savetxt("mtx.txt", mtx, fmt='%d')
+        mtx = mt.to_upper_triangular(mtx)
+        np.savetxt("mtx.txt", mtx, fmt='%d')
         #np.set_printoptions(threshold=np.inf)
         #print(mtx)
         #np.set_printoptions(threshold=6)
