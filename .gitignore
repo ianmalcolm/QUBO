@@ -1,8 +1,8 @@
 Flow.txt
 flow.txt
-__pychache__/
-**/__pychache__/
-utils/__pychache__/
-sim/__pychache__/
-methods/__pychache__/
-problems/__pychache__/
+__pychache__/*
+**/__pychache__/*
+utils/__pychache__/*
+sim/__pychache__/*
+methods/__pychache__/*
+problems/__pychache__/*

@@ -212,14 +212,16 @@ class OurHeuristic:
             for j1,j2 in itertools.product(locations_i,locations_i):
                 DPrime[locations_i_idx_map[j1]][locations_i_idx_map[j2]] = self.D[j1][j2]
 
+            print("+++++specialising %d bunch +++++++" % i)
             linear=self.specialise_bunch(
                 initial_solution,
                 bunch_i_idx_map,
                 locations_i_idx_map
             )
-
+            print("done")
             print(linear)
-
+            
+            print("+++++constructing %d bunch QAP +++++++" % i)
             fine_placement_problem = PlacementQAP(
                 bunch_size,
                 s,
@@ -229,6 +231,7 @@ class OurHeuristic:
                 const_weight_inc=True,
                 linear=linear
             )
+            print("done")
             if self.use_dwave_da_sw == 'dwave':
                 solver_i = Dwave()
             elif self.use_dwave_da_sw == 'sw':
@@ -240,12 +243,15 @@ class OurHeuristic:
                 solver_i,
                 100000000
             )
+            print("done")
+            print("+++++running %d bunch QAP +++++++" % i)
             timing_construction += fine_placement_problem.timing
             solution3[i] = PlacementQAP.solution_matrix(
                 (fine_placement_method.run())[0],
                 bunch_size,
                 s
             )
+            print("done")
             timing_anneal += fine_placement_method.get_timing()
             
             np.set_printoptions(threshold=np.inf)
