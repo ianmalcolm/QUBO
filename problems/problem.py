@@ -56,38 +56,26 @@ class Problem(abc.ABC):
         '''
         gc.collect()
         size = A.shape[0]
+        _root_penalty_weights = list(map(lambda x: math.sqrt(x), penalty_weights))
         num_constraints = len(penalty_weights)
-        print("copying")
-        _A = A.copy()
-        _b = b.copy()
-        print("done.")
-
-        print("populate penalty on A")
+        _A = A
+        _b = b
+        
+        # populate penalty weights
+        multiplicand_mtx = np.identity(size,dtype=np.float32)
         for i in range(num_constraints):
-            _A[i,:] = math.sqrt(penalty_weights[i]) * _A[i,:]
-        print("done.")
+            multiplicand_mtx[i][i] = _root_penalty_weights[i]
 
-        print('populate penalty on b')
-        for i in range(num_constraints):
-            _b[i] = math.sqrt(penalty_weights[i]) * _b[i]
-        print("done")
+        _A = np.matmul(multiplicand_mtx,_A)
+        _b = np.matmul(multiplicand_mtx,_b)
 
         # xt(AtA-2D)x, where D = diagonal generalisation of btA
-        print("computing btA")
         bt_A = np.matmul(_b,_A)
-        print("done")
-
-        print("compute AtA")
-        AtA = np.dot(np.transpose(_A),_A)
-        print("done")
-
-        del _A
-        del _b
-        #print("AtA has %d nonzeros out of %d" % (np.count_nonzero(AtA), AtA.shape[0]*AtA.shape[1]))
+        D = np.zeros((size,size))
         for i in range(size):
-            AtA[i][i] = AtA[i][i] - 2*bt_A[i]
-        
-        del bt_A
-        ret = AtA
-        print(ret.shape)
+            D[i][i] = bt_A[i]
+        AtA = np.matmul(np.transpose(_A),_A)
+        print("AtA has %d nonzeros out of %d" % (np.count_nonzero(AtA), AtA.shape[0]*AtA.shape[1]))
+        ret = np.zeros((size,size))
+        ret = AtA - 2*D
         return mtx.to_upper_triangular(ret)
