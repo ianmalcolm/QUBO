@@ -142,7 +142,7 @@ class OurHeuristic:
                     distance += self.D[loc1][loc2]
                 bigD[j1][j2] = distance
 
-        print("=====================computing aggregate placement======================")
+        print("=====================computing aggregate placement=========================")
         aggregate_placement_problem = PlacementQAP(
             self.k,
             self.k,
@@ -171,7 +171,8 @@ class OurHeuristic:
                 if solution2[i][j]:
                     bunch_to_group[i] = j
 
-        #######placement within bunches########
+        #######placement within bunches###########
+        print("=======================computing fine placement============================")
         ret = np.zeros((self.n, self.m))
         s = (int)(math.floor(self.m / self.k))
         bunch_size = (int)(math.ceil(self.n / self.k))
