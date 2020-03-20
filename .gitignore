@@ -1,6 +1,4 @@
 Flow.txt
 flow.txt
 __pychache__/
-**/__pychache__/
-utils/__pycache__/
-sim/__pycache__/
+*/__pychache__/
