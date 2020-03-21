@@ -180,6 +180,8 @@ class PlacementQAP(Problem):
         D_upper = mtx.to_upper_triangular(self.D)
         ret = np.einsum("ij,kl->ikjl", F_upper, D_upper).astype(np.float32)
         ret = ret.reshape((self.n*self.m,self.n*self.m))
+        if not (self.linear is None):
+            ret = ret + np.diag(self.linear)
         np.savetxt("flow.txt",ret,fmt='%.3f')
         print("done")
         return ret
