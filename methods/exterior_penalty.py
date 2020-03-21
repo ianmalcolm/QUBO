@@ -1,5 +1,5 @@
 import numpy as np
-import datetime
+from datetime import datetime
 
 class ExteriorPenaltyMethod:
     def __init__(self, problem, solver, LIMIT):
