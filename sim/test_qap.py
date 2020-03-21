@@ -23,7 +23,7 @@ class QAPEvaluator:
                 if solution_mtx[i][j]:
                     indices.append((i,j))
         
-        for (i,k),(j,l) in itertools.product(indices):
+        for (i,k),(j,l) in itertools.product(indices, indices):
             energy += self.F[i][j]*self.D[k][l]
         
         return energy
