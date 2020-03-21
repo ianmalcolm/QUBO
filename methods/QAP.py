@@ -235,10 +235,10 @@ class OurHeuristic:
                 s,
                 FPrime,
                 DPrime,
-                initial_weight_estimate=False,
+                initial_weight_estimate=True,
                 const_weight_inc=True,
-                weight0=10000,
-                alpha0=2,
+                # weight0=10000,
+                # alpha0=2,
                 linear=linear
             )
             print("done")
