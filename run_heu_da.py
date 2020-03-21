@@ -36,19 +36,19 @@ def main():
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
 
+            result_dict_list = []
             for i in range(5):
-                result_dict_list = []
                 result_dict = run(filename, warehouse_config)
                 result_dict_list.append(result_dict)
             
-                result_filename = filename + ".csv"
-                if os.path.exists(result_filename):
-                    df = pd.read_csv(result_filename)
-                else:
-                    df = pd.DataFrame()
-                new_results=postprocess(result_dict_list)
-                df = df.append(new_results, ignore_index=True)
-                df.to_csv(os.path.join(RESULT_FOLDER,result_filename))
+            result_filename = filename + ".csv"
+            if os.path.exists(result_filename):
+                df = pd.read_csv(result_filename)
+            else:
+                df = pd.DataFrame()
+            new_results=postprocess(result_dict_list)
+            df = df.append(new_results, ignore_index=True)
+            df.to_csv(os.path.join(RESULT_FOLDER,result_filename))
 
 def run(order_filename, config):
     order_path = os.path.join(ORDER_DIRNAME, order_filename)
@@ -109,7 +109,7 @@ def run(order_filename, config):
         fine_weight0=40000,
         fine_alpha0=0,
         const_weight_inc=True,
-        use_dwave_da_sw='da'
+        use_dwave_da_sw=='da'
     )
     sol_heuristic_da = heuristic_da.run()
     t_heuristic_da = heuristic_da.get_timing()
