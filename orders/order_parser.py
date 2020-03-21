@@ -50,7 +50,7 @@ class OrderParser:
                     else F(num_SKUs by num_SKUs).
                     Everything 0 based.
         '''
-        
+        print("generating F")
         old_F = np.zeros((self.num_SKUs+1, self.num_SKUs+1),dtype=np.int32)
         orders = self.order_str.splitlines()
         for order in orders:
@@ -95,6 +95,7 @@ class OrderParser:
             # print(_ret)
             # np.savetxt("Flow.txt",_ret, fmt='%d')
             # np.set_printoptions(threshold=6)
+            print("done")
             return _ret
     
     def gen_interaction_frequency(self, order):

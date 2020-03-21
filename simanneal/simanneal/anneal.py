@@ -189,11 +189,11 @@ class Annealer(object):
         # Note initial state
         T = self.Tmax
         E = self.energy()
-        print("initial energy: %d" % E)
+        # print("initial energy: %d" % E)
         prevState = self.copy_state(self.state)
         prevEnergy = E
         self.best_state = self.copy_state(self.state)
-        print("initial state: ", self.best_state)
+        # print("initial state: ", self.best_state)
         self.best_energy = E
         trials, accepts, improves = 0, 0, 0
         # if self.updates > 0:
@@ -241,7 +241,7 @@ class Annealer(object):
             self.save_state()
 
         # Return best state and energy
-        print(self.best_state, self.best_energy)
+        # print(self.best_state, self.best_energy)
         return self.best_state, self.best_energy
 
     def auto(self, minutes, steps=100, num_iter=10):

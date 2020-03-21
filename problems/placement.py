@@ -180,6 +180,7 @@ class PlacementQAP(Problem):
         D_upper = mtx.to_upper_triangular(self.D)
         ret = np.einsum("ij,kl->ikjl", F_upper, D_upper).astype(np.float32)
         ret = ret.reshape((self.n*self.m,self.n*self.m))
+        np.savetxt("flow.txt",ret,fmt='%.3f')
         print("done")
         return ret
 
@@ -225,7 +226,7 @@ class PlacementQAP(Problem):
         self.alphas = alphas
 
         ret = super().A_to_Q(A,b,weights)
-        # np.savetxt("constraint.txt",ret,fmt='%d')
+        np.savetxt("constraint.txt",ret,fmt='%.3f')
         print("done")
         return ret
 
@@ -244,4 +245,4 @@ class PlacementQAP(Problem):
     def estimate_initial_weight(self, flow_matrix):
         # add all entries in matrix and divide by n
         size = flow_matrix.shape[0]
-        return abs(np.sum(flow_matrix) / size)
+        return abs(np.amax(flow_matrix))

@@ -26,7 +26,7 @@ class DistanceGenerator:
                 #(x,y)
                 index = find_D_index(x,y,self.num_rows)
                 dist = math.pow(x,2) + math.pow(y,2)
-                print(x,y,index,dist)
+                # print(x,y,index,dist)
                 self.D_euclidean[index][index] = dist
                 for y_prime in range(self.num_rows):
                     for x_prime in range(self.num_cols):
@@ -69,7 +69,7 @@ class DistanceGenerator:
             returns:
                 A symmetric D
         '''
-        
+        print("generating S shape distance matrix")
         distance_from_depot = 0
         goingUp = True
 
@@ -114,7 +114,7 @@ class DistanceGenerator:
             goingUp = not goingUp
         
         for k in range(len(list_even)):
-            print(k, list_even[k], list_distances[k])
+            # print(k, list_even[k], list_distances[k])
             self.D[list_even[k]][list_even[k]] = list_distances[k]
             if list_odd[k] != -1:
                 self.D[list_odd[k]][list_odd[k]] = list_distances[k]
@@ -129,4 +129,6 @@ class DistanceGenerator:
         self.D = self.D + np.transpose(self.D)
         for i in range(self.D.shape[0]):
             self.D[i][i] = self.D[i][i] / 2
+        
+        print("done")
         return self.D
