@@ -247,4 +247,4 @@ class PlacementQAP(Problem):
     def estimate_initial_weight(self, flow_matrix):
         # abs max divided by 2
         # size = flow_matrix.shape[0]
-        return abs(np.amax(flow_matrix)) / 2
+        return abs(np.amax(flow_matrix)) / 4
