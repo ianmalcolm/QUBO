@@ -1,4 +1,5 @@
 import numpy as np
+import datetime
 
 class ExteriorPenaltyMethod:
     def __init__(self, problem, solver, LIMIT):
@@ -20,6 +21,12 @@ class ExteriorPenaltyMethod:
 
     def get_timing(self):
         return self.timing
+
+    @staticmethod
+    def random_filename():
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        return "weight_"+current_time+".txt"
 
     def run(self, test_mode=False):
         '''
@@ -51,7 +58,8 @@ class ExteriorPenaltyMethod:
             if all(satisfied):
                 # at the end of rounds, get timing for the entire run
                 self.timing = self.solver.get_timing()
-                print("External penalty has solution. Returning...")
+                print("External penalty has solution. Saving canonical weights...")
+                np.savetxt(ExteriorPenaltyMethod.random_filename(), ms.read, fmt='%.3f')
                 return solution
             else:
                 for i in range(len(satisfied)):
@@ -63,10 +71,10 @@ class ExteriorPenaltyMethod:
                 best_solution = solution[0]
             # generate constraint matrix with updated weights
             self.problem.update_weights(best_solution)
-            ms_updated, alphas, updated_ct = self.problem.cts
+            ms_read, alphas, updated_ct = self.problem.cts
 
             np.set_printoptions(threshold=np.inf)
-            print("using ms: ", ms_updated)
+            print("using ms: ", ms_read)
             np.set_printoptions(threshold=6)
 
             updated_mtx = initial_flow + updated_ct
