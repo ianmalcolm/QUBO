@@ -59,7 +59,7 @@ class ExteriorPenaltyMethod:
                 # at the end of rounds, get timing for the entire run
                 self.timing = self.solver.get_timing()
                 print("External penalty has solution. Saving canonical weights...")
-                np.savetxt(ExteriorPenaltyMethod.random_filename(), ms.read, fmt='%.3f')
+                np.savetxt(ExteriorPenaltyMethod.random_filename(), ms_read, fmt='%.3f')
                 return solution
             else:
                 for i in range(len(satisfied)):
