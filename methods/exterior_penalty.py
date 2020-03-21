@@ -26,7 +26,7 @@ class ExteriorPenaltyMethod:
     def random_filename():
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        return "weight_"+current_time+".txt"
+        return "weights/weight_"+current_time+".txt"
 
     def run(self, test_mode=False):
         '''
