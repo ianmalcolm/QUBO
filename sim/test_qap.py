@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 class QAPEvaluator:
     def __init__(self, n, m, F, D):
@@ -16,9 +17,13 @@ class QAPEvaluator:
             solution_mtx: n by m
         '''
         energy = 0
+        indices = []
         for i in range(self.n):
-            for j in range(self.n):
-                for k in range(self.m):
-                    for l in range(self.m):
-                        energy += self.F[i][j] * self.D[k][l] * solution_mtx[i][k] * solution_mtx[j][l]
+            for j in range(self.m):
+                if solution_mtx[i][j]:
+                    indices.append((i,j))
+        
+        for (i,k),(j,l) in itertools.product(indices):
+            energy += self.F[i][j]*self.D[k][l]
+        
         return energy
