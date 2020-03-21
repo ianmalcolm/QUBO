@@ -109,7 +109,7 @@ def run(order_filename, config):
         fine_weight0=40000,
         fine_alpha0=0,
         const_weight_inc=True,
-        use_dwave_da_sw=='da'
+        use_dwave_da_sw='da'
     )
     sol_heuristic_da = heuristic_da.run()
     t_heuristic_da = heuristic_da.get_timing()
