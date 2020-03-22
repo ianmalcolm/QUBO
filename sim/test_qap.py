@@ -16,6 +16,7 @@ class QAPEvaluator:
         '''
             solution_mtx: n by m
         '''
+        print("start QAP test")
         energy = 0
         indices = []
         for i in range(self.n):
@@ -25,5 +26,5 @@ class QAPEvaluator:
         
         for (i,k),(j,l) in itertools.product(indices, indices):
             energy += self.F[i][j]*self.D[k][l]
-        
+        print("done")
         return energy

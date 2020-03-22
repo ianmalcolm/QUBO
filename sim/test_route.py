@@ -38,8 +38,8 @@ class RouteEvaluator:
                         stol[self.item_to_sku(i)] = [k]
                     else:
                         stol[self.item_to_sku(i)].append(k)
-        print(ltoi)
-        print(stol)
+        # print(ltoi)
+        # print(stol)
         return ltoi, stol
 
     def make_c(self):
@@ -52,6 +52,7 @@ class RouteEvaluator:
         return c
 
     def run(self, solution_mtx):
+        print("start routing test")
         distance = 0
         
         ltoc = self.make_c()
@@ -87,4 +88,5 @@ class RouteEvaluator:
                 distance += self.num_rows * self.dist_ver
             distance += curr_c * self.dist_hor
 
+        print("done")
         return distance
