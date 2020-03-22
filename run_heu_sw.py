@@ -43,7 +43,7 @@ def main():
             
             result_filename = filename + ".csv"
             if os.path.exists(os.path.join(RESULT_FOLDER, result_filename)):
-                df = pd.read_csv(result_filename)
+                df = pd.read_csv(os.path.join(RESULT_FOLDER, result_filename))
             else:
                 df = pd.DataFrame()
             new_results=postprocess(result_dict_list)
