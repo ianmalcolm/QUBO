@@ -73,12 +73,12 @@ class RouteEvaluator:
                 ltoi[loc] = -1
                 stol[i-1].remove(loc)
             locs = np.sort(locs)
-            print(locs)
+            # print(locs)
             cols = set()
             for l in locs:
                 cols.add(ltoc[l])
             cols = np.sort(list(cols))
-            print(cols)
+            # print(cols)
             curr_c = 0
             for c in cols:
                 distance += self.dist_hor * (c-curr_c)
