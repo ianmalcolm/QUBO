@@ -37,7 +37,7 @@ def main():
                 warehouse_config = json.load(f)
 
             result_dict_list = []
-            for i in range(5):
+            for i in range(1):
                 result_dict = run(filename, warehouse_config)
                 result_dict_list.append(result_dict)
             
