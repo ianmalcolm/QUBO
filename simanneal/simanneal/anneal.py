@@ -244,7 +244,7 @@ class Annealer(object):
         # print(self.best_state, self.best_energy)
         return self.best_state, self.best_energy
 
-    def auto(self, minutes, steps=10000, num_iter=1000):
+    def auto(self, minutes, steps=1000, num_iter=100):
         """Explores the annealing landscape and
         estimates optimal temperature settings.
 
