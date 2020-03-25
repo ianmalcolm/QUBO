@@ -335,4 +335,4 @@ class Annealer(object):
 
         # Don't perform anneal, just return params
         # NOTE:duration has been disabled
-        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*100, 'updates': self.updates, 'num_iter': num_iter*10}
+        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*1000, 'updates': self.updates, 'num_iter': num_iter*100}
