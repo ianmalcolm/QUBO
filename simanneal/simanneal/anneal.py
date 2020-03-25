@@ -244,7 +244,7 @@ class Annealer(object):
         # print(self.best_state, self.best_energy)
         return self.best_state, self.best_energy
 
-    def auto(self, minutes, steps=100, num_iter=100):
+    def auto(self, minutes, steps=10000, num_iter=100):
         """Explores the annealing landscape and
         estimates optimal temperature settings.
 
@@ -322,7 +322,7 @@ class Annealer(object):
         Tmax = T
          
         # Search for Tmin - a temperature that gives 0% improvement
-        while improvement > 0.03:
+        while improvement > 0.01:
             T = round_figures(T / 1.5, 2)
             E, acceptance, improvement = run(T, steps)
             step += steps
@@ -335,4 +335,4 @@ class Annealer(object):
 
         # Don't perform anneal, just return params
         # NOTE:duration has been disabled
-        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*1000, 'updates': self.updates, 'num_iter': num_iter*10}
+        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps, 'updates': self.updates, 'num_iter': num_iter}
