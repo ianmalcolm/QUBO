@@ -316,7 +316,8 @@ class Annealer(object):
             step += steps
             self.update(step, T, E, acceptance, improvement)
         Tmax = T
-
+        Tmin = 0.0000001
+        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*10, 'updates': self.updates, 'num_iter': num_iter*10}
         # Search for Tmin - a temperature that gives 0% improvement
         while improvement > 0.05:
             T = round_figures(T / 1.5, 2)
