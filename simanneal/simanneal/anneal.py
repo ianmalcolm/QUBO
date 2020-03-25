@@ -318,7 +318,7 @@ class Annealer(object):
         Tmax = T
 
         # Search for Tmin - a temperature that gives 0% improvement
-        while improvement > 0.01:
+        while improvement > 0.04:
             T = round_figures(T / 1.5, 2)
             E, acceptance, improvement = run(T, steps)
             step += steps
