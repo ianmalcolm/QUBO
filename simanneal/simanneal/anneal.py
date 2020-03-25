@@ -244,7 +244,7 @@ class Annealer(object):
         # print(self.best_state, self.best_energy)
         return self.best_state, self.best_energy
 
-    def auto(self, minutes, steps=1000, num_iter=100):
+    def auto(self, minutes, steps=100, num_iter=100):
         """Explores the annealing landscape and
         estimates optimal temperature settings.
 
@@ -305,31 +305,36 @@ class Annealer(object):
         E, acceptance, improvement = run(T, steps)
 
         step += steps
+        print("cooling down")
         while acceptance > 0.98:
             T = round_figures(T / 1.5, 2)
             E, acceptance, improvement = run(T, steps)
             step += steps
             self.update(step, T, E, acceptance, improvement)
+        print("done")
+        print("heating up")
         while acceptance < 0.98:
             T = round_figures(T * 1.5, 2)
             E, acceptance, improvement = run(T, steps)
             step += steps
             self.update(step, T, E, acceptance, improvement)
+        print("done")
         Tmax = T
         Tmin = 0.0000001
-        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*10, 'updates': self.updates, 'num_iter': num_iter*10}
-        # Search for Tmin - a temperature that gives 0% improvement
-        while improvement > 0.05:
-            T = round_figures(T / 1.5, 2)
-            E, acceptance, improvement = run(T, steps)
-            step += steps
-            self.update(step, T, E, acceptance, improvement)
-        Tmin = T
+        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*100, 'updates': self.updates, 'num_iter': num_iter*10}
+        
+        # # Search for Tmin - a temperature that gives 0% improvement
+        # while improvement > 0.05:
+        #     T = round_figures(T / 1.5, 2)
+        #     E, acceptance, improvement = run(T, steps)
+        #     step += steps
+        #     self.update(step, T, E, acceptance, improvement)
+        # Tmin = T
 
-        # Calculate anneal duration
-        elapsed = time.time() - self.start
-        duration = round_figures(int(60.0 * minutes * step / elapsed), 2)
+        # # Calculate anneal duration
+        # elapsed = time.time() - self.start
+        # duration = round_figures(int(60.0 * minutes * step / elapsed), 2)
 
-        # Don't perform anneal, just return params
-        # NOTE:duration has been disabled
-        return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*10, 'updates': self.updates, 'num_iter': num_iter*10}
+        # # Don't perform anneal, just return params
+        # # NOTE:duration has been disabled
+        # return {'tmax': Tmax, 'tmin': Tmin, 'steps': steps*10, 'updates': self.updates, 'num_iter': num_iter*10}
