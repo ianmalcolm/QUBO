@@ -1,6 +1,22 @@
 import numpy as np
 import itertools
 
+def make_matrix(perm):
+    n = len(perm)
+    matrix = np.zeros((n,n))
+    for i in range(n):
+        matrix[i][perm[i]] = 1
+    return matrix
+
+def make_perm(mtx):
+    n = mtx.shape[0]
+    perm = np.zeros(n)
+    for i in range(n):
+        for j in range(n):
+            if mtx[i][j]:
+                perm[i] = j
+    return perm
+
 def inspect_entries(F):
     size = F.shape[0]
     zeros = 0

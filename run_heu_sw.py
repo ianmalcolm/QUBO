@@ -36,18 +36,18 @@ def main():
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
 
-            for i in range(5):
+            for i in range(2):
                 result_dict_list = []
                 result_dict = run(filename, warehouse_config)
                 result_dict_list.append(result_dict)
             
                 result_filename = filename + ".csv"
                 if os.path.exists(os.path.join(RESULT_FOLDER, result_filename)):
-                    df = pd.read_csv(os.path.join(RESULT_FOLDER, result_filename))
+                    df = pd.read_csv(os.path.join(RESULT_FOLDER, result_filename),index_col=0)
                 else:
                     df = pd.DataFrame()
                 new_results=postprocess(result_dict_list)
-                df = df.append(new_results, ignore_index=True)
+                df = df.append(new_results,ignore_index=True)
                 df.to_csv(os.path.join(RESULT_FOLDER,result_filename))
 
 def run(order_filename, config):
@@ -93,7 +93,7 @@ def run(order_filename, config):
         NUM_LOCS
     )
     evaluator_qap = QAPEvaluator(
-        NUM_SKUS,
+        NUM_LOCS,
         NUM_LOCS,
         F,
         D
@@ -118,7 +118,7 @@ def run(order_filename, config):
     res_dict['qapres_heu_sw']= qapres_heuristic_sw
     res_dict['res_heu_sw']= res_heuristic_sw
     res_dict['time_heu_sw']= t_heuristic_sw
-
+    res_dict['perm']=mtx.make_perm(sol_heuristic_sw)
 
     return res_dict
 

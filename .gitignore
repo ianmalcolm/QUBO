@@ -1,6 +1,7 @@
 Flow.txt
 flow.txt
 mtx.txt
+*.txt.dat
 __pychache__/*
 **/__pychache__/*
 utils/__pychache__/*

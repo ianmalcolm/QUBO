@@ -43,7 +43,7 @@ def main():
             
                 result_filename = filename + ".csv"
                 if os.path.exists(os.path.join(RESULT_FOLDER, result_filename)):
-                    df = pd.read_csv(os.path.join(RESULT_FOLDER, result_filename))
+                    df = pd.read_csv(os.path.join(RESULT_FOLDER, result_filename),index_col=0)
                 else:
                     df = pd.DataFrame()
                 new_results=postprocess(result_dict_list)
@@ -93,7 +93,7 @@ def run(order_filename, config):
         NUM_LOCS
     )
     evaluator_qap = QAPEvaluator(
-        NUM_SKUS,
+        NUM_LOCS,
         NUM_LOCS,
         F,
         D
@@ -118,6 +118,7 @@ def run(order_filename, config):
     res_dict['qapres_heu_da']= qapres_heuristic_da
     res_dict['res_heu_da']= res_heuristic_da
     res_dict['time_heu_da']= t_heuristic_da
+    res_dict['perm']=mtx.make_perm(sol_heuristic_da)
 
     return res_dict
 
