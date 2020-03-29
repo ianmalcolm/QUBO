@@ -11,3 +11,7 @@ problems/__pychache__/*
 **/*.pyc
 *.pyc
 **/**/*.pyc
+weights/
+constraint.txt
+curl_data.txt
+del.sh
