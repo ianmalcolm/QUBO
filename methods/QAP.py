@@ -65,7 +65,8 @@ class OurHeuristic:
                 variable_list[local_variable_index]= (item_global_idx, loc_global_idx)
         
         print(variable_list)
-        print((89,89) in variable_list)
+        print((0,0) in variable_list)
+        print((0,1) in variable_list)
         input()
         # extract the columns of F and D in variable_list order
         columns_F, columns_D = zip(*variable_list)
