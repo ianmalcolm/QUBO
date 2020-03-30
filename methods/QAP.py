@@ -65,10 +65,10 @@ class OurHeuristic:
                 local_variable_index = idx.index_1_q_to_l_1(item_local_idx+1,loc_local_idx+1,bunch_size) - 1
                 variable_list[local_variable_index]= (item_global_idx, loc_global_idx)
         
-        print(variable_list)
-        print((0,0) in variable_list)
-        print((0,1) in variable_list)
-        input()
+        # print(variable_list)
+        # print((0,0) in variable_list)
+        # print((0,1) in variable_list)
+        # input()
         # extract the columns of F and D in variable_list order
         columns_F, columns_D = zip(*variable_list)
         F1 = self.F[:, columns_F]
@@ -78,7 +78,7 @@ class OurHeuristic:
         for n0 in range(self.n):
             for m0 in range(self.m):
                 if initial_solution[n0][m0]:
-                    print((n0,m0))
+                    # print((n0,m0))
                     linear += F1[n0, :] * D1[m0, :]
 
         return linear
