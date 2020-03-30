@@ -73,6 +73,7 @@ class OurHeuristic:
         for n0 in range(self.n):
             for m0 in range(self.m):
                 if (not (n0,m0) in variable_list) and initial_solution[n0][m0]:
+                    print((n0,m0))
                     linear += F1[n0, :] * D1[m0, :]
 
         return linear
