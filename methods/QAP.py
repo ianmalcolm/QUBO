@@ -58,15 +58,14 @@ class OurHeuristic:
         # print(bunch_i_idx_map.values())
         # print(locations_i_idx_map.values())
         # input()
-        print(bunch_i_idx_map.values())
-        print(locations_i_idx_map.values())
-        input()
         for item_global_idx, item_local_idx in bunch_i_idx_map.items():
             for loc_global_idx, loc_local_idx in locations_i_idx_map.items():
                 # note that local indices run from 0 to bunch_size-1
                 local_variable_index = idx.index_1_q_to_l_1(item_local_idx+1,loc_local_idx+1,bunch_size) - 1
                 variable_list[local_variable_index]= (item_global_idx, loc_global_idx)
         
+        print(variable_list)
+        input()
         # extract the columns of F and D in variable_list order
         columns_F, columns_D = zip(*variable_list)
         F1 = self.F[:, columns_F]
