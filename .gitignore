@@ -8,6 +8,7 @@ utils/__pychache__/*
 sim/__pychache__/*
 methods/__pychache__/*
 problems/__pychache__/*
+ports/da/__pychache__/*
 **/*.pyc
 *.pyc
 **/**/*.pyc
