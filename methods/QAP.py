@@ -58,6 +58,9 @@ class OurHeuristic:
         # print(bunch_i_idx_map.values())
         # print(locations_i_idx_map.values())
         # input()
+        print(bunch_i_idx_map.values())
+        print(locations_i_idx_map.values())
+        input()
         for item_global_idx, item_local_idx in bunch_i_idx_map.items():
             for loc_global_idx, loc_local_idx in locations_i_idx_map.items():
                 # note that local indices run from 0 to bunch_size-1
@@ -72,7 +75,7 @@ class OurHeuristic:
         linear = np.zeros(shape=bunch_size*bunch_size,dtype=np.float32)
         for n0 in range(self.n):
             for m0 in range(self.m):
-                if (not (n0,m0) in variable_list) and initial_solution[n0][m0]:
+                if initial_solution[n0][m0]:
                     print((n0,m0))
                     linear += F1[n0, :] * D1[m0, :]
 
