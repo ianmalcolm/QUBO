@@ -77,7 +77,7 @@ class OurHeuristic:
         linear = np.zeros(shape=bunch_size*bunch_size,dtype=np.float32)
         for n0 in range(self.n):
             for m0 in range(self.m):
-                if initial_solution[n0][m0]:
+                if (not (n0,m0) in variable_list) and initial_solution[n0][m0]:
                     # print((n0,m0))
                     linear += F1[n0, :] * D1[m0, :]
 
