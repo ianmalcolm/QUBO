@@ -52,9 +52,10 @@ class OurHeuristic:
         bunch_size = len(bunch_i_idx_map.keys())
         linear = np.zeros(bunch_size*bunch_size)
 
+        variable_list_length = bunch_size * bunch_size
         # collect a list of item index pairs in the bunch, arranged in
         # order of linear's corresponding local indices,
-        variable_list = np.empty(shape=bunch_size*bunch_size,dtype=object)
+        variable_list = [None] * variable_list_length
         # print(bunch_i_idx_map.values())
         # print(locations_i_idx_map.values())
         # input()
