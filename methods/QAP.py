@@ -116,6 +116,9 @@ class OurHeuristic:
             solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
             print(solution1_5)
             self.timing.append(group_end - group_start)
+        elif self.k==1:
+            solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
+            solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
