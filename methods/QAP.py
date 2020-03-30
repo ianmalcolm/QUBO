@@ -79,41 +79,43 @@ class OurHeuristic:
             
     def run(self):
         start = time.time()
-        print("setting up bunching with simanneal")
-        bunch = QMKP(
-            -self.F,
-            self.k
-        )
-        bunch_auto_schedule = bunch.auto(minutes=1)
-        bunch.set_schedule(bunch_auto_schedule)
-        bunch.copy_strategy = "deepcopy"
-        print("starting to solve bunching with simanneal")
-        state1, energy1 = bunch.anneal()
-        bunch_end = time.time()
-        print(state1)
-        print("done bunching with simanneal. energy: %d" % energy1)
-        solution1 = QMKP.solution_matrix(state1, self.n, self.k)
-        print(solution1)
-        self.timing.append(bunch_end - start)
-        
+    
+        if self.k > 1:
+            print("setting up bunching with simanneal")
+            bunch = QMKP(
+                -self.F,
+                self.k
+            )
+            bunch_auto_schedule = bunch.auto(minutes=1)
+            bunch.set_schedule(bunch_auto_schedule)
+            bunch.copy_strategy = "deepcopy"
+            print("starting to solve bunching with simanneal")
+            state1, energy1 = bunch.anneal()
+            bunch_end = time.time()
+            print(state1)
+            print("done bunching with simanneal. energy: %d" % energy1)
+            solution1 = QMKP.solution_matrix(state1, self.n, self.k)
+            print(solution1)
+            self.timing.append(bunch_end - start)
+            
 
-        #######grouping########
-        print("setting up grouping with simanneal")
-        group_start = time.time()
-        group = QMKP(
-            self.D,
-            self.k
-        )
-        group_auto_schedule = group.auto(minutes=1)
-        group.set_schedule(group_auto_schedule)
-        group.copy_strategy = "deepcopy"
-        print("starting to solve grouping with simanneal")
-        state1_5, energy1_5 = group.anneal()
-        group_end = time.time()
-        print("Done grouping with simanneal. Energy: %d" % energy1_5)
-        solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
-        print(solution1_5)
-        self.timing.append(group_end - group_start)
+            #######grouping########
+            print("setting up grouping with simanneal")
+            group_start = time.time()
+            group = QMKP(
+                self.D,
+                self.k
+            )
+            group_auto_schedule = group.auto(minutes=1)
+            group.set_schedule(group_auto_schedule)
+            group.copy_strategy = "deepcopy"
+            print("starting to solve grouping with simanneal")
+            state1_5, energy1_5 = group.anneal()
+            group_end = time.time()
+            print("Done grouping with simanneal. Energy: %d" % energy1_5)
+            solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
+            print(solution1_5)
+            self.timing.append(group_end - group_start)
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
@@ -151,33 +153,38 @@ class OurHeuristic:
                 bigD[j1][j2] = distance
 
         print("=====================computing aggregate placement=========================")
-        aggregate_placement_problem = PlacementQAP(
-            self.k,
-            self.k,
-            bigF,
-            bigD,
-            initial_weight_estimate=True,
-            const_weight_inc=True
-        )
-        dwave_solver = ClassicalNeal()
-        aggregate_method = ExteriorPenaltyMethod(
-            aggregate_placement_problem,
-            dwave_solver,
-            100000000
-        )
-        solution2 = aggregate_placement_problem.solution_matrix(
-            (aggregate_method.run())[0],
-            self.k,
-            self.k
-        )
-        self.timing.append(aggregate_placement_problem.timing)
-        self.timing.append(aggregate_method.get_timing())
+        if self.k > 1:
+            aggregate_placement_problem = PlacementQAP(
+                self.k,
+                self.k,
+                bigF,
+                bigD,
+                initial_weight_estimate=True,
+                const_weight_inc=True
+            )
+            dwave_solver = ClassicalNeal()
+            aggregate_method = ExteriorPenaltyMethod(
+                aggregate_placement_problem,
+                dwave_solver,
+                100000000
+            )
+            solution2 = aggregate_placement_problem.solution_matrix(
+                (aggregate_method.run())[0],
+                self.k,
+                self.k
+            )
+            self.timing.append(aggregate_placement_problem.timing)
+            self.timing.append(aggregate_method.get_timing())
+
+        elif self.k==1:
+            solution2 = np.ones(shape=(1,1),dtype=np.int32)
 
         bunch_to_group = {}
         for i in range(self.k):
             for j in range(self.k):
                 if solution2[i][j]:
                     bunch_to_group[i] = j
+
 
         #######placement within bunches###########
         print("=======================computing fine placement============================")
