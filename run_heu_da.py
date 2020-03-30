@@ -88,7 +88,7 @@ def run(order_filename, config):
         WAREHOUSE_NUM_COLS,
         WAREHOUSE_NUM_ROWS,
         DIST_VERTICAL,
-        DIST_HORIZONTAL,
+        3,
         NUM_LOCS,
         NUM_LOCS
     )
