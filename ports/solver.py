@@ -20,7 +20,7 @@ class Solver(abc.ABC):
     def sa_params(self, mtx):
         ''' mtx is upper triangular '''
         params = {}
-        params['number_iterations'] = 1000000
+        params['number_iterations'] = 10000000
         params['number_runs'] = 100
         params['number_replicas'] = 100
         size = mtx.shape[0]
