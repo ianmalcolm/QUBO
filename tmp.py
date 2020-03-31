@@ -15,36 +15,36 @@ def make_matrix(perm):
         matrix[i][perm[i]] = 1
     return matrix
 
-order_parser = OrderParser(
-    'orders/order_144_30_a.txt',
-    30,
-    0
-)
-F1 = order_parser.gen_F()
-D_gen = DistanceGenerator(
-    6,
-    24,
-    1,
-    3,
-    None,
-    None
-)
-D1 = D_gen.gen_S_shape()
+# order_parser = OrderParser(
+#     'orders/order_144_30_a.txt',
+#     30,
+#     0
+# )
+# F1 = order_parser.gen_F()
+# D_gen = DistanceGenerator(
+#     6,
+#     24,
+#     1,
+#     3,
+#     None,
+#     None
+# )
+# D1 = D_gen.gen_S_shape()
 
-F,D = qaplib.readqaplib('qaplib/xu144.dat')
+F,D = qaplib.readqaplib('order_90_10_a.txt.dat')
 
 # with open('tai35b.dat', 'w') as f:
 #     f.write(format(F,D))
 
-ans = np.random.permutation(144)
+ans = np.random.permutation(90)
 
 evaluator = QAPEvaluator(
-    144,144,F,D
+    90,90,F,D
 )
-evaluator1 = QAPEvaluator(
-    144,144,F1,D1
-)
+# evaluator1 = QAPEvaluator(
+#     144,144,F1,D1
+# )
 print(std.obj(F,D,ans))
-print(std.obj(F1,D1,ans))
+# print(std.obj(F1,D1,ans))
 print(evaluator.run(make_matrix(ans)))
-print(evaluator1.run(make_matrix(ans)))
+# print(evaluator1.run(make_matrix(ans)))

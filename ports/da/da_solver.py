@@ -3,6 +3,7 @@ from ..solver import Solver
 import delete
 import numpy as np
 import utils.mtx as mt
+import math
 
 
 import subprocess
@@ -63,8 +64,40 @@ class DASolver(Solver):
                 ret[str(k)]=False
         return ret
 
+    @staticmethod
+    def temper(matrix):
+        '''temper an input matrix
+            input:
+                matrix  symmetric matrix m
+        '''
+        mtx = matrix.copy()
+        size = mtx.shape[0]
+        # check if upper triangular. If so, make symmetric
+        if np.allclose(mtx,np.triu(mtx)):
+            to_add = mtx.T / 2
+            np.fill_diagonal(to_add, 0)
+            mtx += to_add
+            mtx -= to_add.T
+
+        n = int(math.sqrt(size))
+        step = n
+        for i in range(n):
+            for j in range(n):
+                window = mtx[i*step:i*(step+1), j*step:j*(step+1)]
+                mtx[i*step:i*(step+1), j*step:j*(step+1)] -= np.average(window)
+        
+        for i in range(n):
+            for j in range(n):
+                list_row_indices = [k+i for k in range(0,n*n, step)]
+                list_column_indices = [k+j for k in range(0,n*n, step)]
+                window = mtx[list_row_indices, list_column_indices]
+                mtx[list_row_indices, list_column_indices] -= np.average(window)
+        
+        return mtx
+
     def solve(self, matrix, initial=(), test_mode=False):
         mtx = matrix.copy()
+        mtx = DASolver.temper(mtx)
         mtx = mt.to_upper_triangular(mtx)
         np.savetxt("mtx.txt", mtx, fmt='%d')
 
