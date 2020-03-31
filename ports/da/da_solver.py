@@ -84,6 +84,8 @@ class DASolver(Solver):
         for i in range(n):
             for j in range(n):
                 window = mtx[i*step:i*(step+1), j*step:j*(step+1)]
+                print(window)
+                input()
                 mtx[i*step:i*(step+1), j*step:j*(step+1)] -= np.average(window)
         
         for i in range(n):
@@ -91,6 +93,7 @@ class DASolver(Solver):
                 list_row_indices = [k+i for k in range(0,n*n, step)]
                 list_column_indices = [k+j for k in range(0,n*n, step)]
                 window = mtx[list_row_indices, list_column_indices]
+                print(window)
                 mtx[list_row_indices, list_column_indices] -= np.average(window)
         
         return mtx
