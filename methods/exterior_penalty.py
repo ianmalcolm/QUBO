@@ -89,7 +89,10 @@ class ExteriorPenaltyMethod:
             updated_mtx = initial_flow + updated_ct
             mtx = updated_mtx
             
-            initial = solution
+            if self.test_mode:
+                initial = solution[0]
+            else:
+                initial=solution
         
         self.timing = self.solver.get_timing()
         print("External penalty has failed. Result is:")
