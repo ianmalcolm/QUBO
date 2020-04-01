@@ -258,16 +258,24 @@ class OurHeuristic:
                 linear=linear
             )
             print("done")
+
+
+            test_mode = False
             if self.use_dwave_da_sw == 'dwave':
                 solver_i = Dwave()
+                test_mode = False
             elif self.use_dwave_da_sw == 'sw':
                 solver_i = ClassicalNeal()
+                test_mode = False
             elif self.use_dwave_da_sw == 'da':
                 solver_i = DASolver()
+                test_mode = True
+
             fine_placement_method = ExteriorPenaltyMethod(
                 fine_placement_problem,
                 solver_i,
-                100000000
+                LIMIT=100000000,
+                test_mode=test_mode
             )
             print("done")
             print("+++++running %d bunch QAP +++++++" % i)

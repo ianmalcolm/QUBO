@@ -2,7 +2,7 @@ import numpy as np
 from datetime import datetime
 
 class ExteriorPenaltyMethod:
-    def __init__(self, problem, solver, LIMIT):
+    def __init__(self, problem, solver, LIMIT, test_mode=False):
         '''
             precondition:
                 problem.isExterior = True
@@ -16,7 +16,7 @@ class ExteriorPenaltyMethod:
         self.problem = problem
         self.solver = solver
         self.LIMIT = LIMIT
-        
+        self.test_mode = test_mode
         self.timing = 0
 
     def get_timing(self):
@@ -28,7 +28,7 @@ class ExteriorPenaltyMethod:
         current_time = now.strftime("%H:%M:%S")
         return "weights/weight_"+current_time+".txt"
 
-    def run(self, test_mode=False):
+    def run(self):
         '''
         repeat:
             squashes the flow and the constraints into a single matrix.
@@ -49,23 +49,32 @@ class ExteriorPenaltyMethod:
         for i in range(self.LIMIT):
             print("External penalty iteration %d" % i)
             
-            solution = self.solver.solve(mtx, initial, test_mode=test_mode)
-            if test_mode:
-                to_check = solution[0][0]
+            solution = self.solver.solve(mtx, initial, test_mode=self.test_mode)
+            if self.test_mode:
+                for sol in solution:
+                    configuration_to_check = sol[0]
+                    satisfied = self.problem.check(configuration_to_check)
+                    if all(satisfied):
+                        self.timing = self.solver.get_timing()
+                        print("External penalty has solution. Saving canonical weights...")
+                        np.savetxt(ExteriorPenaltyMethod.random_filename(), ms_read, fmt='%.3f')
+                        return configuration_to_check
+                    else:
+                        pass
             else:
                 to_check = solution[0]
-            satisfied = self.problem.check(to_check)
-            if all(satisfied):
-                # at the end of rounds, get timing for the entire run
-                self.timing = self.solver.get_timing()
-                print("External penalty has solution. Saving canonical weights...")
-                np.savetxt(ExteriorPenaltyMethod.random_filename(), ms_read, fmt='%.3f')
-                return solution
-            else:
-                for i in range(len(satisfied)):
-                    print("ct%d: %s" % (i,satisfied[i]))
+                satisfied = self.problem.check(to_check)
+                if all(satisfied):
+                    # at the end of rounds, get timing for the entire run
+                    self.timing = self.solver.get_timing()
+                    print("External penalty has solution. Saving canonical weights...")
+                    np.savetxt(ExteriorPenaltyMethod.random_filename(), ms_read, fmt='%.3f')
+                    return solution
+                else:
+                    for i in range(len(satisfied)):
+                        print("ct%d: %s" % (i,satisfied[i]))
             
-            if test_mode:
+            if self.test_mode:
                 best_solution = solution[0][0]
             else:
                 best_solution = solution[0]
