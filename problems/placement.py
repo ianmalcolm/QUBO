@@ -215,7 +215,7 @@ class PlacementQAP(Problem):
         
         # prepare weights
         if self.initial_weight_estimate:
-            initial_weight = self.estimate_initial_weight(flow_matrix)
+            initial_weight = self.estimate_initial_weight2(flow_matrix)
             weights = np.full(shape=self.num_constraints, fill_value=initial_weight)
             alphas = np.full(shape=self.num_constraints, fill_value=1.5)
         else:
@@ -248,3 +248,7 @@ class PlacementQAP(Problem):
         # abs max divided by 2
         # size = flow_matrix.shape[0]
         return abs(np.amax(flow_matrix)) / 2
+    
+    def estimate_initial_weight2(self, flow_matrix):
+        average = np.average(flow_matrix)
+        return self.n*(self.n-1)*average
