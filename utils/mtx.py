@@ -118,6 +118,9 @@ def temper(matrix):
             # print("across-submatrix preprocessing. shape: ",window.shape)
             il = np.tril_indices(n)
             window[il] = 0
+
+            window = window - np.average(window)
+            window[il] = 0
             print(window)
             input()
             mtx[i:(n*n):n, j:(n*n):n] -= np.average(window)
