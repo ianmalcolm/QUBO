@@ -113,14 +113,12 @@ def temper(matrix):
     
     for i in range(n):
         for j in range(n):
-            list_row_indices = [k+i for k in range(0,n*n, step)]
-            list_column_indices = [k+j for k in range(0,n*n, step)]
-            window = mtx[list_row_indices, list_column_indices]
+            window = mtx[i:(n*n):n, j:(n*n):n]
             window = window.copy()
-            print(window.shape)
+            print("across-submatrix preprocessing. shape: "window.shape)
             il = np.tril_indices(n)
             window[il] = 0
             # print(window)
-            mtx[list_row_indices, list_column_indices] -= np.average(window)
+            mtx[i:(n*n):n, j:(n*n):n] -= np.average(window)
     
     return mtx
