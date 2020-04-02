@@ -121,6 +121,7 @@ def temper(matrix):
 
             window = window - np.average(window)
             window[il] = 0
+            np.set_printoptions(threshold=np.inf)
             print(window)
             input()
             mtx[i:(n*n):n, j:(n*n):n] -= np.average(window)
