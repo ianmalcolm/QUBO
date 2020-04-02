@@ -118,7 +118,7 @@ def temper(matrix):
             # print("across-submatrix preprocessing. shape: ",window.shape)
             il = np.tril_indices(n)
             window[il] = 0
-            window = np.average(window)
+            window[:,:] = np.average(window)
             window[il] = 0
             np.set_printoptions(threshold=np.inf)
             print(window)
