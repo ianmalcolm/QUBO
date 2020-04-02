@@ -184,6 +184,7 @@ class PlacementQAP(Problem):
             ret = ret + np.diag(self.linear)
         np.savetxt("flow.txt",ret,fmt='%.3f')
         print("done")
+        ret = mtx.temper(ret)
         return ret
 
     def initialise_constraint_matrix(self, flow_matrix):
