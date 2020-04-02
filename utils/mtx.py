@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import math
 
 def make_matrix(perm):
     n = len(perm)
