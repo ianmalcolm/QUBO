@@ -64,44 +64,9 @@ class DASolver(Solver):
                 ret[str(k)]=False
         return ret
 
-    @staticmethod
-    def temper(matrix):
-        '''temper an input matrix
-            input:
-                matrix  symmetric matrix m
-        '''
-        mtx = matrix.copy()
-        size = mtx.shape[0]
-        # check if upper triangular. If so, make symmetric
-        # if np.allclose(mtx,np.triu(mtx)):
-        #     to_add = mtx.T / 2
-        #     np.fill_diagonal(to_add, 0)
-        #     mtx += to_add
-        #     mtx -= to_add.T
-
-        n = int(math.sqrt(size))
-        step = n
-        for i in range(n):
-            for j in range(n):
-                if i < j:
-                    window = mtx[i*step:(i+1)*step , j*step:(j+1)*step]
-                    # print(window)
-                    # input()
-                    mtx[i*step:(i+1)*step , j*step:(j+1)*step] -= np.average(window)
-        
-        # for i in range(n):
-        #     for j in range(n):
-        #         list_row_indices = [k+i for k in range(0,n*n, step)]
-        #         list_column_indices = [k+j for k in range(0,n*n, step)]
-        #         window = mtx[list_row_indices, list_column_indices]
-        #         # print(window)
-        #         mtx[list_row_indices, list_column_indices] -= np.average(window)
-        
-        return mtx
-
     def solve(self, matrix, initial=(), test_mode=False):
         mtx = matrix.copy()
-        mtx = DASolver.temper(mtx)
+        # mtx = mt.temper(mtx)
         mtx = mt.to_upper_triangular(mtx)
         np.savetxt("mtx.txt", mtx, fmt='%d')
 
