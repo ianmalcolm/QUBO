@@ -115,7 +115,7 @@ def temper(matrix):
         for j in range(n):
             window = mtx[i:(n*n):n, j:(n*n):n]
             window = window.copy()
-            print("across-submatrix preprocessing. shape: "window.shape)
+            print("across-submatrix preprocessing. shape: ",window.shape)
             il = np.tril_indices(n)
             window[il] = 0
             # print(window)
