@@ -184,7 +184,7 @@ class PlacementQAP(Problem):
             ret = ret + np.diag(self.linear)
 
         print("done")
-        ret = mtx.temper(ret)
+        # ret = mtx.temper(ret)
         np.savetxt("flow.txt",ret,fmt='%.3f')
         return ret
 
