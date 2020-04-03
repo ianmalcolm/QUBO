@@ -344,7 +344,6 @@ class OurHeuristic:
             print(canonical_permutation)
             all_permutations = set(itertools.permutations(canonical_permutation))
             print(list(all_permutations))
-            input()
 
             r=0
             for aggregate_permutation in all_permutations:
