@@ -351,8 +351,8 @@ class OurHeuristic:
                 else:
                     is_canonical=False
                 self.canonical_record.append(is_canonical)
-                # print(aggregate_permutation)
-                solution2 = mt.make_matrix(aggregate_permutation)
+                print(aggregate_perm_listform)
+                solution2 = mt.make_matrix(aggregate_perm_listform)
                 print("=======================computing EXHAUSTIVE %dth fine placement============================" % r)
                 ret = self.run_fine_placement(solution2, members, locations)
                 ret_list.append(ret)
