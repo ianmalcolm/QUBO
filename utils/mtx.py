@@ -15,7 +15,7 @@ def make_perm(mtx):
     for i in range(n):
         for j in range(n):
             if mtx[i][j]:
-                perm[i] = j
+                perm[i] = int(j)
     return perm
 
 def make_perm_dict(mtx):
