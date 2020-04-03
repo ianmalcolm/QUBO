@@ -18,6 +18,15 @@ def make_perm(mtx):
                 perm[i] = j
     return perm
 
+def make_perm_dict(mtx):
+    n = mtx.shape[0]
+    perm = {}
+    for i in range(n):
+        for j in range(n):
+            if mtx[i][j]:
+                perm[i] = j
+    return perm
+
 def inspect_entries(F):
     size = F.shape[0]
     zeros = 0

@@ -24,9 +24,11 @@ RESULT_FOLDER = "simdata_heu_da"
 ORDER_DIRNAME = 'orders_heu_da'
 CONFIG_DIRNAME = 'configs'
 
+TAKE = ['order_180_30_a.txt']
+
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
-        if filename.endswith('.txt'):
+        if filename in TAKE:
             print(filename)
             order_character = filename.split('_')
             num_items = num_locs = int(order_character[1])
@@ -37,9 +39,7 @@ def main():
                 warehouse_config = json.load(f)
 
             for i in range(1):
-                result_dict_list = []
-                result_dict = run(filename, warehouse_config)
-                result_dict_list.append(result_dict)
+                result_dict_list = run(filename, warehouse_config)
             
                 result_filename = filename + ".csv"
                 if os.path.exists(os.path.join(RESULT_FOLDER, result_filename)):
@@ -61,6 +61,7 @@ def run(order_filename, config):
     DIST_HORIZONTAL = int(config['DIST_HORIZONTAL'])
     GROUP_NUM_ROWS = int(config['GROUP_NUM_ROWS'])
     GROUP_NUM_COLS = int(config['GROUP_NUM_COLS'])
+    EXHAUST_AGGREGATES = config['EXHAUST_AGGREGATES']
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
@@ -100,6 +101,10 @@ def run(order_filename, config):
     )
     res_dict = {}
     
+    exhaust_permutation=False
+    if EXHAUST_AGGREGATES=='y':
+        exhaust_permutation=True
+
     heuristic_da = OurHeuristic(
         NUM_LOCS,
         NUM_LOCS,
@@ -109,18 +114,27 @@ def run(order_filename, config):
         fine_weight0=40000,
         fine_alpha0=0,
         const_weight_inc=True,
-        use_dwave_da_sw='da'
+        use_dwave_da_sw='da',
+        exhaust_permutation=exhaust_permutation
     )
-    sol_heuristic_da = heuristic_da.run()
-    t_heuristic_da = heuristic_da.get_timing()
-    res_heuristic_da = evaluator.run(sol_heuristic_da)
-    qapres_heuristic_da = evaluator_qap.run(sol_heuristic_da)
-    res_dict['qapres_heu_da']= qapres_heuristic_da
-    res_dict['res_heu_da']= res_heuristic_da
-    res_dict['time_heu_da']= t_heuristic_da
-    res_dict['perm']=mtx.make_perm(sol_heuristic_da)
-
-    return res_dict
+    sols_heuristic_da = heuristic_da.run()
+    res_list = []
+    loop_index = 0
+    for sol_heuristic_da in sols_heuristic_da:
+        res_dict = {}
+        is_canonical = heuristic_da.canonical_record[loop_index]
+        t_heuristic_da = heuristic_da.get_timing()
+        res_heuristic_da = evaluator.run(sol_heuristic_da)
+        qapres_heuristic_da = evaluator_qap.run(sol_heuristic_da)
+        res_dict['is_canonical']= is_canonical
+        res_dict['qapres_heu_da']= qapres_heuristic_da
+        res_dict['res_heu_da']= res_heuristic_da
+        timing_list = t_heuristic_da['overall'] + t_heuristic_da['partition'][loop_index]
+        res_dict['time_heu_da']= timing_list
+        res_dict['perm']=mtx.make_perm(sol_heuristic_da)
+        res_list.append(res_dict)
+        loop_index += 1
+    return res_list
 
 def postprocess(result_dict):
     return pd.DataFrame(result_dict)

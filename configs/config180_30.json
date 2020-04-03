@@ -1,16 +1,17 @@
 {
     "NUM_GROUPS": 2,
-    "GROUP_NUM_ROWS": 30,
-    "GROUP_NUM_COLS": 3,
+    "GROUP_NUM_ROWS": 45,
+    "GROUP_NUM_COLS": 2,
     "DIST_VERTICAL": 1,
-    "DIST_HORIZONTAL": 60,
-    "WAREHOUSE_NUM_COLS": 6,
-    "WAREHOUSE_NUM_ROWS": 30,
+    "DIST_HORIZONTAL": 90,
+    "WAREHOUSE_NUM_COLS": 4,
+    "WAREHOUSE_NUM_ROWS": 45,
     "NUM_ITEMS": 180,
     "NUM_LOCS": 180,
     "NUM_SKUS": 30,
     "USE_DWAVE": "n",
     "USE_PURE": "n",
     "USE_DA": "y",
-    "USE_SW": "n"
+    "USE_SW": "n",
+    "EXHAUST_AGGREGATES": "y"
 }

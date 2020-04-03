@@ -12,5 +12,6 @@
     "USE_DWAVE": "n",
     "USE_PURE": "y",
     "USE_DA": "n",
-    "USE_SW": "n"
+    "USE_SW": "n",
+    "EXHAUST_AGGREGATES": "n"
 }

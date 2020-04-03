@@ -13,10 +13,16 @@ from ports.da.da_solver import DASolver
 from ports.classical_simanneal import ClassicalNeal
 from .exterior_penalty import ExteriorPenaltyMethod
 import utils.index as idx
+import utils.mtx as mt
 
 QMKP_DATA_FOLDER = 'qmkpdata'
 class OurHeuristic:
-    def __init__(self,n,m,k,F,D, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave_da_sw="dwave"):
+    def __init__(self,n,m,k,F,D, fine_weight0, fine_alpha0, 
+        const_weight_inc=False, 
+        use_dwave_da_sw="dwave",
+        random_partition=False,
+        exhaust_permutation=False
+    ):
         self.n = n
         self.m = m
         self.k = k
@@ -27,7 +33,16 @@ class OurHeuristic:
         self.fine_weight0 = fine_weight0
         self.fine_alpha0 = fine_alpha0
         self.const_weight_inc = const_weight_inc
-        self.timing = []
+        self.random_partition = random_partition
+        self.exhaust_permutation = exhaust_permutation
+
+        self.timing = {}
+        self.timing['overall'] = []
+        self.timing['partition'] = []
+        self.canonical_record = []
+
+        self.end = 0
+        self.start = 0
     
     def get_timing(self):
         return self.timing
@@ -85,87 +100,7 @@ class OurHeuristic:
 
         return linear
             
-    def run(self):
-        start = time.time()
-    
-        if self.k > 1:
-            print("setting up bunching with simanneal")
-            bunch = QMKP(
-                -self.F,
-                self.k
-            )
-            bunch_auto_schedule = bunch.auto(minutes=1)
-            bunch.set_schedule(bunch_auto_schedule)
-            bunch.copy_strategy = "deepcopy"
-            print("starting to solve bunching with simanneal")
-            state1, energy1 = bunch.anneal()
-            bunch_end = time.time()
-            print(state1)
-            print("done bunching with simanneal. energy: %d" % energy1)
-            solution1 = QMKP.solution_matrix(state1, self.n, self.k)
-            print(solution1)
-            self.timing.append(bunch_end - start)
-            
-
-            #######grouping########
-            print("setting up grouping with simanneal")
-            group_start = time.time()
-            group = QMKP(
-                self.D,
-                self.k
-            )
-            group_auto_schedule = group.auto(minutes=1)
-            group.set_schedule(group_auto_schedule)
-            group.copy_strategy = "deepcopy"
-            print("starting to solve grouping with simanneal")
-            state1_5, energy1_5 = group.anneal()
-            group_end = time.time()
-            print("Done grouping with simanneal. Energy: %d" % energy1_5)
-            solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
-            print(solution1_5)
-            np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
-            input("done grouping. inspect using bare eyes.")
-            self.timing.append(group_end - group_start)
-        elif self.k==1:
-            solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
-            solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
-
-        #######bunch permutation/ aggregate QAP########
-        g = np.zeros(shape=self.n)
-        members = []
-        for i in range(self.k):
-            members.append([])
-        for i in range(self.n):
-            for j in range(self.k):
-                if solution1[i][j]:
-                    g[i]=j
-                    members[j].append(i)
-        
-        bigF = np.zeros((self.k,self.k))
-        for i1 in range(self.k):
-            for i2 in range(i1 + 1,self.k):
-                interaction = 0
-                for item1,item2 in itertools.product(members[i1],members[i2]):
-                    interaction += self.F[item1][item2]
-                bigF[i1][i2] = interaction
-
-        locations = []
-        for i in range(self.k):
-            locations.append([])
-        for i in range(self.m):
-            for j in range(self.k):
-                if solution1_5[i][j]:
-                    locations[j].append(i)
-
-        bigD = np.zeros((self.k,self.k))
-        for j1 in range(self.k):
-            for j2 in range(j1+1,self.k):
-                distance = 0
-                for loc1, loc2 in itertools.product(locations[j1], locations[j2]):
-                    distance += self.D[loc1][loc2]
-                bigD[j1][j2] = distance
-
-        print("=====================computing aggregate placement=========================")
+    def run_aggregate_placement(self,bigF,bigD):
         if self.k > 1:
             aggregate_placement_problem = PlacementQAP(
                 self.k,
@@ -186,24 +121,19 @@ class OurHeuristic:
                 self.k,
                 self.k
             )
-            self.timing.append(aggregate_placement_problem.timing)
-            self.timing.append(aggregate_method.get_timing())
+            self.timing['overall'].append(aggregate_placement_problem.timing)
+            self.timing['overall'].append(aggregate_method.get_timing())
+            return solution2
 
         elif self.k==1:
             solution2 = np.ones(shape=(1,1),dtype=np.int32)
-
-        bunch_to_group = {}
-        for i in range(self.k):
-            for j in range(self.k):
-                if solution2[i][j]:
-                    bunch_to_group[i] = j
-
-
-        #######placement within bunches###########
-        print("=======================computing fine placement============================")
+            return solution2
+    
+    def run_fine_placement(self, solution2, members, locations):
         ret = np.zeros((self.n, self.m))
         s = (int)(math.floor(self.m / self.k))
         bunch_size = (int)(math.ceil(self.n / self.k))
+        bunch_to_group = mt.make_perm_dict(solution2)
 
         solution3 = {}
         # np.set_printoptions(threshold=np.inf)
@@ -307,10 +237,126 @@ class OurHeuristic:
         if not all(check):
             raise ValueError("unfeasible solution error")
         
-        self.timing.append(timing_construction)
-        self.timing.append(timing_anneal)
-        end = time.time()
-        self.timing.append(end-start)
+        sub_timing_list = []
+        sub_timing_list.append(timing_construction)
+        sub_timing_list.append(timing_anneal)
         
+        self.timing['partition'].append(sub_timing_list)
         return ret
+
+    def run(self):
+        self.start = time.time()
         
+        if not self.random_partition:
+            if self.k > 1:
+                print("setting up bunching with simanneal")
+                bunch = QMKP(
+                    -self.F,
+                    self.k
+                )
+                bunch_auto_schedule = bunch.auto(minutes=1)
+                bunch.set_schedule(bunch_auto_schedule)
+                bunch.copy_strategy = "deepcopy"
+                print("starting to solve bunching with simanneal")
+                state1, energy1 = bunch.anneal()
+                bunch_end = time.time()
+                print(state1)
+                print("done bunching with simanneal. energy: %d" % energy1)
+                solution1 = QMKP.solution_matrix(state1, self.n, self.k)
+                print(solution1)
+                self.timing['overall'].append(bunch_end - self.start)
+                
+
+                #######grouping########
+                print("setting up grouping with simanneal")
+                group_start = time.time()
+                group = QMKP(
+                    self.D,
+                    self.k
+                )
+                group_auto_schedule = group.auto(minutes=1)
+                group.set_schedule(group_auto_schedule)
+                group.copy_strategy = "deepcopy"
+                print("starting to solve grouping with simanneal")
+                state1_5, energy1_5 = group.anneal()
+                group_end = time.time()
+                print("Done grouping with simanneal. Energy: %d" % energy1_5)
+                solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
+                print(solution1_5)
+                np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
+                input("done grouping. inspect using bare eyes.")
+                self.timing['overall'].append(group_end - group_start)
+            elif self.k==1:
+                solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
+                solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
+        else:
+            solution1_perm = np.random.permutation(self.n)
+            solution1_5_perm = np.random.permutation(self.n)
+            solution1 = mt.make_matrix(solution1_perm)
+            solution1_5 = mt.make_matrix(solution1_5_perm)
+
+        #######bunch permutation/ aggregate QAP########
+        g = np.zeros(shape=self.n)
+        members = []
+        for i in range(self.k):
+            members.append([])
+        for i in range(self.n):
+            for j in range(self.k):
+                if solution1[i][j]:
+                    g[i]=j
+                    members[j].append(i)
+        
+        bigF = np.zeros((self.k,self.k))
+        for i1 in range(self.k):
+            for i2 in range(i1 + 1,self.k):
+                interaction = 0
+                for item1,item2 in itertools.product(members[i1],members[i2]):
+                    interaction += self.F[item1][item2]
+                bigF[i1][i2] = interaction
+
+        locations = []
+        for i in range(self.k):
+            locations.append([])
+        for i in range(self.m):
+            for j in range(self.k):
+                if solution1_5[i][j]:
+                    locations[j].append(i)
+
+        bigD = np.zeros((self.k,self.k))
+        for j1 in range(self.k):
+            for j2 in range(j1+1,self.k):
+                distance = 0
+                for loc1, loc2 in itertools.product(locations[j1], locations[j2]):
+                    distance += self.D[loc1][loc2]
+                bigD[j1][j2] = distance
+
+        ret_list=[]
+        if not self.exhaust_permutation:
+            self.canonical_record = [True]
+            print("=====================computing ONLY aggregate placement=========================")
+            solution2 = self.run_aggregate_placement(bigF, bigD)
+            print("=======================computing ONLY fine placement============================")
+            ret = self.run_fine_placement(solution2, members, locations)
+            ret_list.append(ret)
+        else:
+            print("=====================computing EXHAUSTIVE aggregate placement=========================")
+            canonical_permutation = mt.make_perm(self.run_aggregate_placement(bigF, bigD))
+            all_permutations = set(itertools.permutations(canonical_permutation))
+
+            r=0
+            for aggregate_permutation in all_permutations:
+                if np.equal(aggregate_permutation, canonical_permutation):
+                    is_canonical=True
+                else:
+                    is_canonical=False
+                self.canonical_record.append(is_canonical)
+                solution2 = mt.make_matrix(aggregate_permutation)
+                print("=======================computing EXHAUSTIVE %dth fine placement============================" % r)
+                ret = self.run_fine_placement(solution2, members, locations)
+                ret_list.append(ret)
+                r += 1
+
+        self.end = time.time()
+        self.timing['overall'].append(self.end-self.start)
+
+        return ret_list
