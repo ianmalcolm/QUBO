@@ -341,7 +341,10 @@ class OurHeuristic:
         else:
             print("=====================computing EXHAUSTIVE aggregate placement=========================")
             canonical_permutation = mt.make_perm(self.run_aggregate_placement(bigF, bigD))
+            print(canonical_permutation)
             all_permutations = set(itertools.permutations(canonical_permutation))
+            print(list(all_permutations))
+            input()
 
             r=0
             for aggregate_permutation in all_permutations:
