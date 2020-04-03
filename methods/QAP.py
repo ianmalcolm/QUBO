@@ -345,12 +345,13 @@ class OurHeuristic:
 
             r=0
             for aggregate_permutation in all_permutations:
-                if all(np.equal(aggregate_permutation, canonical_permutation)):
+                aggregate_perm_listform = list(aggregate_permutation)
+                if all(np.equal(aggregate_perm_listform, canonical_permutation)):
                     is_canonical=True
                 else:
                     is_canonical=False
                 self.canonical_record.append(is_canonical)
-                print(aggregate_permutation)
+                # print(aggregate_permutation)
                 solution2 = mt.make_matrix(aggregate_permutation)
                 print("=======================computing EXHAUSTIVE %dth fine placement============================" % r)
                 ret = self.run_fine_placement(solution2, members, locations)
