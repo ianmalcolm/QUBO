@@ -345,7 +345,7 @@ class OurHeuristic:
 
             r=0
             for aggregate_permutation in all_permutations:
-                if np.equal(aggregate_permutation, canonical_permutation):
+                if all(np.equal(aggregate_permutation, canonical_permutation)):
                     is_canonical=True
                 else:
                     is_canonical=False
