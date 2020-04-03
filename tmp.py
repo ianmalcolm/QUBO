@@ -6,6 +6,7 @@ from sim.test_qap import QAPEvaluator
 from DistanceGenerator import DistanceGenerator
 from problems.placement import PlacementQAP
 
+import pandas as pd
 from orders.order_parser import OrderParser
 
 def make_matrix(perm):
@@ -31,10 +32,17 @@ def make_matrix(perm):
 # )
 # D1 = D_gen.gen_S_shape()
 
-F,D = qaplib.readqaplib('order_90_10_a.txt.dat')
+F,D = qaplib.readqaplib('order_8100_500_a.txt.dat')
 
 # with open('tai35b.dat', 'w') as f:
 #     f.write(format(F,D))
+
+df = pd.read.csv("simdata_heu_da/order_8100_500_a.txt.csv.back", index_col=0)
+permutation_string = df['perm']
+print(permutation_string)
+input()
+    
+
 
 ans = np.random.permutation(90)
 

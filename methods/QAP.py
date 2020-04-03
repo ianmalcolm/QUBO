@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import os
 import math
 import time
 
@@ -13,6 +14,7 @@ from ports.classical_simanneal import ClassicalNeal
 from .exterior_penalty import ExteriorPenaltyMethod
 import utils.index as idx
 
+QMKP_DATA_FOLDER = 'qmkpdata'
 class OurHeuristic:
     def __init__(self,n,m,k,F,D, fine_weight0, fine_alpha0, const_weight_inc=False, use_dwave_da_sw="dwave"):
         self.n = n
@@ -121,6 +123,8 @@ class OurHeuristic:
             print("Done grouping with simanneal. Energy: %d" % energy1_5)
             solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
             print(solution1_5)
+            np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
+            input("done grouping. inspect using bare eyes.")
             self.timing.append(group_end - group_start)
         elif self.k==1:
             solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
