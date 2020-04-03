@@ -11,7 +11,7 @@ def make_matrix(perm):
 
 def make_perm(mtx):
     n = mtx.shape[0]
-    perm = np.zeros(n)
+    perm = np.zeros(n,dtype=np.int32)
     for i in range(n):
         for j in range(n):
             if mtx[i][j]:
