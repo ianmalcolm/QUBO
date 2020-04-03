@@ -253,4 +253,4 @@ class PlacementQAP(Problem):
     
     def estimate_initial_weight2(self, flow_matrix):
         average = np.average(flow_matrix)
-        return (n*0.4)*(self.n-1)*average
+        return (self.n*0.4)*(self.n-1)*average
