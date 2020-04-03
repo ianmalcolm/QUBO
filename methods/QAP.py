@@ -284,7 +284,7 @@ class OurHeuristic:
                 solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
                 print(solution1_5)
                 np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
-                input("done grouping. inspect using bare eyes.")
+                print("done saving grouping. inspect using bare eyes.")
                 self.timing['overall'].append(group_end - group_start)
             elif self.k==1:
                 solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
