@@ -9,6 +9,13 @@ def make_matrix(perm):
         matrix[i][perm[i]] = 1
     return matrix
 
+def make_matrix_k(perm, k):
+    n=len(perm)
+    matrix = np.zeros((n,k))
+    for i in range(n):
+        matrix[i][perm[i]] = 1
+    return matrix
+
 def make_perm(mtx):
     n = mtx.shape[0]
     perm = np.zeros(n,dtype=np.int32)

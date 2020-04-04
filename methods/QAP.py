@@ -53,6 +53,17 @@ class OurHeuristic:
     def get_timing(self):
         return self.timing
     
+    @staticmethod
+    def get_random_bunching(n, k):
+        item_state = np.zeros(shape=n, dtype=np.int32)
+        s = int(n/k)        
+        a=0
+        for i in range(k):
+            for j in range(s):
+                item_state[a]=i
+                a+=1
+        np.random.shuffle(item_state)
+        return item_state
 
     def get_feasible_solution(self, members, locations, solution2):
         ret = np.zeros((self.n, self.m))
@@ -293,15 +304,17 @@ class OurHeuristic:
                 # solution1_5 = self.run_bunching(self.D,self.k)
                 # np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
                 # print("done saving grouping. inspect using bare eyes.")
-            
             elif self.k==1:
                 solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
                 # solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
         else:
-            solution1_perm = np.random.permutation(self.n)
-            # solution1_5_perm = np.random.permutation(self.n)
-            solution1 = mt.make_matrix(solution1_perm)
-            # solution1_5 = mt.make_matrix(solution1_5_perm)
+            if self.k > 1:
+                solution1_perm = OurHeuristic.get_random_bunching(self.n, self.k)
+                # solution1_5_perm = np.random.permutation(self.n)
+                solution1 = mt.make_matrix_k(solution1_perm, self.k)
+                # solution1_5 = mt.make_matrix(solution1_5_perm)
+            elif self.k==1:
+                solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
         
         if not self.random_grouping:
             if self.k > 1:
@@ -311,8 +324,12 @@ class OurHeuristic:
             elif self.k==1:
                 solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
         else:
-            solution1_5_perm = np.random.permutation(self.n)
-            solution1_5 = mt.make_matrix(solution1_5_perm)
+            if self.k > 1:
+                solution1_5_perm = OurHeuristic.get_random_bunching(self.n, self.k)
+                solution1_5 = mt.make_matrix_k(solution1_5_perm, self.k)
+            elif self.k==1:
+                solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
+
 
         #######bunch permutation/ aggregate QAP########
         g = np.zeros(shape=self.n)
