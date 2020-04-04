@@ -14,5 +14,6 @@
     "USE_DA": "y",
     "USE_SW": "n",
     "EXHAUST_AGGREGATES": "n",
-    "RANDOM_PARTITION": "n"
+    "RANDOM_BUNCHING": "n",
+    "RANDOM_GROUPING": "n"
 }

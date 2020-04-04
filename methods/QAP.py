@@ -17,23 +17,29 @@ import utils.mtx as mt
 
 QMKP_DATA_FOLDER = 'qmkpdata'
 class OurHeuristic:
-    def __init__(self,n,m,k,F,D, fine_weight0, fine_alpha0, 
+    def __init__(self,n,m,k,F,D, fine_weight0, fine_alpha0,
+        num_rows,
+        num_cols, 
         const_weight_inc=False, 
         use_dwave_da_sw="dwave",
-        random_partition=False,
-        exhaust_permutation=False
+        random_bunching=False,
+        random_grouping=False,
+        exhaust_permutation=False,
     ):
         self.n = n
         self.m = m
         self.k = k
         self.F = F
         self.D = D
+        self.num_rows = num_rows
+        self.num_cols = num_cols
         self.use_dwave_da_sw = use_dwave_da_sw
 
         self.fine_weight0 = fine_weight0
         self.fine_alpha0 = fine_alpha0
         self.const_weight_inc = const_weight_inc
-        self.random_partition = random_partition
+        self.random_bunching = random_bunching
+        self.random_grouping = random_grouping
         self.exhaust_permutation = exhaust_permutation
 
         self.timing = {}
@@ -244,55 +250,68 @@ class OurHeuristic:
         self.timing['partition'].append(sub_timing_list)
         return ret
 
+    def run_bunching(self, F, k):
+        bunch_start =time.time()
+        bunch = QMKP(
+            F,
+            k
+        )
+        bunch_auto_schedule = bunch.auto(minutes=1)
+        bunch.set_schedule(bunch_auto_schedule)
+        bunch.copy_strategy = "deepcopy"
+        print("starting to solve QMKP with simanneal")
+        state1, energy1 = bunch.anneal()
+        bunch_end = time.time()
+        print("done QMKP with simanneal. energy: %d" % energy1)
+        solution1 = QMKP.solution_matrix(state1, self.n, self.k)
+        self.timing['overall'].append(bunch_end - bunch_start)
+        return solution1
+
+    def run_grouping(self):
+        locations = []
+        solution1_5 = np.zeros(shape=(self.n, self.k),dtype=np.int32)
+        for i in range(self.k):
+            locations.append([])
+        j=0
+        for i in range(self.k):
+            # 1-based (x,y) = (2*(j+1)-1,r) and neighboring item
+            for r in range(1,self.num_rows+1):
+                solution1_5[idx.index_1_q_to_l_1(2*j+1,r,self.num_rows) - 1][i] = 1
+                solution1_5[idx.index_1_q_to_l_1(2*j+2,r,self.num_rows) - 1][i] = 1
+            j+=1
+        return solution1_5
+
     def run(self):
         self.start = time.time()
         
-        if not self.random_partition:
+        if not self.random_bunching:
             if self.k > 1:
                 print("setting up bunching with simanneal")
-                bunch = QMKP(
-                    -self.F,
-                    self.k
-                )
-                bunch_auto_schedule = bunch.auto(minutes=1)
-                bunch.set_schedule(bunch_auto_schedule)
-                bunch.copy_strategy = "deepcopy"
-                print("starting to solve bunching with simanneal")
-                state1, energy1 = bunch.anneal()
-                bunch_end = time.time()
-                print(state1)
-                print("done bunching with simanneal. energy: %d" % energy1)
-                solution1 = QMKP.solution_matrix(state1, self.n, self.k)
-                print(solution1)
-                self.timing['overall'].append(bunch_end - self.start)
+                solution1 = self.run_bunching(-self.F,self.k)
                 
-
-                #######grouping########
-                print("setting up grouping with simanneal")
-                group_start = time.time()
-                group = QMKP(
-                    self.D,
-                    self.k
-                )
-                group_auto_schedule = group.auto(minutes=1)
-                group.set_schedule(group_auto_schedule)
-                group.copy_strategy = "deepcopy"
-                print("starting to solve grouping with simanneal")
-                state1_5, energy1_5 = group.anneal()
-                group_end = time.time()
-                print("Done grouping with simanneal. Energy: %d" % energy1_5)
-                solution1_5 = QMKP.solution_matrix(state1_5, self.n, self.k)
-                print(solution1_5)
-                np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
-                print("done saving grouping. inspect using bare eyes.")
-                self.timing['overall'].append(group_end - group_start)
+                # print("setting up grouping with simanneal")
+                # solution1_5 = self.run_bunching(self.D,self.k)
+                # np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
+                # print("done saving grouping. inspect using bare eyes.")
+            
             elif self.k==1:
                 solution1 = np.ones(shape=(self.n,1), dtype=np.int32)
-                solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
+                # solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
         else:
             solution1_perm = np.random.permutation(self.n)
-            solution1_5_perm = np.random.permutation(self.n)
+            # solution1_5_perm = np.random.permutation(self.n)
             solution1 = mt.make_matrix(solution1_perm)
+            # solution1_5 = mt.make_matrix(solution1_5_perm)
+        
+        if not self.random_grouping:
+            if self.k > 1:
+                solution1_5 = self.run_grouping()
+                print(solution1_5)
+                input()
+            elif self.k==1:
+                solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
+        else:
+            solution1_5_perm = np.random.permutation(self.n)
             solution1_5 = mt.make_matrix(solution1_5_perm)
 
         #######bunch permutation/ aggregate QAP########
@@ -308,11 +327,13 @@ class OurHeuristic:
         
         bigF = np.zeros((self.k,self.k))
         for i1 in range(self.k):
-            for i2 in range(i1 + 1,self.k):
-                interaction = 0
-                for item1,item2 in itertools.product(members[i1],members[i2]):
-                    interaction += self.F[item1][item2]
-                bigF[i1][i2] = interaction
+            for i2 in range(self.k):
+                if i1<=i2:
+                    interaction = 0
+                    for item1,item2 in itertools.product(members[i1],members[i2]):
+                        interaction += self.F[item1][item2]
+                    bigF[i1][i2] = interaction
+                    bigF[i2][i1] = interaction
 
         locations = []
         for i in range(self.k):
@@ -324,11 +345,13 @@ class OurHeuristic:
 
         bigD = np.zeros((self.k,self.k))
         for j1 in range(self.k):
-            for j2 in range(j1+1,self.k):
-                distance = 0
-                for loc1, loc2 in itertools.product(locations[j1], locations[j2]):
-                    distance += self.D[loc1][loc2]
-                bigD[j1][j2] = distance
+            for j2 in range(self.k):
+                if j1<=j2:
+                    distance = 0
+                    for loc1, loc2 in itertools.product(locations[j1], locations[j2]):
+                        distance += self.D[loc1][loc2]
+                    bigD[j1][j2] = distance
+                    bigD[j2][j1] = distance
 
         ret_list=[]
         if not self.exhaust_permutation:

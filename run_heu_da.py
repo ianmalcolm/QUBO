@@ -62,7 +62,8 @@ def run(order_filename, config):
     GROUP_NUM_ROWS = int(config['GROUP_NUM_ROWS'])
     GROUP_NUM_COLS = int(config['GROUP_NUM_COLS'])
     EXHAUST_AGGREGATES = config['EXHAUST_AGGREGATES']
-    RANDOM_PARTITION = config['RANDOM_PARTITION']
+    RANDOM_BUNCHING = config['RANDOM_BUNCHING']
+    RANDOM_GROUPING = config['RANDOM_GROUPING']
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
@@ -105,9 +106,12 @@ def run(order_filename, config):
     exhaust_permutation=False
     if EXHAUST_AGGREGATES=='y':
         exhaust_permutation=True
-    random_partition=False
-    if RANDOM_PARTITION=='y':
-        random_partition=True
+    random_bunching=False
+    if RANDOM_BUNCHING=='y':
+        random_bunching=True
+    random_grouping=False
+    if RANDOM_GROUPING=='y':
+        random_grouping=True
 
     heuristic_da = OurHeuristic(
         NUM_LOCS,
@@ -117,9 +121,12 @@ def run(order_filename, config):
         D,
         fine_weight0=40000,
         fine_alpha0=0,
+        num_rows=WAREHOUSE_NUM_ROWS,
+        num_cols=WAREHOUSE_NUM_COLS,
         const_weight_inc=True,
         use_dwave_da_sw='da',
-        random_partition=random_partition,
+        random_bunching=random_bunching,
+        random_grouping=random_grouping,
         exhaust_permutation=exhaust_permutation
     )
     sols_heuristic_da = heuristic_da.run()
@@ -132,6 +139,8 @@ def run(order_filename, config):
         res_heuristic_da = evaluator.run(sol_heuristic_da)
         qapres_heuristic_da = evaluator_qap.run(sol_heuristic_da)
         res_dict['is_canonical']= is_canonical
+        res_dict['random_bunching']=heuristic_da.random_bunching
+        res_dict['random_grouping']=heuristic_da.random_grouping
         res_dict['qapres_heu_da']= qapres_heuristic_da
         res_dict['res_heu_da']= res_heuristic_da
         timing_list = t_heuristic_da['overall'] + t_heuristic_da['partition'][loop_index]
