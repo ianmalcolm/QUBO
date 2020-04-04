@@ -62,6 +62,7 @@ def run(order_filename, config):
     GROUP_NUM_ROWS = int(config['GROUP_NUM_ROWS'])
     GROUP_NUM_COLS = int(config['GROUP_NUM_COLS'])
     EXHAUST_AGGREGATES = config['EXHAUST_AGGREGATES']
+    RANDOM_PARTITION = config['RANDOM_PARTITION']
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
@@ -104,6 +105,9 @@ def run(order_filename, config):
     exhaust_permutation=False
     if EXHAUST_AGGREGATES=='y':
         exhaust_permutation=True
+    random_partition=False
+    if RANDOM_PARTITION=='y':
+        random_partition=True
 
     heuristic_da = OurHeuristic(
         NUM_LOCS,
@@ -115,6 +119,7 @@ def run(order_filename, config):
         fine_alpha0=0,
         const_weight_inc=True,
         use_dwave_da_sw='da',
+        random_partition=random_partition,
         exhaust_permutation=exhaust_permutation
     )
     sols_heuristic_da = heuristic_da.run()
