@@ -13,5 +13,6 @@
     "USE_PURE": "n",
     "USE_DA": "y",
     "USE_SW": "n",
-    "EXHAUST_AGGREGATES": "y"
+    "EXHAUST_AGGREGATES": "y",
+    "RANDOM_PARTITION": "n"
 }

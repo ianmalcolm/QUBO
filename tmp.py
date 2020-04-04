@@ -1,5 +1,4 @@
 import qaplib.readqaplib as qaplib
-from gen_qap_dat import format
 import numpy as np
 import sim.std_qap as std
 from sim.test_qap import QAPEvaluator
@@ -32,27 +31,28 @@ def make_matrix(perm):
 # )
 # D1 = D_gen.gen_S_shape()
 
-F,D = qaplib.readqaplib('order_8100_500_a.txt.dat')
+F,D = qaplib.readqaplib('order_180_30_a.txt.dat')
 
 # with open('tai35b.dat', 'w') as f:
 #     f.write(format(F,D))
 
-df = pd.read.csv("simdata_heu_da/order_8100_500_a.txt.csv.back", index_col=0)
-permutation_string = df['perm']
+df = pd.read_csv("simdata_heu_da/order_180_30_a.txt.csv", index_col=0)
+permutation_string = df['perm'][0]
 print(permutation_string)
-input()
-    
+print(type(permutation_string))
+permutation = np.fromstring(permutation_string[1:-1], sep=' ')
+print(permutation)
 
-
-ans = np.random.permutation(90)
+ans = np.random.permutation(180)
 
 evaluator = QAPEvaluator(
-    90,90,F,D
+    180,180,F,D
 )
 # evaluator1 = QAPEvaluator(
 #     144,144,F1,D1
 # )
 print(std.obj(F,D,ans))
 # print(std.obj(F1,D1,ans))
-print(evaluator.run(make_matrix(ans)))
+print(evaluator.run(make_matrix(permutation.astype(np.int32))))
 # print(evaluator1.run(make_matrix(ans)))
+
