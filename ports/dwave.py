@@ -1,13 +1,17 @@
 from .solver import Solver
 from dwave.system.samplers import DWaveSampler
 from dwave.system.composites import EmbeddingComposite
+from problems.placement import PlacementQAP
 
 import dimod
 import utils.index as idx
 import utils.mtx as mt
 import numpy as np
 import itertools
+import math
 
+num_reads = 50
+anneal_time = 20
 class Dwave(Solver):
     def __init__(self):
         print("Dwave solver created...")
@@ -16,11 +20,12 @@ class Dwave(Solver):
     def get_timing(self):
         return self.timing
 
-    def solve(self, matrix, initial=()):
+    def solve(self, matrix, initial=(), test_mode=False):
         '''
             returns: a solution
                     solution is a tuple (dict, float) representing sample and energy.
         '''
+        n = matrix.shape[0]
         if bool(initial):
             initial_sample = list(initial[0].values())
             print("initial sample: ",initial_sample)
@@ -51,16 +56,25 @@ class Dwave(Solver):
         if bool(initial):
             print(initial)
             initial_state_dict = initial[0]
-            response = sampler.sample_qubo(Q,num_reads=50, anneal_schedule=anneal_schedule, initial_state=initial_state_dict)
+            response = sampler.sample_qubo(Q,num_reads=num_reads, anneal_schedule=anneal_schedule, initial_state=initial_state_dict)
         else:
-            response = sampler.sample_qubo(Q,num_reads=50, annealing_time=20)
+            response = sampler.sample_qubo(Q,num_reads=num_reads, annealing_time=anneal_time)
 
-        timing_iter = (response.info['timing']['qpu_sampling_time'] / 1000000)
+        # timing_iter = (response.info['timing']['qpu_sampling_time'] / 1000000)
+        timing_iter = num_reads * anneal_time
         self.timing += timing_iter
         print(timing_iter)
         print(response.info)
         for datum in response.data(fields=['sample','energy','num_occurrences']):
             print(datum)
             break
-
+        
+        qap_n = int(math.sqrt(n))
+        solution_matrix = PlacementQAP.solution_matrix(
+            response.first.sample,
+            qap_n,
+            qap_n
+        )
+        np.set_printoptions(threshold=np.inf)
+        print(solution_matrix)
         return (response.first.sample, response.first.energy)
