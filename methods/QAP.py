@@ -320,7 +320,6 @@ class OurHeuristic:
             if self.k > 1:
                 solution1_5 = self.run_grouping()
                 print(solution1_5)
-                input()
             elif self.k==1:
                 solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
         else:
