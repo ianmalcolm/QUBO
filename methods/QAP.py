@@ -108,10 +108,12 @@ class OurHeuristic:
         F1 = self.F[:, columns_F]
         D1 = self.D[:, columns_D]
 
+        variable_set = set(variable_list)
+        
         linear = np.zeros(shape=bunch_size*bunch_size,dtype=np.float32)
         for n0 in range(self.n):
             for m0 in range(self.m):
-                if (not (n0,m0) in variable_list) and initial_solution[n0][m0]:
+                if initial_solution[n0][m0] and (not (n0,m0) in variable_set):
                     # print((n0,m0))
                     linear += F1[n0, :] * D1[m0, :]
 

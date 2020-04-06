@@ -61,7 +61,7 @@ class Dwave(Solver):
             response = sampler.sample_qubo(Q,num_reads=num_reads, annealing_time=anneal_time)
 
         # timing_iter = (response.info['timing']['qpu_sampling_time'] / 1000000)
-        timing_iter = num_reads * anneal_time
+        timing_iter = num_reads * anneal_time / 1000000
         self.timing += timing_iter
         print(timing_iter)
         print(response.info)

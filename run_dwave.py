@@ -38,7 +38,7 @@ def main():
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
 
-            for i in range(1):
+            for i in range(2):
                 result_dict_list = run(filename, warehouse_config)
             
                 result_filename = filename + ".csv"
