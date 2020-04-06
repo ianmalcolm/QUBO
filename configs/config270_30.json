@@ -15,5 +15,5 @@
     "USE_SW": "n",
     "EXHAUST_AGGREGATES": "n",
     "RANDOM_BUNCHING": "n",
-    "RANDOM_GROUPING": "y"
+    "RANDOM_GROUPING": "n"
 }

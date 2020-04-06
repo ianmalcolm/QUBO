@@ -320,6 +320,7 @@ class OurHeuristic:
             if self.k > 1:
                 solution1_5 = self.run_grouping()
                 print(solution1_5)
+                np.savetxt(os.path.join(QMKP_DATA_FOLDER, str(self.n)+'.txt'), solution1_5, fmt='%d')
             elif self.k==1:
                 solution1_5 = np.ones(shape=(self.n,1), dtype=np.int32)
         else:
