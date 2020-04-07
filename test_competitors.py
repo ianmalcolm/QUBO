@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import json
 
+from problems.placement import PlacementQAP
 from orders.order_parser import OrderParser
 from DistanceGenerator import DistanceGenerator
 from methods.QAP import OurHeuristic
@@ -29,7 +30,7 @@ group_num_locs = group_num_cols * group_num_rows
 
 NUM_ITERATIONS = 10
 
-TAKE = ['order_270_30_a.txt']
+TAKE = ['order_3600_300_a.txt']
 
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
@@ -42,7 +43,7 @@ def main():
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
             
-            for i in range(1):
+            for i in range(5):
                 result_dict_list = run(filename, warehouse_config)
                 result_file = os.path.join(RESULT_FOLDER, filename+'_competitors.csv')
                 if os.path.exists(result_file):
@@ -88,8 +89,10 @@ def run(order_filename,config):
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
 
-    # ifhoos = IFHOOS(F,D)
-    # sol_ifhoos = ifhoos.run()
+    ifhoos = IFHOOS(F,D, beta=5)
+    sol_ifhoos = ifhoos.run()
+    if not all(PlacementQAP.check_mtx(sol_ifhoos)):
+        raise ValueError("Unfeasible solution from ifhoos")
 
     abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
     sol_abc = abc.run()
@@ -110,11 +113,12 @@ def run(order_filename,config):
     )
     res_abc = evaluator.run(sol_abc)
     res_coi = evaluator.run(sol_coi)
-    # res_ifhoos = evaluator.run(sol_ifhoos)
+    res_ifhoos = evaluator.run(sol_ifhoos)
     
+
     print(mtx.from_mtx_to_map(sol_abc))
     print(mtx.from_mtx_to_map(sol_coi))
-    # print(mtx.from_mtx_to_map(sol_ifhoos))
+    print(mtx.from_mtx_to_map(sol_ifhoos))
     
     str_abc = "result of abc is " + str(res_abc) + '\n'
     print(str_abc)
@@ -122,15 +126,15 @@ def run(order_filename,config):
     str_coi = "result of coi is " + str(res_coi) + '\n'
     print(str_coi)
     
-    # str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
-    # print(str_ifhoos)
+    str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
+    print(str_ifhoos)
 
     # print(np.diag(D))
     # print(np.diag(D_euclidean))
     result_dict = {}
     result_dict['abc'] = res_abc
     result_dict['coi'] = res_coi
-    # result_dict['ifhoos'] = res_ifhoos
+    result_dict['ifhoos'] = res_ifhoos
 
     return [result_dict]
 
