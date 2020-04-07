@@ -129,7 +129,7 @@ class OurHeuristic:
                 initial_weight_estimate=True,
                 const_weight_inc=True
             )
-            dwave_solver = ClassicalNeal()
+            dwave_solver = DASolver()
             aggregate_method = ExteriorPenaltyMethod(
                 aggregate_placement_problem,
                 dwave_solver,
