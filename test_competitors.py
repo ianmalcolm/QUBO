@@ -30,7 +30,7 @@ group_num_locs = group_num_cols * group_num_rows
 
 NUM_ITERATIONS = 10
 
-TAKE = ['order_8100_500_a.txt']
+TAKE = ['order_270_30_a.txt', 'order_180_30_a.txt', 'order_90_10_a.txt', 'order_8_3_a.txt']
 
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
@@ -80,25 +80,14 @@ def run(order_filename,config):
         WAREHOUSE_NUM_COLS, 
         DIST_VERTICAL, 
         DIST_HORIZONTAL,
-        group_num_rows,
-        group_num_cols
+        GROUP_NUM_ROWS,
+        GROUP_NUM_COLS
         )
     D = D_gen.gen_S_shape()
     D_euclidean = D_gen.gen_Euclidean()
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
-
-    ifhoos = IFHOOS(F,D, beta=5)
-    sol_ifhoos = ifhoos.run()
-    if not all(PlacementQAP.check_mtx(sol_ifhoos)):
-        raise ValueError("Unfeasible solution from ifhoos")
-
-    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
-    sol_abc = abc.run()
-
-    coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
-    sol_coi = coi.run()
 
     print(qty)
     evaluator = RouteEvaluator(
@@ -111,30 +100,35 @@ def run(order_filename,config):
         NUM_LOCS,
         NUM_LOCS
     )
-    res_abc = evaluator.run(sol_abc)
-    res_coi = evaluator.run(sol_coi)
-    res_ifhoos = evaluator.run(sol_ifhoos)
-    
-
-    print(mtx.from_mtx_to_map(sol_abc))
-    print(mtx.from_mtx_to_map(sol_coi))
-    print(mtx.from_mtx_to_map(sol_ifhoos))
-    
-    str_abc = "result of abc is " + str(res_abc) + '\n'
-    print(str_abc)
-
-    str_coi = "result of coi is " + str(res_coi) + '\n'
-    print(str_coi)
-    
-    str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
-    print(str_ifhoos)
-
-    # print(np.diag(D))
-    # print(np.diag(D_euclidean))
     result_dict = {}
-    result_dict['abc'] = res_abc
-    result_dict['coi'] = res_coi
-    result_dict['ifhoos'] = res_ifhoos
+
+    random = RandomMethod(NUM_LOCS, NUM_LOCS)
+    sol_random = random.run()
+    res_random = evaluator.run(sol_random)
+    result_dict['random'] = res_random
+
+    # abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
+    # sol_abc = abc.run()
+    # res_abc = evaluator.run(sol_abc)
+    # str_abc = "result of abc is " + str(res_abc) + '\n'
+    # print(str_abc)
+    # result_dict['abc'] = res_abc
+
+    # coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
+    # sol_coi = coi.run()
+    # res_coi = evaluator.run(sol_coi)
+    # str_coi = "result of coi is " + str(res_coi) + '\n'
+    # print(str_coi)
+    # result_dict['coi'] = res_coi
+
+    # ifhoos = IFHOOS(F,D, beta=5)
+    # sol_ifhoos = ifhoos.run()
+    # if not all(PlacementQAP.check_mtx(sol_ifhoos)):
+    #     raise ValueError("Unfeasible solution from ifhoos")
+    # res_ifhoos = evaluator.run(sol_ifhoos)
+    # str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
+    # print(str_ifhoos)
+    # result_dict['ifhoos'] = res_ifhoos
 
     return [result_dict]
 
