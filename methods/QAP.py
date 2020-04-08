@@ -126,6 +126,7 @@ class OurHeuristic:
                 self.k,
                 bigF,
                 bigD,
+                gamma=1.8,
                 initial_weight_estimate=True,
                 const_weight_inc=True
             )
@@ -204,6 +205,7 @@ class OurHeuristic:
                 s,
                 FPrime,
                 DPrime,
+                gamma=1.8,
                 initial_weight_estimate=True,
                 const_weight_inc=True,
                 # weight0=10000,
