@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import json
 
+from problems.placement import PlacementQAP
 from orders.order_parser import OrderParser
 from DistanceGenerator import DistanceGenerator
 from methods.QAP import OurHeuristic
@@ -88,8 +89,10 @@ def run(order_filename,config):
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
 
-    ifhoos = IFHOOS(F,D)
+    ifhoos = IFHOOS(F,D, beta=5)
     sol_ifhoos = ifhoos.run()
+    if not all(PlacementQAP.check_mtx(sol_ifhoos)):
+        raise ValueError("Unfeasible solution from ifhoos")
 
     abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
     sol_abc = abc.run()
@@ -112,6 +115,7 @@ def run(order_filename,config):
     res_coi = evaluator.run(sol_coi)
     res_ifhoos = evaluator.run(sol_ifhoos)
     
+
     print(mtx.from_mtx_to_map(sol_abc))
     print(mtx.from_mtx_to_map(sol_coi))
     print(mtx.from_mtx_to_map(sol_ifhoos))
