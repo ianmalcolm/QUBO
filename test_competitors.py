@@ -28,7 +28,7 @@ group_num_cols = 2
 group_num_rows = 4
 group_num_locs = group_num_cols * group_num_rows
 
-TAKE = ['order_3600_300_b.txt']
+TAKE = ['order_180_30_b.txt']
 # perm_file = 'perm270'
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
@@ -89,6 +89,7 @@ def run(order_filename,config):
         GROUP_NUM_COLS
         )
     D = D_gen.gen_S_shape()
+    D_euclidean = D_gen.gen_Euclidean()
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
@@ -119,19 +120,19 @@ def run(order_filename,config):
     #     permutation = np.fromstring(permutation_string[1:-1], sep=' ', dtype=np.int32)
     # res_direct = evaluator.run(make_matrix(permutation))
 
-    # abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
-    # sol_abc = abc.run()
-    # res_abc = evaluator.run(sol_abc)
-    # str_abc = "result of abc is " + str(res_abc) + '\n'
-    # print(str_abc)
-    # result_dict['abc'] = res_abc
+    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
+    sol_abc = abc.run()
+    res_abc = evaluator.run(sol_abc)
+    str_abc = "result of abc is " + str(res_abc) + '\n'
+    print(str_abc)
+    result_dict['abc'] = res_abc
 
-    # coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
-    # sol_coi = coi.run()
-    # res_coi = evaluator.run(sol_coi)
-    # str_coi = "result of coi is " + str(res_coi) + '\n'
-    # print(str_coi)
-    # result_dict['coi'] = res_coi
+    coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
+    sol_coi = coi.run()
+    res_coi = evaluator.run(sol_coi)
+    str_coi = "result of coi is " + str(res_coi) + '\n'
+    print(str_coi)
+    result_dict['coi'] = res_coi
 
     print("Start ifhoos assignment")
     ifhoos = IFHOOS(F,D, beta=0.6)

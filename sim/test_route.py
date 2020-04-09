@@ -51,6 +51,35 @@ class RouteEvaluator:
                 c[idx.index_1_q_to_l_1(2*x+1,y,self.num_rows) - 1] = x
                 c[idx.index_1_q_to_l_1(2*x+2,y,self.num_rows) - 1] = x
         return c
+    
+    def print_warehouse(self, ltoi, itos):
+        # print(ltoi)
+        # print(itos)
+        # input()
+        bigpad = "    "
+        smallpad = "|"
+        warehouse = ""
+        pad = bigpad
+
+        def changepad(curr):
+            if curr==smallpad:
+                return bigpad
+            else:
+                return smallpad
+
+        for y in range(self.num_rows, 0, -1):
+            for x in range(1,self.num_cols+1):
+                location_index = idx.index_1_q_to_l_1(x,y,self.num_rows)-1
+                if ltoi[location_index] == -1:
+                    warehouse += 'x'
+                else:
+                    warehouse += str(ltoi[location_index])
+                # print(warehouse)
+                # print("pad is: ",pad)
+                warehouse += pad
+                pad = changepad(pad)
+            warehouse += '\n'
+        print(warehouse)
 
     def run(self, solution_mtx):
         print("start routing test")
@@ -65,6 +94,8 @@ class RouteEvaluator:
         
         num_orders = len(self.order_set)
         for o in range(num_orders):
+            self.print_warehouse(ltoi, self.itos_dict)
+            
             order = self.order_set[o]
             locs = []
             for i in order:

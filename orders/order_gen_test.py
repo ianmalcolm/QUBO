@@ -28,8 +28,8 @@ def gen_300():
 def gen_8100():
     NO = 8100
     MAX = 50
-    NO_SKU = 500
-    start = ord('b')
+    NO_SKU = 100
+    start = ord('c')
     order_generator = OrderGen(NO_SKU,MAX)
     o = order_generator.generate_exact(NO)
     order_generator.save("order"+"_"+str(NO)+"_"+str(NO_SKU)+"_"+chr(start)+".txt")
@@ -37,8 +37,8 @@ def gen_8100():
 def gen_3600():
     NO = 3600
     MAX = 50
-    NO_SKU = 300
-    start = ord('b')
+    NO_SKU = 100
+    start = ord('c')
     order_generator = OrderGen(NO_SKU,MAX)
     o = order_generator.generate_exact(NO)
     order_generator.save("order"+"_"+str(NO)+"_"+str(NO_SKU)+"_"+chr(start)+".txt")
@@ -116,4 +116,5 @@ def gen_270():
     o = order_generator.generate_exact(NO)
     order_generator.save("order"+"_"+str(NO)+"_"+str(NO_SKU)+"_"+chr(start)+".txt")
  
-gen_270()
+gen_3600()
+gen_8100()
