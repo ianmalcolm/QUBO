@@ -28,10 +28,7 @@ group_num_cols = 2
 group_num_rows = 4
 group_num_locs = group_num_cols * group_num_rows
 
-NUM_ITERATIONS = 10
-F = None
-D = None
-TAKE = ['order_270_30_b.txt']
+TAKE = ['order_3600_300_b.txt']
 # perm_file = 'perm270'
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
@@ -63,6 +60,7 @@ def make_matrix(perm):
     return matrix
 
 def run(order_filename,config):
+    print("begin running")
     NUM_SKUS = int(config['NUM_SKUS'])
     WAREHOUSE_NUM_COLS = int(config['WAREHOUSE_NUM_COLS'])
     WAREHOUSE_NUM_ROWS = int(config['WAREHOUSE_NUM_ROWS'])
@@ -78,27 +76,24 @@ def run(order_filename,config):
 
     order_path = os.path.join(ORDER_DIRNAME,order_filename)
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
-    global F
-    global D
     
-    if F is None:
-        F = order_parser.gen_F()
+    F = order_parser.gen_F()
     qty = order_parser.summary()
 
-    if D is None:
-        D_gen = DistanceGenerator(
-            WAREHOUSE_NUM_ROWS,
-            WAREHOUSE_NUM_COLS, 
-            DIST_VERTICAL, 
-            DIST_HORIZONTAL,
-            GROUP_NUM_ROWS,
-            GROUP_NUM_COLS
-            )
-        D = D_gen.gen_S_shape()
+    D_gen = DistanceGenerator(
+        WAREHOUSE_NUM_ROWS,
+        WAREHOUSE_NUM_COLS, 
+        DIST_VERTICAL, 
+        DIST_HORIZONTAL,
+        GROUP_NUM_ROWS,
+        GROUP_NUM_COLS
+        )
+    D = D_gen.gen_S_shape()
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
 
+    print("constructing routing evaluator")
     evaluator = RouteEvaluator(
         qty,
         order_set,
