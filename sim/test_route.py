@@ -19,6 +19,7 @@ class RouteEvaluator:
         # stol - sku to location(s)
         self.itos_dict = {}
         a = 0
+        print(self.qty)
         for i in range(self.num_skus):
             for j in range(self.qty[i]):
                 self.itos_dict[a] = i
