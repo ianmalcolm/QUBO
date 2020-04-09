@@ -63,6 +63,7 @@ def make_matrix(perm):
     return matrix
 
 def run(order_filename,config):
+    print("begin running")
     NUM_SKUS = int(config['NUM_SKUS'])
     WAREHOUSE_NUM_COLS = int(config['WAREHOUSE_NUM_COLS'])
     WAREHOUSE_NUM_ROWS = int(config['WAREHOUSE_NUM_ROWS'])
@@ -99,6 +100,7 @@ def run(order_filename,config):
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
 
+    print("constructing routing evaluator")
     evaluator = RouteEvaluator(
         qty,
         order_set,
