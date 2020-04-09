@@ -99,7 +99,6 @@ def run(order_filename,config):
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
 
-    print(qty)
     evaluator = RouteEvaluator(
         qty,
         order_set,
@@ -112,10 +111,12 @@ def run(order_filename,config):
     )
     result_dict = {}
 
+    print("Start random assignment")
     random = RandomMethod(NUM_LOCS, NUM_LOCS)
     sol_random = random.run()
     res_random = evaluator.run(sol_random)
     result_dict['random'] = res_random
+    print("Done with random assignment")
 
     # permutation = []
     # with open(perm_file, 'r') as f:
@@ -137,6 +138,7 @@ def run(order_filename,config):
     # print(str_coi)
     # result_dict['coi'] = res_coi
 
+    print("Start ifhoos assignment")
     ifhoos = IFHOOS(F,D, beta=0.6)
     sol_ifhoos = ifhoos.run()
     if not all(PlacementQAP.check_mtx(sol_ifhoos)):
@@ -145,7 +147,7 @@ def run(order_filename,config):
     str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
     print(str_ifhoos)
     result_dict['ifhoos'] = res_ifhoos
-
+    print("Done ifhoos")
 
     # result_dict['directqap'] = res_direct
     return [result_dict]
