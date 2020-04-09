@@ -31,7 +31,7 @@ group_num_locs = group_num_cols * group_num_rows
 NUM_ITERATIONS = 10
 F = None
 D = None
-TAKE = ['order_3600_300_b.txt']
+TAKE = ['order_270_30_b.txt']
 # perm_file = 'perm270'
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
