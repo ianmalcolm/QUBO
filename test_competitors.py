@@ -30,7 +30,7 @@ group_num_locs = group_num_cols * group_num_rows
 
 NUM_ITERATIONS = 10
 
-TAKE = ['order_270_30_a.txt', 'order_180_30_a.txt', 'order_90_10_a.txt', 'order_8_3_a.txt']
+TAKE = ['order_3600_300_a.txt', 'order_8100_500_a.txt']
 
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
