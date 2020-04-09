@@ -147,7 +147,7 @@ def run(order_filename,config):
     result_dict['ifhoos'] = res_ifhoos
 
 
-    result_dict['directqap'] = res_direct
+    # result_dict['directqap'] = res_direct
     return [result_dict]
 
 def postprocess(result_dict):
