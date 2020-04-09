@@ -24,7 +24,7 @@ RESULT_FOLDER = "simdata_heu_da"
 ORDER_DIRNAME = 'orders_heu_da'
 CONFIG_DIRNAME = 'configs'
 
-TAKE = ['order_90_10_b.txt','order_180_30_b.txt', 'order_270_30_b.txt']
+TAKE = ['order_3600_300_b.txt','order_8100_500_b.txt']
 
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
