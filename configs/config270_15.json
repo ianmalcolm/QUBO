@@ -1,0 +1,19 @@
+{
+    "NUM_GROUPS": 3,
+    "GROUP_NUM_ROWS": 45,
+    "GROUP_NUM_COLS": 2,
+    "DIST_VERTICAL": 1,
+    "DIST_HORIZONTAL": 3,
+    "WAREHOUSE_NUM_COLS": 6,
+    "WAREHOUSE_NUM_ROWS": 45,
+    "NUM_ITEMS": 270,
+    "NUM_LOCS": 270,
+    "NUM_SKUS": 15,
+    "USE_DWAVE": "n",
+    "USE_PURE": "n",
+    "USE_DA": "y",
+    "USE_SW": "n",
+    "EXHAUST_AGGREGATES": "n",
+    "RANDOM_BUNCHING": "n",
+    "RANDOM_GROUPING": "n"
+}

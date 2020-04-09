@@ -29,9 +29,10 @@ group_num_rows = 4
 group_num_locs = group_num_cols * group_num_rows
 
 NUM_ITERATIONS = 10
-
-TAKE = ['order_270_30_a.txt', 'order_180_30_a.txt', 'order_90_10_a.txt', 'order_8_3_a.txt']
-
+F = None
+D = None
+TAKE = ['order_3600_300_b.txt']
+# perm_file = 'perm270'
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
         if filename in TAKE:
@@ -54,6 +55,12 @@ def main():
                 new_result = postprocess(result_dict_list)
                 df = df.append(new_result, ignore_index=True)
                 df.to_csv(result_file)
+def make_matrix(perm):
+    n = len(perm)
+    matrix = np.zeros((n,n))
+    for i in range(n):
+        matrix[i][perm[i]] = 1
+    return matrix
 
 def run(order_filename,config):
     NUM_SKUS = int(config['NUM_SKUS'])
@@ -71,20 +78,23 @@ def run(order_filename,config):
 
     order_path = os.path.join(ORDER_DIRNAME,order_filename)
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
+    global F
+    global D
     
-    F = order_parser.gen_F()
+    if F is None:
+        F = order_parser.gen_F()
     qty = order_parser.summary()
 
-    D_gen = DistanceGenerator(
-        WAREHOUSE_NUM_ROWS,
-        WAREHOUSE_NUM_COLS, 
-        DIST_VERTICAL, 
-        DIST_HORIZONTAL,
-        GROUP_NUM_ROWS,
-        GROUP_NUM_COLS
-        )
-    D = D_gen.gen_S_shape()
-    D_euclidean = D_gen.gen_Euclidean()
+    if D is None:
+        D_gen = DistanceGenerator(
+            WAREHOUSE_NUM_ROWS,
+            WAREHOUSE_NUM_COLS, 
+            DIST_VERTICAL, 
+            DIST_HORIZONTAL,
+            GROUP_NUM_ROWS,
+            GROUP_NUM_COLS
+            )
+        D = D_gen.gen_S_shape()
 
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     order_set = order_parser.gen_raw_orders()
@@ -107,6 +117,12 @@ def run(order_filename,config):
     res_random = evaluator.run(sol_random)
     result_dict['random'] = res_random
 
+    # permutation = []
+    # with open(perm_file, 'r') as f:
+    #     permutation_string = f.read()
+    #     permutation = np.fromstring(permutation_string[1:-1], sep=' ', dtype=np.int32)
+    # res_direct = evaluator.run(make_matrix(permutation))
+
     # abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
     # sol_abc = abc.run()
     # res_abc = evaluator.run(sol_abc)
@@ -121,15 +137,17 @@ def run(order_filename,config):
     # print(str_coi)
     # result_dict['coi'] = res_coi
 
-    # ifhoos = IFHOOS(F,D, beta=5)
-    # sol_ifhoos = ifhoos.run()
-    # if not all(PlacementQAP.check_mtx(sol_ifhoos)):
-    #     raise ValueError("Unfeasible solution from ifhoos")
-    # res_ifhoos = evaluator.run(sol_ifhoos)
-    # str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
-    # print(str_ifhoos)
-    # result_dict['ifhoos'] = res_ifhoos
+    ifhoos = IFHOOS(F,D, beta=0.6)
+    sol_ifhoos = ifhoos.run()
+    if not all(PlacementQAP.check_mtx(sol_ifhoos)):
+        raise ValueError("Unfeasible solution from ifhoos")
+    res_ifhoos = evaluator.run(sol_ifhoos)
+    str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
+    print(str_ifhoos)
+    result_dict['ifhoos'] = res_ifhoos
 
+
+    result_dict['directqap'] = res_direct
     return [result_dict]
 
 def postprocess(result_dict):

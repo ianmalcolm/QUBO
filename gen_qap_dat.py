@@ -22,7 +22,7 @@ import utils.mtx as mtx
 
 ORDER_DIRNAME = 'orders'
 CONFIG_DIRNAME = 'configs'
-TAKE = ['order_90_10_a.txt','order_180_30_a.txt', 'order_270_30_a.txt', 'order_8_3_a.txt', 'order_3600_300_a.txt', 'order_8100_500_a.txt']
+TAKE = ['order_270_30_b.txt']
 
 # prepares order data to file
 def main():

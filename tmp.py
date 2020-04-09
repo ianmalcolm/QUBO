@@ -8,6 +8,8 @@ from problems.placement import PlacementQAP
 import pandas as pd
 from orders.order_parser import OrderParser
 
+
+
 def make_matrix(perm):
     n = len(perm)
     matrix = np.zeros((n,n))

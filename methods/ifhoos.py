@@ -18,7 +18,9 @@ class IFHOOS:
                 pairs_list.append(((i,j), self.F[i][j]))
         pairs_dtype = [('indices',int,(2,)), ('f', int)]
         pairs = np.sort(np.array(pairs_list, dtype=pairs_dtype),order='f')[::-1]
-
+        # np.set_printoptions(threshold=np.inf)
+        # print(pairs)
+        # input()
         #np.set_printoptions(threshold=np.inf)
         #print(pairs)
         #input()
@@ -42,8 +44,8 @@ class IFHOOS:
         # print("after singles: ", item_allocated)
         # print(ret)
         ret = self.allocate_pairs(ret, pairs, self.distance, item_allocated, loc_allocated, beta=self.beta)
-        print("after pairs: ", item_allocated, loc_allocated)
-        print(ret)
+        # print("after pairs: ", item_allocated, loc_allocated)
+        # print(ret)
         ret = self.sweep(ret, item_allocated, loc_allocated, self.popularity, self.distance)
         # print("Finally: ", item_allocated)
         # print(ret)
@@ -91,7 +93,7 @@ class IFHOOS:
         for i in range(len(remainder_items)):
             item = remainder_items[i]['idx']
             loc = remainder_locs[i]['idx']
-            print(item,loc)
+            # print(item,loc)
             ret[item][loc] = 1
             item_allocated[item] = loc
             loc_allocated[loc] = item
@@ -134,14 +136,14 @@ class IFHOOS:
     def allocate_pairs(self, ret, pairs, distance, item_allocated, loc_allocated, beta):
         np.set_printoptions(threshold=np.inf)
         def update_records(j1,j2,loc_j1,loc_j2):
-            if loc_j1==63:
-                print("loc of 63: ",j1)
-            if loc_j2==63:
-                print("loc of 63: ",j2)
-            if j1 == 32:
-                print("j1 of 32:",loc_j1)
-            if j2 == 32:
-                print("j2 of 32:",loc_j2)
+            # if loc_j1==63:
+            #     print("loc of 63: ",j1)
+            # if loc_j2==63:
+            #     print("loc of 63: ",j2)
+            # if j1 == 32:
+            #     print("j1 of 32:",loc_j1)
+            # if j2 == 32:
+            #     print("j2 of 32:",loc_j2)
             item_allocated[j1] = loc_j1
             item_allocated[j2] = loc_j2
             if not loc_j1 is None:
@@ -207,8 +209,8 @@ class IFHOOS:
                 loc_j1_final = self.find_nearest_loc(loc_j2_final, locs_j1)
                 update_records(j1,j2,loc_j1_final,loc_j2_final)
             
-        print(item_allocated)
-        print(loc_allocated)
+        # print(item_allocated)
+        # print(loc_allocated)
         return ret
 
     def allocate_singles(self, ret, item_allocated, loc_allocated):

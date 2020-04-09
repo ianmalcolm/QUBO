@@ -33,7 +33,6 @@ def main():
             order_character = filename.split('_')
             num_items = num_locs = int(order_character[1])
             num_skus = int(order_character[2])
-            
             config_filename = os.path.join(CONFIG_DIRNAME, 'config'+str(num_items)+'_'+str(num_skus)+'.json')
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
