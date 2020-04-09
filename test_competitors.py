@@ -41,7 +41,7 @@ def main():
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
             
-            for i in range(3):
+            for i in range(1):
                 result_dict_list = run(filename, warehouse_config)
                 result_file = os.path.join(RESULT_FOLDER, filename+'_competitors.csv')
                 if os.path.exists(result_file):
