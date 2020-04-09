@@ -24,7 +24,7 @@ RESULT_FOLDER = "simdata_heu_da"
 ORDER_DIRNAME = 'orders_heu_da'
 CONFIG_DIRNAME = 'configs'
 
-TAKE = ['order_90_10_a.txt','order_180_30_a.txt', 'order_270_30_a.txt', 'order_8_3_a.txt']
+TAKE = ['order_90_10_b.txt','order_180_30_b.txt', 'order_270_30_b.txt']
 
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
@@ -37,7 +37,7 @@ def main():
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
 
-            for i in range(3):
+            for i in range(1):
                 result_dict_list = run(filename, warehouse_config)
             
                 result_filename = filename + ".csv"
