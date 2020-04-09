@@ -33,6 +33,10 @@ class IFHOOS:
         indices_location = np.arange(0,self.size)
         dtype_dist = [('idx',int),('dist',int)]
         self.distance = np.sort(np.array(list(zip(indices_location,np.diag(self.D))),dtype=dtype_dist), order='dist')
+        # print(self.distance)
+        np.random.shuffle(self.distance)
+        # print(self.distance)
+        # input()
 
         # a map from item index to allocated location
         item_allocated = np.full(self.size, fill_value=None)

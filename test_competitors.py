@@ -28,7 +28,7 @@ group_num_cols = 2
 group_num_rows = 4
 group_num_locs = group_num_cols * group_num_rows
 
-TAKE = ['order_180_30_b.txt']
+TAKE = ['order_3600_300_b.txt']
 # perm_file = 'perm270'
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
@@ -135,7 +135,7 @@ def run(order_filename,config):
     result_dict['coi'] = res_coi
 
     print("Start ifhoos assignment")
-    ifhoos = IFHOOS(F,D, beta=0.6)
+    ifhoos = IFHOOS(F,D, beta=0.7)
     sol_ifhoos = ifhoos.run()
     if not all(PlacementQAP.check_mtx(sol_ifhoos)):
         raise ValueError("Unfeasible solution from ifhoos")
