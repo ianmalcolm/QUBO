@@ -12,7 +12,7 @@ def index_1_l_to_q_1(k,m):
     r = k % m
     j = r
     i = (k-r) / m + 1
-    return (i,j)
+    return (int(i),int(j))
 
 def index_1_to_0(i):
     return i-1

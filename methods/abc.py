@@ -23,10 +23,10 @@ class ABCMethod:
         
         if(num_grps)==1:
             print("coi distance array: ")
-            print(self.distance)
+            # print(self.distance)
         else:
             print("abc distance array: ")
-            print(self.distance)
+            # print(self.distance)
 
         self.num_grps = num_grps
         self.grp_sizes = []

@@ -1,9 +1,10 @@
-from order_parser import OrderParser
+from .order_parser import OrderParser
+import utils.mtx as mt
 
-order_parser = OrderParser("order.txt",100)
+order_parser = OrderParser("orders/order_270_30_b.txt",30,0)
 
-F = order_parser.gen_F()
+F = order_parser.gen_F(is_for_items=False)
 
-print(F)
-print(order_parser.summary())
-print(sum(order_parser.summary()))
+d = mt.make_dict(F)
+
+print(d)

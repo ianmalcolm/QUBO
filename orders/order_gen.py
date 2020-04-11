@@ -20,7 +20,10 @@ class OrderGen:
             orders.append(order)
         self.orders = orders
         return orders
-
+    # n  - number of items in a warehouse 
+    # n * 0.8 - 20%
+    # there can be multiple items of an SKU
+    # num_SKUs * 0.2 
     def generate_exact(self, num_items):
         num_items_eighty = int(math.ceil(num_items*0.8))
         num_items_twenty = num_items - num_items_eighty
@@ -32,31 +35,16 @@ class OrderGen:
         
         second_num_skus = self.num_skus - first_num_skus
         sku_sublist2 = list(range(1+first_num_skus, 1+first_num_skus+second_num_skus))
+        #sublist1 - 20% of skus, 80% items
         order_eighty = self.aux(num_items_eighty, sku_sublist1)
+        #sublist2 - 80% of skus, 20% items
         order_twenty = self.aux(num_items_twenty, sku_sublist2)
         ret = order_eighty + order_twenty
         ret = self.shuffle(ret)
         self.orders = ret
         return ret
-
-    def shuffle(self, order_list):
-        order_size_list = []
-        flat_list = [item for l in order_list for item in l]
-        rd.shuffle(flat_list)
-        
-        for order in order_list:
-            order_size_list.append(len(order))
-        new_order_list = []
-        
-        num_orders = len(order_list)
-        start = 0
-        for i in range(num_orders):
-            order_size = order_size_list[i]
-            new_order_list.append(flat_list[start:start+order_size])
-            start += order_size
-
-        return new_order_list            
-
+    
+    # sku_list
     def aux(self, num_items, sku_list):
         '''generate the exact number of items specified by num_items, updating summary'''
         '''control 20% of SKU to appear in 80% of all orders'''
@@ -77,6 +65,23 @@ class OrderGen:
             num_left -= order_size
         return orders
 
+    def shuffle(self, order_list):
+        order_size_list = []
+        flat_list = [item for l in order_list for item in l]
+        rd.shuffle(flat_list)
+        
+        for order in order_list:
+            order_size_list.append(len(order))
+        new_order_list = []
+        
+        num_orders = len(order_list)
+        start = 0
+        for i in range(num_orders):
+            order_size = order_size_list[i]
+            new_order_list.append(flat_list[start:start+order_size])
+            start += order_size
+
+        return new_order_list            
 
     def save(self,dest):
         with open(dest,'w') as f:

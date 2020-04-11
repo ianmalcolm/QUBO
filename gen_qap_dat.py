@@ -22,7 +22,7 @@ import utils.mtx as mtx
 
 ORDER_DIRNAME = 'orders'
 CONFIG_DIRNAME = 'configs'
-TAKE = ['order_270_30_b.txt','order_90_10_b.txt','order_180_30_b.txt','order_3600_300_b.txt', 'order_8100_500_b.txt']
+TAKE = ['order_270_30_b.txt']
 
 # prepares order data to file
 def main():
@@ -52,7 +52,6 @@ def run(order_filename, config):
     order_parser = OrderParser(order_path, NUM_SKUS, threshold=0)
     # F: (n by n) symmetric interaction frequency matrix
     F = order_parser.gen_F()
-
     # D: (m by m) symmetric distance matrix
     D_gen = DistanceGenerator(
         WAREHOUSE_NUM_ROWS,
@@ -63,7 +62,6 @@ def run(order_filename, config):
         GROUP_NUM_COLS
         )
     D = D_gen.gen_S_shape()
-
     with open(order_filename+'.dat', 'w') as f:
         f.write(format(F,D))
 

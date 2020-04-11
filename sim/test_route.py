@@ -52,6 +52,10 @@ class RouteEvaluator:
                 c[idx.index_1_q_to_l_1(2*x+2,y,self.num_rows) - 1] = x
         return c
     
+    def print_warehouse(self, solution_mtx):
+        ltoi, stol = self.make_map(solution_mtx)
+        self.print_warehouse(ltoi, self.itos_dict)
+    
     def print_warehouse(self, ltoi, itos):
         # print(ltoi)
         # print(itos)
@@ -71,9 +75,15 @@ class RouteEvaluator:
             for x in range(1,self.num_cols+1):
                 location_index = idx.index_1_q_to_l_1(x,y,self.num_rows)-1
                 if ltoi[location_index] == -1:
-                    warehouse += 'x'
+                    warehouse += 'x '
                 else:
-                    warehouse += str(ltoi[location_index])
+                    sku = ltoi[location_index] + 1
+                    sku_str = ""
+                    if sku<10:
+                        sku_str += str(sku) + " "
+                    else:
+                        sku_str = str(sku)
+                    warehouse += sku_str
                 # print(warehouse)
                 # print("pad is: ",pad)
                 warehouse += pad
@@ -81,7 +91,7 @@ class RouteEvaluator:
             warehouse += '\n'
         print(warehouse)
 
-    def run(self, solution_mtx):
+    def run(self, solution_mtx, print_warehouse=False):
         print("start routing test")
         distance = 0
         
@@ -92,10 +102,10 @@ class RouteEvaluator:
         
         ltoi, stol = self.make_map(solution_mtx)
         
+        if print_warehouse:
+            self.print_warehouse(ltoi, self.itos_dict)
         num_orders = len(self.order_set)
         for o in range(num_orders):
-            self.print_warehouse(ltoi, self.itos_dict)
-            
             order = self.order_set[o]
             locs = []
             for i in order:
@@ -110,7 +120,11 @@ class RouteEvaluator:
             for l in locs:
                 cols.add(ltoc[l])
             cols = np.sort(list(cols))
-            # print(cols)
+
+            print("Order is: ", order)
+            locs_x_y = [idx.index_1_l_to_q_1(l+1, self.num_rows) for l in locs]
+            print("Locations picked: ", locs_x_y)
+            print("Columns picked: ", cols)
             curr_c = 0
             for c in cols:
                 distance += self.dist_hor * (c-curr_c)
@@ -119,6 +133,7 @@ class RouteEvaluator:
             if len(cols) % 2:
                 distance += self.num_rows * self.dist_ver
             distance += curr_c * self.dist_hor
-
+            if print_warehouse:
+                self.print_warehouse(ltoi, self.itos_dict)
         print("done")
         return distance

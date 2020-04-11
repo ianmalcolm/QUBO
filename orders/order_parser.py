@@ -85,16 +85,17 @@ class OrderParser:
                     if i==j:
                         # interaction between 2 identical items = its popularity
                         _ret[i-1][i-1] = self.qty[sku_indices[i]]
+                        # pass
                     else:
                         # NOTE: when sku_indices[i] == sku_indices[j], 
                         #       the value is on diagonal of old_F which is the nC2 definition.
                         if old_F[sku_indices[i]][sku_indices[j]] > self.threshold:
                             _ret[i-1][j-1] = old_F[sku_indices[i]][sku_indices[j]]
-            print("Flow matrix: ")
-            #np.set_printoptions(threshold=np.inf)
-            # print(_ret)
-            # np.savetxt("Flow.txt",_ret, fmt='%d')
-            # np.set_printoptions(threshold=6)
+            # print("Flow matrix: ")
+            np.set_printoptions(threshold=np.inf)
+            print(_ret)
+            np.savetxt("Flow.txt",old_F, fmt='%d')
+            np.set_printoptions(threshold=6)
             print("done")
             return _ret
     
@@ -144,7 +145,7 @@ class OrderParser:
         for i in range(len(sku_types_ls)):
             sku = sku_types_ls[i]
             if sku_quantities[str(sku)] >1:
-                ret[sku][sku] = self.nCr(sku_quantities[str(sku)],2)
+                ret[sku][sku] = 0 * self.nCr(sku_quantities[str(sku)],2)
 
         return ret
 

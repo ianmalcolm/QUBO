@@ -28,8 +28,7 @@ group_num_cols = 2
 group_num_rows = 4
 group_num_locs = group_num_cols * group_num_rows
 
-TAKE = ['order_3600_300_b.txt']
-# perm_file = 'perm270'
+TAKE = ['order_270_30_b.txt']
 def main():
     for filename in os.listdir(ORDER_DIRNAME):
         if filename in TAKE:
@@ -37,12 +36,15 @@ def main():
             num_items = num_locs = int(order_character[1])
             num_skus = int(order_character[2])
             
+
             config_filename = os.path.join(CONFIG_DIRNAME, 'config'+str(num_items)+'_'+str(num_skus)+'.json')
             with open(config_filename, 'r') as f:
                 warehouse_config = json.load(f)
             
             for i in range(1):
-                result_dict_list = run(filename, warehouse_config)
+                # perm_file = ''
+                perm_file = os.path.join('perms', 'perm' + str(num_items) + '_'+str(i))
+                result_dict_list = run(filename, warehouse_config, perm_file)
                 result_file = os.path.join(RESULT_FOLDER, filename+'_competitors.csv')
                 if os.path.exists(result_file):
                     df = pd.read_csv(result_file,index_col=0)
@@ -59,7 +61,7 @@ def make_matrix(perm):
         matrix[i][perm[i]] = 1
     return matrix
 
-def run(order_filename,config):
+def run(order_filename,config,perm_file):
     print("begin running")
     NUM_SKUS = int(config['NUM_SKUS'])
     WAREHOUSE_NUM_COLS = int(config['WAREHOUSE_NUM_COLS'])
@@ -107,45 +109,48 @@ def run(order_filename,config):
     )
     result_dict = {}
 
-    print("Start random assignment")
-    random = RandomMethod(NUM_LOCS, NUM_LOCS)
-    sol_random = random.run()
-    res_random = evaluator.run(sol_random)
-    result_dict['random'] = res_random
-    print("Done with random assignment")
+    # print("Start random assignment")
+    # random = RandomMethod(NUM_LOCS, NUM_LOCS)
+    # sol_random = random.run()
+    # res_random = evaluator.run(sol_random)
+    # result_dict['random'] = res_random
+    # print("Done with random assignment")
 
-    # permutation = []
-    # with open(perm_file, 'r') as f:
-    #     permutation_string = f.read()
-    #     permutation = np.fromstring(permutation_string[1:-1], sep=' ', dtype=np.int32)
-    # res_direct = evaluator.run(make_matrix(permutation))
+    permutation = []
+    print(perm_file)
+    with open(perm_file, 'r') as f:
+        permutation_string = f.read()
+        permutation = np.fromstring(permutation_string[1:-1], sep=' ', dtype=np.int32)
+    res_direct = evaluator.run(make_matrix(permutation), print_warehouse=True)
+    result_dict['directqap'] = res_direct
+    print("result: ", res_direct)
 
-    abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
-    sol_abc = abc.run()
-    res_abc = evaluator.run(sol_abc)
-    str_abc = "result of abc is " + str(res_abc) + '\n'
-    print(str_abc)
-    result_dict['abc'] = res_abc
+    # abc = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D_euclidean), 8)
+    # sol_abc = abc.run()
+    # res_abc = evaluator.run(sol_abc)
+    # str_abc = "result of abc is " + str(res_abc) + '\n'
+    # print(str_abc)
+    # result_dict['abc'] = res_abc
 
-    coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
-    sol_coi = coi.run()
-    res_coi = evaluator.run(sol_coi)
-    str_coi = "result of coi is " + str(res_coi) + '\n'
-    print(str_coi)
-    result_dict['coi'] = res_coi
+    # coi = ABCMethod(NUM_LOCS, NUM_LOCS, np.diag(F), np.diag(D), NUM_LOCS)
+    # sol_coi = coi.run()
+    # res_coi = evaluator.run(sol_coi)
+    # str_coi = "result of coi is " + str(res_coi) + '\n'
+    # print(str_coi)
+    # result_dict['coi'] = res_coi
 
-    print("Start ifhoos assignment")
-    ifhoos = IFHOOS(F,D, beta=0.7)
-    sol_ifhoos = ifhoos.run()
-    if not all(PlacementQAP.check_mtx(sol_ifhoos)):
-        raise ValueError("Unfeasible solution from ifhoos")
-    res_ifhoos = evaluator.run(sol_ifhoos)
-    str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
-    print(str_ifhoos)
-    result_dict['ifhoos'] = res_ifhoos
-    print("Done ifhoos")
+    # print("Start ifhoos assignment")
+    # ifhoos = IFHOOS(F,D, beta=2)
+    # sol_ifhoos = ifhoos.run()
+    # if not all(PlacementQAP.check_mtx(sol_ifhoos)):
+    #     raise ValueError("Unfeasible solution from ifhoos")
+    # res_ifhoos = evaluator.run(sol_ifhoos, print_warehouse=True)
+    # str_ifhoos = "result of ifhoos is " + str(res_ifhoos) + '\n'
+    # print(str_ifhoos)
+    # result_dict['ifhoos'] = res_ifhoos
+    # print("Done ifhoos")
 
-    # result_dict['directqap'] = res_direct
+
     return [result_dict]
 
 def postprocess(result_dict):
